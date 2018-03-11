@@ -1,11 +1,67 @@
 package com.haiyiyang.light.server;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.haiyiyang.light.exception.LightException;
+
 public class LightConfigServer {
-	
-	public static String getLightConfigServer() {
 
-		return null;
+	private static Logger logger = LogManager.getLogger(LightConfigServer.class);
+	private static final String CONFIG_SERVER_URL = "http://config.haiyiyang.com";
 
+	public static String getLightConfigServer() throws LightException {
+		String result = null;
+		CloseableHttpResponse response = null;
+		try {
+			response = HttpClients.createDefault().execute(new HttpGet(CONFIG_SERVER_URL));
+		} catch (IOException e) {
+			logger.info("Light config server is not available: {}", CONFIG_SERVER_URL);
+		}
+		if (response != null) {
+			try {
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					InputStream is = entity.getContent();
+					try {
+						StringBuffer out = new StringBuffer();
+						byte[] b = new byte[4096];
+						for (int n; (n = is.read(b)) != -1;) {
+							out.append(new String(b, 0, n));
+						}
+						result = out.toString();
+					} finally {
+						is.close();
+					}
+				}
+			} catch (UnsupportedOperationException | IOException e) {
+				logger.info("Parse Light config server URL error.");
+			} finally {
+				try {
+					response.close();
+				} catch (IOException e) {
+					logger.info("Close Http Response error.");
+				}
+			}
+		}
+		if (result == null) {
+			throw new LightException(LightException.Code.UNDEFINED, "Light config server URL is invalid.");
+		}
+		logger.info("Light config server URL: {}", result);
+		return result;
+	}
+
+	public static void main(String[] args) throws ClientProtocolException, IOException {
+		String config = getLightConfigServer();
+		System.out.println(config);
 	}
 
 }

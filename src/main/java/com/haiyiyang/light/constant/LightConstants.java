@@ -2,7 +2,7 @@ package com.haiyiyang.light.constant;
 
 import java.io.File;
 
-public class LightConstant {
+public class LightConstants {
 
 	public static final String DOT = ".";
 	public static final String SLASH = "/";
@@ -21,16 +21,16 @@ public class LightConstant {
 	public static final String UH = System.getProperty("user.home");
 
 	public static final String LIGHT_PROPS_REMOTE_URL = "/config/light/light.props";
-	public static final String LIGHT_PROPS_LOCAL_URL = UH + LIGHT_PROPS_REMOTE_URL.replaceAll("/", LightConstant.FS);
+	public static final String LIGHT_PROPS_LOCAL_URL = UH + LIGHT_PROPS_REMOTE_URL.replaceAll("/", LightConstants.FS);
 
 	public static final String APP_PORT_PROPS_REMOTE_URL = "/config/light/appPort.props";
-	public static final String APP_PORT_PROPS_LOCAL_URL = UH + APP_PORT_PROPS_REMOTE_URL.replaceAll("/", LightConstant.FS);
+	public static final String APP_PORT_PROPS_LOCAL_URL = UH + APP_PORT_PROPS_REMOTE_URL.replaceAll("/", LightConstants.FS);
 
 	public static final String RESOURCE_PROPS_REMOTE_PATH = "/config/light/resource/";
-	public static final String RESOURCE_PROPS_LOCAL_PATH = UH + RESOURCE_PROPS_REMOTE_PATH.replaceAll("/", LightConstant.FS);
+	public static final String RESOURCE_PROPS_LOCAL_PATH = UH + RESOURCE_PROPS_REMOTE_PATH.replaceAll("/", LightConstants.FS);
 
 	public static final String APP_PROPS_REMOTE_PATH = "/config/light/app/";
-	public static final String APP_PROPS_LOCAL_PATH = UH + APP_PROPS_REMOTE_PATH.replaceAll("/", LightConstant.FS);
+	public static final String APP_PROPS_LOCAL_PATH = UH + APP_PROPS_REMOTE_PATH.replaceAll("/", LightConstants.FS);
 
 
 }

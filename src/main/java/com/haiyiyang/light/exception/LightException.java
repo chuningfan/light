@@ -4,51 +4,51 @@ public class LightException extends RuntimeException {
 
 	private static final long serialVersionUID = 2356666188593679816L;
 
-	private final byte code;
+	private final String code;
 	private final String message;
-	private static final String codePrefix = "code: ";
+	private static final String codePrefix = "LightException > code: ";
 	private static final String messagePrefix = " | message: ";
 
-	public byte getCode() {
+	public String getCode() {
 		return code;
 	}
 
-	public String getMessage() {
-		return message;
+	public LightException(Code code) {
+		super(getCauseMessage(code.name(), null));
+		this.code = code.name();
+		this.message = null;
 	}
 
-	public LightException(byte code, String message) {
-		super(getCauseMessage(code, message));
-		this.code = code;
+	public LightException(Code code, String message) {
+		super(getCauseMessage(code.name(), message));
+		this.code = code.name();
 		this.message = message;
 	}
 
-	public LightException(byte code, String message, Throwable cause) {
-		super(getCauseMessage(code, message), cause);
-		this.code = code;
+	public LightException(Code code, String message, Throwable cause) {
+		super(getCauseMessage(code.name(), message), cause);
+		this.code = code.name();
 		this.message = message;
 	}
 
-	private static String getCauseMessage(byte code, String message) {
+	private static String getCauseMessage(String code, String message) {
 		return new StringBuilder(codePrefix).append(code).append(messagePrefix).append(message).toString();
 	}
 
 	public static enum Code {
+		UNDEFINED(), NO_SERVICE(), ZK_ERROR(), SETTINGS_ERROR();
+	}
 
-		UNDEFINED((byte) -1), NOSERVICE((byte) -2), ZKERROR((byte) -3);
+	@Override
+	public String toString() {
+		return "LightException [code=" + code + ", message=" + message + "]";
+	}
 
-		private byte value;
-
-		private Code(byte value) {
-			this.value = value;
-		}
-
-		public byte getValue() {
-			return value;
-		}
-
-		public void setValue(byte value) {
-			this.value = value;
+	public static void main(String[] args) {
+		try {
+			throw new LightException(Code.SETTINGS_ERROR);
+		} catch (LightException e) {
+			System.out.println(e.getMessage());
 		}
 	}
 

@@ -3,7 +3,7 @@ package com.haiyiyang.light.service.invocation;
 import java.io.Serializable;
 import java.util.StringTokenizer;
 
-import com.haiyiyang.light.constant.LightConstant;
+import com.haiyiyang.light.constant.LightConstants;
 
 public class InvocationFactor implements Serializable {
 
@@ -24,10 +24,10 @@ public class InvocationFactor implements Serializable {
 
 	private void setAppNameByServiceName(String serviceName) {
 		StringBuilder strb = new StringBuilder();
-		StringTokenizer st = new StringTokenizer(serviceName, LightConstant.DOT);
-		int dotCount = LightConstant.INT0;
-		while (dotCount <= LightConstant.INT3 && st.hasMoreTokens()) {
-			strb.append(st.nextToken()).append(LightConstant.DOT);
+		StringTokenizer st = new StringTokenizer(serviceName, LightConstants.DOT);
+		int dotCount = LightConstants.INT0;
+		while (dotCount <= LightConstants.INT3 && st.hasMoreTokens()) {
+			strb.append(st.nextToken()).append(LightConstants.DOT);
 			dotCount++;
 		}
 		this.setAppName(strb.substring(0, strb.length() - 1).toString());

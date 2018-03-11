@@ -1,28 +1,24 @@
 package com.haiyiyang.light.app;
 
-import com.haiyiyang.light.meta.LightAppMeta;
+import com.haiyiyang.light.context.LightApplicationContext;
 
-public class LightApp extends LightAppMeta {
+public class LightApp {
 
-	private static volatile LightApp LIGHT_APP;
+	private static LightApplicationContext lightApplicationContext;
 
-	private LightApp(String appName) {
-		super(appName);
+	public static LightApplicationContext getContext() {
+		return lightApplicationContext;
 	}
 
-	public static LightApp SINGLETON(String appName) {
-		if (LIGHT_APP == null) {
-			synchronized (LIGHT_APP) {
-				if (LIGHT_APP == null) {
-					LIGHT_APP = new LightApp(appName);
+	public static void main(String[] args) {
+		if (lightApplicationContext == null) {
+			synchronized (lightApplicationContext) {
+				if (lightApplicationContext == null) {
+					lightApplicationContext = new LightApplicationContext();
+					lightApplicationContext.start();
 				}
 			}
 		}
-		return LIGHT_APP;
-	}
-
-	public String getAppName() {
-		return this.getAppName();
 	}
 
 }
