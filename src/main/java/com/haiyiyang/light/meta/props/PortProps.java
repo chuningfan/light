@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.haiyiyang.light.meta.LightAppMeta;
-import com.haiyiyang.light.subscriber.LightSubscriber;
+import com.haiyiyang.light.subscription.LightSubscriptionProxy;
 
 public class PortProps {
 
@@ -43,7 +43,7 @@ public class PortProps {
 	}
 
 	public static void refreshRemotePortProps(LightAppMeta lightAppMeta) {
-		LightSubscriber lightSubscriber = LightSubscriber.getLightConfigSubscriber();
+		LightSubscriptionProxy lightSubscriber = LightSubscriptionProxy.getLightConfigSubscriber();
 		REMOTE_PORT_PROPS = lightSubscriber.subscribeLightConfig(lightAppMeta.getPortPropsRemoteURL());
 	}
 

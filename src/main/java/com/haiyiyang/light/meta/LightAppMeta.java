@@ -1,8 +1,10 @@
 package com.haiyiyang.light.meta;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.server.LightConfigServer;
 
@@ -12,12 +14,13 @@ public class LightAppMeta {
 	private String appPort;
 
 	private static String CONFIG_REGISTRY;
-	private static Set<String> PUBLISH_REGISTRY_SET;
-	private static Map<String, String> SUBSCRIBE_REGISTRY_MAP;
+	private static List<String> PUBLISH_REGISTRIES = Lists.newArrayListWithCapacity(3);
+	private static Multimap<String, String> SUBSCRIBER_REGISTRIES_MAP = ArrayListMultimap.create();;
+	private static final String DEFAULT_SUBSCRIBER_REGISTRY = "DEFAULT_SUBSCRIBER_REGISTRY";
 
 	private static volatile LightAppMeta LIGHT_APP_META;
 
-	private LightAppMeta(String appName) throws LightException{
+	private LightAppMeta(String appName) throws LightException {
 		this.appName = appName;
 		CONFIG_REGISTRY = LightConfigServer.getLightConfigServer();
 	}

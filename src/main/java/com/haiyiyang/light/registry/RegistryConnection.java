@@ -19,7 +19,7 @@ public abstract class RegistryConnection implements Watcher {
 
 	protected String registryHost = null;
 
-	private CountDownLatch connectedSignal = null;
+	private CountDownLatch countDownLatch = null;
 
 	protected static final int SESSION_TIMEOUT = 60 * 1000;
 
@@ -55,9 +55,9 @@ public abstract class RegistryConnection implements Watcher {
 	}
 
 	private void connect(String registryHost) throws IOException, InterruptedException {
-		connectedSignal = new CountDownLatch(1);
+		countDownLatch = new CountDownLatch(1);
 		registry = new ZooKeeper(registryHost, SESSION_TIMEOUT, this);
-		connectedSignal.await(SESSION_TIMEOUT, TimeUnit.MILLISECONDS);
+		countDownLatch.await(SESSION_TIMEOUT, TimeUnit.MILLISECONDS);
 	}
 
 	public void close() throws InterruptedException {

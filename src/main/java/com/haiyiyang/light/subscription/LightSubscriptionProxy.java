@@ -1,17 +1,22 @@
-package com.haiyiyang.light.subscriber;
+package com.haiyiyang.light.subscription;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import jodd.props.Props;
-
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 
+import com.google.common.collect.Lists;
 import com.haiyiyang.light.service.entry.LightServiceEntry;
 
-public class LightSubscriber implements Watcher {
+import jodd.props.Props;
+
+public class LightSubscriptionProxy implements Watcher {
+
+	private LightSubscriber lightSubscriber;
+
+	private List<LightSubscriptionProxy> lightSubscribers = Lists.newArrayListWithCapacity(3);
 
 	private String registry;
 
@@ -19,34 +24,34 @@ public class LightSubscriber implements Watcher {
 		return registry;
 	}
 
-	public static ConcurrentHashMap<String, LightSubscriber> LIGHT_SUBSCRIBER_CACHE = new ConcurrentHashMap<String, LightSubscriber>();
+	public static ConcurrentHashMap<String, LightSubscriptionProxy> SUBSCRIBERS = new ConcurrentHashMap<String, LightSubscriptionProxy>();
 
-	private LightSubscriber(String registry) {
+	private LightSubscriptionProxy(String registry) {
 		this.registry = registry;
 	}
 
-	public static LightSubscriber getLightConfigSubscriber() {
+	public static LightSubscriptionProxy getLightConfigSubscriber() {
 		return getLightSubscriber(null);
 	}
 
-	public LightSubscriber getLightServiceSubscriber(String appName) {
+	public LightSubscriptionProxy getLightServiceSubscriber(String appName) {
 		return getLightSubscriber(null);
 	}
 
-	private static LightSubscriber getLightSubscriber(String appName) {
+	private static LightSubscriptionProxy getLightSubscriber(String appName) {
 
 		String registryHost = null; // TODO
 
-		LightSubscriber lightSubscriber = LIGHT_SUBSCRIBER_CACHE.get(registryHost);
+		LightSubscriptionProxy lightSubscriber = SUBSCRIBERS.get(registryHost);
 		if (lightSubscriber != null) {
 			return lightSubscriber;
 		}
 
-		synchronized (LIGHT_SUBSCRIBER_CACHE) {
-			lightSubscriber = LIGHT_SUBSCRIBER_CACHE.get(registryHost);
+		synchronized (SUBSCRIBERS) {
+			lightSubscriber = SUBSCRIBERS.get(registryHost);
 			if (lightSubscriber == null) {
-				lightSubscriber = new LightSubscriber(registryHost);
-				LIGHT_SUBSCRIBER_CACHE.put(registryHost, lightSubscriber);
+				lightSubscriber = new LightSubscriptionProxy(registryHost);
+				SUBSCRIBERS.put(registryHost, lightSubscriber);
 			}
 		}
 
