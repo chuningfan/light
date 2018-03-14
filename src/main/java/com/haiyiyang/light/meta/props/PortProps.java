@@ -2,13 +2,12 @@ package com.haiyiyang.light.meta.props;
 
 import java.io.File;
 
-import jodd.props.Props;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.haiyiyang.light.meta.LightAppMeta;
-import com.haiyiyang.light.subscription.LightSubscriptionProxy;
+
+import jodd.props.Props;
 
 public class PortProps {
 
@@ -36,15 +35,9 @@ public class PortProps {
 							logger.error(ex.getMessage(), ex);
 						}
 					}
-					refreshRemotePortProps(lightAppMeta);
 				}
 			}
 		}
-	}
-
-	public static void refreshRemotePortProps(LightAppMeta lightAppMeta) {
-		LightSubscriptionProxy lightSubscriber = LightSubscriptionProxy.getLightConfigSubscriber();
-		REMOTE_PORT_PROPS = lightSubscriber.subscribeLightConfig(lightAppMeta.getPortPropsRemoteURL());
 	}
 
 }
