@@ -16,22 +16,22 @@ public class LightSubscription extends RegistryConnection {
 	private LightSubscriber lightSubscriber;
 	private static final Map<LightSubscriber, LightSubscription> SUBSCRIPTIONS = Maps.newConcurrentMap();
 
-	private LightSubscription(LightSubscriber lightSubscriber) {
-		super(lightSubscriber.getRegistry());
-		this.lightSubscriber = lightSubscriber;
+	private LightSubscription(LightSubscriber subscriber) {
+		super(subscriber.getRegistry());
+		this.lightSubscriber = subscriber;
 		SUBSCRIPTIONS.put(this.lightSubscriber, this);
-
 	}
 
-	public static LightSubscription getSubscription(LightSubscriber lightSubscriber) {
-		if (SUBSCRIPTIONS.containsKey(lightSubscriber)) {
-			return SUBSCRIPTIONS.get(lightSubscriber);
+	public static LightSubscription getSubscription(LightSubscriber subscriber) {
+		if (SUBSCRIPTIONS.containsKey(subscriber)) {
+			return SUBSCRIPTIONS.get(subscriber);
 		}
-		synchronized (lightSubscriber) {
-			if (SUBSCRIPTIONS.containsKey(lightSubscriber)) {
-				return SUBSCRIPTIONS.get(lightSubscriber);
+		synchronized (subscriber) {
+			if (SUBSCRIPTIONS.containsKey(subscriber)) {
+				return SUBSCRIPTIONS.get(subscriber);
 			} else {
-				return new LightSubscription(lightSubscriber);
+				REGISTRY_LEVEL_LOCK.putIfAbsent(subscriber.getRegistry(), subscriber.getRegistry());
+				return new LightSubscription(subscriber);
 			}
 		}
 	}
@@ -59,7 +59,5 @@ public class LightSubscription extends RegistryConnection {
 		// TODO Auto-generated method stub
 
 	}
-
-	
 
 }

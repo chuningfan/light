@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.haiyiyang.light.constant.LightConstants;
@@ -16,7 +16,7 @@ import jodd.props.Props;
 
 public class SettingsProps {
 
-	private static Logger logger = LogManager.getLogger(SettingsProps.class);
+	private static Logger logger = LoggerFactory.getLogger(SettingsProps.class);
 
 	private final static String FILE_SETTINGS_PROPS = "settings.props";
 	private final static String KEY_APP_NAME = "appName";

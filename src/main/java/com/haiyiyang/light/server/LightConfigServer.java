@@ -8,14 +8,14 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.haiyiyang.light.exception.LightException;
 
 public class LightConfigServer {
 
-	private static Logger logger = LogManager.getLogger(LightConfigServer.class);
+	private static Logger logger = LoggerFactory.getLogger(LightConfigServer.class);
 	private static final String CONFIG_SERVER_URL = "http://config.haiyiyang.com";
 
 	public static String getLightConfigServer() throws LightException {

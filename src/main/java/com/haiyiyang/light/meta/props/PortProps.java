@@ -2,8 +2,8 @@ package com.haiyiyang.light.meta.props;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.haiyiyang.light.meta.LightAppMeta;
 
@@ -11,7 +11,7 @@ import jodd.props.Props;
 
 public class PortProps {
 
-	protected static Logger logger = LogManager.getLogger(PortProps.class);
+	protected static Logger logger = LoggerFactory.getLogger(PortProps.class);
 
 	private static Props LOCAL_PORT_PROPS, REMOTE_PORT_PROPS;
 
