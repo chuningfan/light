@@ -1,8 +1,9 @@
 package com.haiyiyang.light.subscription;
 
+import java.util.List;
 import java.util.Map;
 
-import org.apache.zookeeper.data.Stat;
+import org.apache.zookeeper.WatchedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,27 +38,25 @@ public class LightSubscription extends RegistryConnection {
 	}
 
 	public byte[] getData(String path) {
-		if (path == null) {
-			path = this.lightSubscriber.getSubscriptionPath();
-		}
-		Stat stat = existsPath(path, false);
-		if (stat == null) {
-			LOGGER.debug("The path {} is not exists.", path);
-			return null;
-		}
 		return getData(path, this);
 	}
-	
-	public byte[] getChildrenDatas(String path) {
-		if (path == null) {
-			path = this.lightSubscriber.getSubscriptionPath();
-		}
-		Stat stat = existsPath(path, false);
-		if (stat == null) {
-			LOGGER.debug("The path {} is not exists.", path);
-			return null;
-		}
-		return getData(path, this);
+
+	public byte[] getData() {
+		return getData(lightSubscriber.getPath(), this);
+	}
+
+	public List<String> getChildren(String path) {
+		return getChildren(path, this);
+	}
+
+	public List<String> getChildren() {
+		return getChildren(lightSubscriber.getPath(), this);
+	}
+
+	@Override
+	public void doProcess(WatchedEvent event) {
+		this.getData();
+		lightSubscriber.processData(getData(), lightSubscriber.getPath());
 	}
 
 }

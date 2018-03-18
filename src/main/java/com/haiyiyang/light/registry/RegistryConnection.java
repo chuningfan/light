@@ -10,6 +10,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
@@ -46,8 +47,14 @@ public abstract class RegistryConnection implements Watcher {
 		if (event.getState() == KeeperState.SyncConnected) {
 			countDownLatch.countDown();
 			logger.info("CountDownLatch has counted down the latch.");
+		} else if (event.getType() == EventType.None) {
+			if (event.getState() == KeeperState.Expired || event.getState() == KeeperState.Disconnected) {
+				doProcess(event);
+			}
 		}
 	}
+
+	abstract public void doProcess(WatchedEvent event);
 
 	protected ZooKeeper getRegistry() {
 		synchronized (this.registry) {

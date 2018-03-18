@@ -11,14 +11,14 @@ public class AppProps implements LightSubscriber {
 	}
 
 	@Override
-	public String getRegistry() {
-		return registry;
+	public String getPath() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public String getSubscriptionPath() {
-		// TODO Auto-generated method stub
-		return null;
+	public String getRegistry() {
+		return registry;
 	}
 
 	@Override

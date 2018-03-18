@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import jodd.props.Props;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,11 +14,9 @@ import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.subscription.LightSubscriber;
 import com.haiyiyang.light.subscription.LightSubscription;
 
-import jodd.props.Props;
-
 public class LightProps implements LightSubscriber {
 
-	private static Logger logger = LoggerFactory.getLogger(LightProps.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(LightProps.class);
 
 	private static final String OPEN_GROUP = "openGroup";
 
@@ -51,7 +51,7 @@ public class LightProps implements LightSubscriber {
 				try {
 					props.load(file);
 				} catch (Exception ex) {
-					logger.error(ex.getMessage(), ex);
+					LOGGER.error(ex.getMessage(), ex);
 				}
 			}
 		} else {
@@ -60,10 +60,12 @@ public class LightProps implements LightSubscriber {
 	}
 
 	private void updatePropsData(byte[] data) {
-		try {
-			props.load(new ByteArrayInputStream(data));
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
+		synchronized (this) {
+			try {
+				props.load(new ByteArrayInputStream(data));
+			} catch (IOException e) {
+				LOGGER.error(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -72,13 +74,12 @@ public class LightProps implements LightSubscriber {
 	}
 
 	@Override
-	public String getRegistry() {
-		// TODO Auto-generated method stub
+	public String getPath() {
 		return null;
 	}
 
 	@Override
-	public String getSubscriptionPath() {
+	public String getRegistry() {
 		// TODO Auto-generated method stub
 		return null;
 	}
