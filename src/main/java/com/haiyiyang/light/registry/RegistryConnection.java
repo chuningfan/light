@@ -1,5 +1,7 @@
 package com.haiyiyang.light.registry;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +13,7 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,20 +26,17 @@ public abstract class RegistryConnection implements Watcher {
 
 	protected String registry = null;
 	protected ZooKeeper zooKeeper = null;
-	protected PathLevelLock pathLevelLock = null;
 
 	private CountDownLatch countDownLatch = null;
 	protected static final int SESSION_TIMEOUT = 60 * 1000;
 
 	protected volatile static ConcurrentHashMap<String, String> REGISTRY_LEVEL_LOCK = new ConcurrentHashMap<>(8);
-	protected volatile static ConcurrentHashMap<String, PathLevelLock> PATH_LEVEL_LOCK = new ConcurrentHashMap<>(8);
 
 	protected static ConcurrentHashMap<String, ZooKeeper> REGISTRIES = new ConcurrentHashMap<>(8);
 
 	protected RegistryConnection(String registry) {
 		synchronized (REGISTRY_LEVEL_LOCK.get(registry)) {
 			this.registry = registry;
-			this.pathLevelLock = PATH_LEVEL_LOCK.putIfAbsent(registry, new PathLevelLock());
 			this.getRegistry();
 		}
 	}
@@ -49,23 +49,22 @@ public abstract class RegistryConnection implements Watcher {
 		}
 	}
 
-	private ZooKeeper getRegistry() {
-		zooKeeper = REGISTRIES.get(this.registry);
-		if (zooKeeper != null && zooKeeper.getState() != null && zooKeeper.getState().isAlive()) {
-			return zooKeeper;
-		}
+	protected ZooKeeper getRegistry() {
 		synchronized (this.registry) {
+			zooKeeper = REGISTRIES.get(this.registry);
 			if (zooKeeper == null) {
 				this.connect();
-				logger.info("Zookeeper connection {} have been establish.", registry);
 			}
-			if (zooKeeper.getState() == null || !zooKeeper.getState().isAlive()) {
-				this.close();
-				this.connect();
-				logger.info("Zookeeper connection {} have been reestablish.", registry);
+			if (zooKeeper != null) {
+				if (!zooKeeper.getState().isAlive()) {
+					this.connect();
+				} else if (!zooKeeper.getState().isConnected()) {
+					this.close();
+					this.connect();
+				}
 			}
+			return zooKeeper;
 		}
-		return zooKeeper;
 	}
 
 	private void connect() {
@@ -74,8 +73,11 @@ public abstract class RegistryConnection implements Watcher {
 			zooKeeper = new ZooKeeper(registry, SESSION_TIMEOUT, this);
 			REGISTRIES.put(registry, zooKeeper);
 			countDownLatch.await(SESSION_TIMEOUT, TimeUnit.MILLISECONDS);
-		} catch (Exception e) {
-			logger.error("Closed zookeeper connection error.");
+			logger.info("Zookeeper connection {} have been establish.", registry);
+		} catch (IOException e) {
+			logger.error("Zookeeper connection {} error: {}.", registry, e.getMessage());
+		} catch (InterruptedException e) {
+			logger.error("Zookeeper connection {} got interrupted exception: {}.", registry, e.getMessage());
 		}
 	}
 
@@ -90,43 +92,61 @@ public abstract class RegistryConnection implements Watcher {
 		}
 	}
 
-	public void createLightPath() throws KeeperException, InterruptedException {
-		if (existsPath(PATH_LIGHT, false) == null) {
-			getRegistry().create(PATH_LIGHT, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-			logger.info("Created root path PATH_LIGHT.");
-		}
+	protected void createLightPath() {
+		createPath(PATH_LIGHT, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 	}
 
-	public Stat existsPath(String path, boolean watch) throws KeeperException, InterruptedException {
+	protected Stat existsPath(String path, boolean watch) {
 		try {
 			return getRegistry().exists(path, watch);
-		} catch (KeeperException.ConnectionLossException e) {
-			close();
-			return getRegistry().exists(path, watch);
+		} catch (KeeperException ke) {
+			logger.error("Execute existsPath caused keeper exception, code : {}", ke.code());
+			return null;
+		} catch (InterruptedException ie) {
+			logger.error("Execute existsPath caused interrupted exception : {}", ie.getMessage());
+			return null;
 		}
 	}
 
-	public void createPath(String path) throws KeeperException, InterruptedException {
-		this.pathLevelLock.addLock(path);
-		synchronized (this.pathLevelLock.getLock(path)) {
+	protected void createPath(String path, byte data[], List<ACL> acl, CreateMode createMode) {
+		synchronized (this.registry) {
 			if (existsPath(path, false) == null) {
-				getRegistry().create(path, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-				logger.info("Created root path PATH_LIGHT.");
+				try {
+					getRegistry().create(path, null, acl, createMode);
+					logger.info("ZookKeeper created the path {}.", path);
+				} catch (KeeperException ke) {
+					logger.error("Execute createPath {} caused KeeperException error : {}", path, ke.getMessage());
+				} catch (InterruptedException ie) {
+					logger.error("Execute createPath {} caused InterruptedException error : {}", path, ie.getMessage());
+				}
 			}
 		}
 	}
 
-	class PathLevelLock {
-
-		private ConcurrentHashMap<String, String> PATH_LEVEL_LOCK = new ConcurrentHashMap<>();
-
-		void addLock(String path) {
-			PATH_LEVEL_LOCK.putIfAbsent(path, path);
+	public byte[] getData(String path, Watcher watcher) {
+		if (existsPath(path, false) != null) {
+			try {
+				return getRegistry().getData(path, watcher, null);
+			} catch (KeeperException ke) {
+				logger.error("Execute getData caused KeeperException error : {}", ke.getMessage());
+			} catch (InterruptedException ie) {
+				logger.error("Execute getData caused InterruptedException error : {}", ie.getMessage());
+			}
 		}
+		return null;
+	}
 
-		protected String getLock(String path) {
-			return PATH_LEVEL_LOCK.get(path);
+	public List<String> getChildren(String path, Watcher watcher) {
+		if (existsPath(path, false) != null) {
+			try {
+				return getRegistry().getChildren(path, watcher);
+			} catch (KeeperException ke) {
+				logger.error("Execute getChildren of path {} caused KeeperException error : {}", path, ke.getMessage());
+			} catch (InterruptedException ie) {
+				logger.error("Execute getChildren of path {} caused InterruptedException error : {}", path, ie.getMessage());
+			}
 		}
+		return null;
 	}
 
 }

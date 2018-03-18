@@ -16,11 +16,11 @@ public class ZKTester {
 
 		new Thread(new ThreadC("Thread-C")).start();
 
-		try {
-			Thread.sleep(100000000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			Thread.sleep(100000000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	static class ThreadA implements Runnable {
@@ -35,13 +35,13 @@ public class ZKTester {
 		public void run() {
 			System.out.println("Thread: " + name + " \t");
 			LightSubscription subscription = LightSubscription.getSubscription(new AppProps(REGISTRY_LOCAL));
-			try {
-				subscription.createLightPath();
-				subscription.createPath("/test");
-				subscription.createPath("/test/11111");
-			} catch (KeeperException | InterruptedException e1) {
-				e1.printStackTrace();
-			}
+//			try {
+//				subscription.createLightPath();
+//				subscription.createPath("/test");
+//				subscription.createPath("/test/11111");
+//			} catch (KeeperException | InterruptedException e1) {
+//				e1.printStackTrace();
+//			}
 		}
 	}
 
@@ -57,13 +57,13 @@ public class ZKTester {
 		public void run() {
 			System.out.println("Thread: " + name + " \t");
 			LightSubscription subscription = LightSubscription.getSubscription(new AppProps(REGISTRY_LOCAL));
-			try {
-				subscription.createLightPath();
-				subscription.createPath("/test");
-				subscription.createPath("/test/22222");
-			} catch (KeeperException | InterruptedException e1) {
-				e1.printStackTrace();
-			}
+//			try {
+//				subscription.createLightPath();
+//				subscription.createPath("/test");
+//				subscription.createPath("/test/22222");
+//			} catch (KeeperException | InterruptedException e1) {
+//				e1.printStackTrace();
+//			}
 		}
 	}
 
@@ -79,13 +79,13 @@ public class ZKTester {
 		public void run() {
 			System.out.println("Thread: " + name + " \t");
 			LightSubscription subscription = LightSubscription.getSubscription(new AppProps(REGISTRY_LOCAL));
-			try {
-				subscription.createLightPath();
-				subscription.createPath("/test");
-				subscription.createPath("/test/33333");
-			} catch (KeeperException | InterruptedException e1) {
-				e1.printStackTrace();
-			}
+//			try {
+//				subscription.createLightPath();
+//				subscription.createPath("/test");
+//				subscription.createPath("/test/33333");
+//			} catch (KeeperException | InterruptedException e1) {
+//				e1.printStackTrace();
+//			}
 		}
 	}
 
