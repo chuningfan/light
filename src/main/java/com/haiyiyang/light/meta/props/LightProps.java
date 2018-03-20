@@ -4,8 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
-import jodd.props.Props;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,16 +12,19 @@ import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.subscription.LightSubscriber;
 import com.haiyiyang.light.subscription.LightSubscription;
 
+import jodd.props.Props;
+
 public class LightProps implements LightSubscriber {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(LightProps.class);
 
 	private static final String OPEN_GROUP = "openGroup";
+	public static final String LIGHT_PROPS_URL = "/light/light.props";
+	public static final String LIGHT_PROPS_LOCAL_URL = LightConstants.USER_HOME
+			+ LIGHT_PROPS_URL.replaceAll("/", LightConstants.FS);
 
 	private Props props;
-
 	private LightAppMeta lightAppMeta;
-
 	private static LightProps LIGHT_PROPS;
 
 	private LightProps(LightAppMeta lightAppMeta) {
@@ -46,7 +47,7 @@ public class LightProps implements LightSubscriber {
 
 	private void initLightProps() {
 		if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
-			File file = new File(lightAppMeta.getLightPropsLocalURL());
+			File file = new File(LIGHT_PROPS_LOCAL_URL);
 			if (file.isFile()) {
 				try {
 					props.load(file);
@@ -55,7 +56,7 @@ public class LightProps implements LightSubscriber {
 				}
 			}
 		} else {
-			updatePropsData(LightSubscription.getSubscription(this).getData(null));
+			updatePropsData(LightSubscription.getSubscription(this).getData());
 		}
 	}
 
@@ -73,21 +74,27 @@ public class LightProps implements LightSubscriber {
 		return LightConstants.STR1.equals(props.getValue(OPEN_GROUP));
 	}
 
+	public String getPropsValue(String key) {
+		return props.getValue(key);
+	}
+
+	public String getPropsValue(final String key, String profiles) {
+		return props.getValue(key, profiles);
+	}
+
 	@Override
 	public String getPath() {
-		return null;
+		return LIGHT_PROPS_URL;
 	}
 
 	@Override
 	public String getRegistry() {
-		// TODO Auto-generated method stub
-		return null;
+		return lightAppMeta.getConfigRegistry();
 	}
 
 	@Override
 	public void processData(byte[] data, String path) {
-		// TODO Auto-generated method stub
-
+		LOGGER.info("LightProps>>>> PATH: {}, data", path, data);
 	}
 
 }

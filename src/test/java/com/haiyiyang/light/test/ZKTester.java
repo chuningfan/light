@@ -1,8 +1,7 @@
 package com.haiyiyang.light.test;
 
-import org.apache.zookeeper.KeeperException;
-
 import com.haiyiyang.light.meta.props.AppProps;
+import com.haiyiyang.light.meta.props.ResourceProps;
 import com.haiyiyang.light.subscription.LightSubscription;
 
 public class ZKTester {
@@ -14,13 +13,18 @@ public class ZKTester {
 
 		new Thread(new ThreadB("Thread-B")).start();
 
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		new Thread(new ThreadC("Thread-C")).start();
-
-//		try {
-//			Thread.sleep(100000000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+		
+		try {
+			Thread.sleep(10000000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	static class ThreadA implements Runnable {
@@ -34,14 +38,8 @@ public class ZKTester {
 		@Override
 		public void run() {
 			System.out.println("Thread: " + name + " \t");
-			LightSubscription subscription = LightSubscription.getSubscription(new AppProps(REGISTRY_LOCAL));
-//			try {
-//				subscription.createLightPath();
-//				subscription.createPath("/test");
-//				subscription.createPath("/test/11111");
-//			} catch (KeeperException | InterruptedException e1) {
-//				e1.printStackTrace();
-//			}
+//			LightSubscription subscription = LightSubscription.getSubscription(new AppProps(REGISTRY_LOCAL));
+//			subscription.getData("/light/appProps");
 		}
 	}
 
@@ -56,14 +54,15 @@ public class ZKTester {
 		@Override
 		public void run() {
 			System.out.println("Thread: " + name + " \t");
-			LightSubscription subscription = LightSubscription.getSubscription(new AppProps(REGISTRY_LOCAL));
-//			try {
-//				subscription.createLightPath();
-//				subscription.createPath("/test");
-//				subscription.createPath("/test/22222");
-//			} catch (KeeperException | InterruptedException e1) {
-//				e1.printStackTrace();
-//			}
+//			LightSubscription subscription = LightSubscription.getSubscription(new ResourceProps(REGISTRY_LOCAL));
+//			subscription.getData("/light/resourceProps");
+			// try {
+			// subscription.createLightPath();
+			// subscription.createPath("/test");
+			// subscription.createPath("/test/22222");
+			// } catch (KeeperException | InterruptedException e1) {
+			// e1.printStackTrace();
+			// }
 		}
 	}
 
@@ -78,14 +77,16 @@ public class ZKTester {
 		@Override
 		public void run() {
 			System.out.println("Thread: " + name + " \t");
-			LightSubscription subscription = LightSubscription.getSubscription(new AppProps(REGISTRY_LOCAL));
-//			try {
-//				subscription.createLightPath();
-//				subscription.createPath("/test");
-//				subscription.createPath("/test/33333");
-//			} catch (KeeperException | InterruptedException e1) {
-//				e1.printStackTrace();
-//			}
+//			LightSubscription subscription = LightSubscription.getSubscription(new AppProps(REGISTRY_LOCAL));
+//			subscription.getData("/light/ap");
+//			subscription.getData();
+			// try {
+			// subscription.createLightPath();
+			// subscription.createPath("/test");
+			// subscription.createPath("/test/33333");
+			// } catch (KeeperException | InterruptedException e1) {
+			// e1.printStackTrace();
+			// }
 		}
 	}
 

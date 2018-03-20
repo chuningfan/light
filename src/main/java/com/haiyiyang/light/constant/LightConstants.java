@@ -19,6 +19,7 @@ public class LightConstants {
 
 	public static final String UTF8 = "UTF-8";
 	public static final String FS = File.separator;
+	public static final String DOT_PROPS = ".props";
 	public static final String USER_HOME = System.getProperty("user.home");
 	public static final String USE_LOCAL_PROPS = System.getProperty("useLocalProps");
 

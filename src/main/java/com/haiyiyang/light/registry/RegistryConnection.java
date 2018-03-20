@@ -10,7 +10,6 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
@@ -29,7 +28,7 @@ public abstract class RegistryConnection implements Watcher {
 	protected ZooKeeper zooKeeper = null;
 
 	private CountDownLatch countDownLatch = null;
-	protected static final int SESSION_TIMEOUT = 60 * 1000;
+	protected static final int SESSION_TIMEOUT = 50;
 
 	protected volatile static ConcurrentHashMap<String, String> REGISTRY_LEVEL_LOCK = new ConcurrentHashMap<>(8);
 
@@ -45,16 +44,22 @@ public abstract class RegistryConnection implements Watcher {
 	@Override
 	public void process(WatchedEvent event) {
 		if (event.getState() == KeeperState.SyncConnected) {
-			countDownLatch.countDown();
-			logger.info("CountDownLatch has counted down the latch.");
-		} else if (event.getType() == EventType.None) {
-			if (event.getState() == KeeperState.Expired || event.getState() == KeeperState.Disconnected) {
-				doProcess(event);
+			if (countDownLatch != null) {
+				countDownLatch.countDown();
+				countDownLatch = null;
+				logger.info("CountDownLatch has counted down the latch.");
 			}
+			if (event.getPath() != null) {
+				doWatcherProcess(false, event);
+			}
+		} else if (event.getState() == KeeperState.Expired) {
+			getRegistry();
+			doWatcherProcess(true, event);
+			logger.info("KeeperState Expired. zooKeeper: {}", zooKeeper);
 		}
 	}
 
-	abstract public void doProcess(WatchedEvent event);
+	abstract public void doWatcherProcess(boolean sessionExpired, WatchedEvent event);
 
 	protected ZooKeeper getRegistry() {
 		synchronized (this.registry) {
@@ -150,7 +155,8 @@ public abstract class RegistryConnection implements Watcher {
 			} catch (KeeperException ke) {
 				logger.error("Execute getChildren of path {} caused KeeperException error : {}", path, ke.getMessage());
 			} catch (InterruptedException ie) {
-				logger.error("Execute getChildren of path {} caused InterruptedException error : {}", path, ie.getMessage());
+				logger.error("Execute getChildren of path {} caused InterruptedException error : {}", path,
+						ie.getMessage());
 			}
 		}
 		return null;
