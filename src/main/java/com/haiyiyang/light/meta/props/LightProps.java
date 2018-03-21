@@ -3,10 +3,12 @@ package com.haiyiyang.light.meta.props;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.subscription.LightSubscriber;
@@ -56,7 +58,7 @@ public class LightProps implements LightSubscriber {
 				}
 			}
 		} else {
-			updatePropsData(LightSubscription.getSubscription(this).getData());
+			updatePropsData(LightSubscription.getSubscription(this).getData(LIGHT_PROPS_URL));
 		}
 	}
 
@@ -83,17 +85,17 @@ public class LightProps implements LightSubscriber {
 	}
 
 	@Override
-	public String getPath() {
-		return LIGHT_PROPS_URL;
-	}
-
-	@Override
 	public String getRegistry() {
 		return lightAppMeta.getConfigRegistry();
 	}
 
 	@Override
-	public void processData(byte[] data, String path) {
+	public List<String> getPaths() {
+		return Lists.newArrayList(LIGHT_PROPS_URL);
+	}
+
+	@Override
+	public void processData(String path, byte[] data) {
 		LOGGER.info("LightProps>>>> PATH: {}, data", path, data);
 	}
 

@@ -5,11 +5,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.subscription.LightSubscriber;
@@ -66,7 +68,7 @@ public class AppProps implements LightSubscriber {
 				}
 			}
 		} else {
-			updatePropsData(LightSubscription.getSubscription(this).getData());
+			updatePropsData(LightSubscription.getSubscription(this).getData(this.appPropsPath));
 		}
 	}
 
@@ -100,17 +102,17 @@ public class AppProps implements LightSubscriber {
 	}
 
 	@Override
-	public String getPath() {
-		return this.appPropsPath;
-	}
-
-	@Override
 	public String getRegistry() {
 		return lightAppMeta.getConfigRegistry();
 	}
 
 	@Override
-	public void processData(byte[] data, String path) {
+	public List<String> getPaths() {
+		return Lists.newArrayList(this.appPropsPath);
+	}
+
+	@Override
+	public void processData(String path, byte[] data) {
 		LOGGER.info("AppProps>>>> PATH: {}, data", path, data);
 	}
 

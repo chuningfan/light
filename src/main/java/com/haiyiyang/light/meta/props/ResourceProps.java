@@ -3,7 +3,9 @@ package com.haiyiyang.light.meta.props;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,17 +103,17 @@ public class ResourceProps implements LightSubscriber {
 	}
 
 	@Override
-	public String getPath() {
-		return RESOURCE_PROPS_PATH;
-	}
-
-	@Override
 	public String getRegistry() {
 		return lightAppMeta.getConfigRegistry();
 	}
 
 	@Override
-	public void processData(byte[] data, String path) {
+	public List<String> getPaths() {
+		return new ArrayList<>(PATH_RESOURCES.keySet());
+	}
+
+	@Override
+	public void processData(String path, byte[] data) {
 		LOGGER.info("ResourceProps>>>> PATH: {}, data", path, data);
 	}
 

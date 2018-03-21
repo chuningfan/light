@@ -41,21 +41,19 @@ public class LightSubscription extends RegistryConnection {
 		return getData(path, this);
 	}
 
-	public byte[] getData() {
-		return getData(lightSubscriber.getPath(), this);
-	}
-
 	public List<String> getChildren(String path) {
 		return getChildren(path, this);
 	}
 
-	public List<String> getChildren() {
-		return getChildren(lightSubscriber.getPath(), this);
-	}
-
 	@Override
 	public void doWatcherProcess(boolean sessionExpired, WatchedEvent event) {
-		lightSubscriber.processData(getData(event.getPath()), event.getPath());
+		if (sessionExpired) {
+			for (String path : lightSubscriber.getPaths()) {
+				lightSubscriber.processData(path, getData(path));
+			}
+		} else {
+			lightSubscriber.processData(event.getPath(), getData(event.getPath()));
+		}
 	}
 
 }

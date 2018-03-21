@@ -1,11 +1,13 @@
 package com.haiyiyang.light.subscription;
 
-public interface LightSubscriber {
+import java.util.List;
 
-	public String getPath();
+public interface LightSubscriber {
 
 	public String getRegistry();
 
-	public void processData(byte[] data, String path);
+	public List<String> getPaths();
+
+	public void processData(String path, byte[] data);
 
 }
