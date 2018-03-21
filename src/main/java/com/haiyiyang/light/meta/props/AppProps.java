@@ -3,6 +3,9 @@ package com.haiyiyang.light.meta.props;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +16,14 @@ import com.haiyiyang.light.subscription.LightSubscriber;
 import com.haiyiyang.light.subscription.LightSubscription;
 
 import jodd.props.Props;
+import jodd.props.PropsEntry;
 
 public class AppProps implements LightSubscriber {
 	protected static Logger LOGGER = LoggerFactory.getLogger(AppProps.class);
 
-	public static final String APP_PROPS_PATH = "/light/app/";
-	public static final String APP_PROPS_LOCAL_PATH = LightConstants.USER_HOME
+	private static final String SECTION_RESOURCE = "resource";
+	private static final String APP_PROPS_PATH = "/light/app/";
+	private static final String APP_PROPS_LOCAL_PATH = LightConstants.USER_HOME
 			+ APP_PROPS_PATH.replaceAll("/", LightConstants.FS);
 
 	private Props props;
@@ -73,6 +78,17 @@ public class AppProps implements LightSubscriber {
 				LOGGER.error(e.getMessage(), e);
 			}
 		}
+	}
+
+	public Map<String, String> getResources() {
+		Map<String, String> map = new HashMap<>();
+		Iterator<PropsEntry> it = props.entries().section(SECTION_RESOURCE).iterator();
+		PropsEntry pe;
+		while (it.hasNext()) {
+			pe = it.next();
+			map.put(pe.getKey(), pe.getValue());
+		}
+		return map;
 	}
 
 	public String getPropsValue(String key) {
