@@ -20,7 +20,7 @@ public class LightApplicationContext extends AnnotationConfigApplicationContext 
 					}
 					Class<?>[] appConfigurableClasses = SettingsProps.getAppConfigurableClasses();
 					if (appConfigurableClasses.length > 0) {
-						this.register();
+						this.register(appConfigurableClasses);
 					}
 					this.refresh();
 				}

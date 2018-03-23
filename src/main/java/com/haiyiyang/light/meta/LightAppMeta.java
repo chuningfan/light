@@ -10,7 +10,7 @@ import com.haiyiyang.light.meta.props.AppProps;
 import com.haiyiyang.light.meta.props.LightProps;
 import com.haiyiyang.light.meta.props.PortProps;
 import com.haiyiyang.light.meta.props.ResourceProps;
-import com.haiyiyang.light.server.LightConfigServer;
+import com.haiyiyang.light.server.LightConfig;
 
 public class LightAppMeta {
 
@@ -30,7 +30,7 @@ public class LightAppMeta {
 
 	private LightAppMeta(String appName) throws LightException {
 		this.appName = appName;
-		this.configRegistry = LightConfigServer.getLightConfigServer();
+		this.configRegistry = LightConfig.getLightConfigServer();
 		this.lightProps = LightProps.SINGLETON(this);
 		this.portProps = PortProps.SINGLETON(this);
 		this.appProps = AppProps.SINGLETON(this);

@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import com.haiyiyang.light.exception.LightException;
 
-public class LightConfigServer {
+public class LightConfig {
 
-	private static Logger logger = LoggerFactory.getLogger(LightConfigServer.class);
+	private static Logger logger = LoggerFactory.getLogger(LightConfig.class);
 	private static final String CONFIG_SERVER_URL = "http://config.haiyiyang.com";
 
 	public static String getLightConfigServer() throws LightException {
