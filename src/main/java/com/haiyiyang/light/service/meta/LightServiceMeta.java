@@ -1,10 +1,6 @@
 package com.haiyiyang.light.service.meta;
 
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.support.AopUtils;
-
 public class LightServiceMeta {
-	private static final String LIGHT_DOT = "light.";
 
 	private String appName;
 	private String serviceName;
@@ -17,7 +13,7 @@ public class LightServiceMeta {
 
 	public LightServiceMeta(String appName, Object object) {
 		this.appName = appName;
-		this.serviceImpl = getServiceImpl(object);
+		this.serviceImpl = object;
 		this.serviceName = getServiceName(this.serviceImpl);
 		this.serviceImplName = serviceImpl.getClass().getName();
 	}
@@ -60,24 +56,10 @@ public class LightServiceMeta {
 		if (classes != null && classes.length > 0) {
 			for (Class<?> clazz : classes) {
 				if (sampleName.indexOf(clazz.getSimpleName()) != -1) {
-					return new StringBuilder(LIGHT_DOT).append(clazz.getName()).toString();
+					return clazz.getName();
 				}
 			}
 		}
 		return serviceImpl.getClass().getName();
 	}
-
-	public static Object getServiceImpl(Object object) {
-		if (AopUtils.isAopProxy(object) && object instanceof Advised) {
-			Advised advised = (Advised) object;
-			try {
-				object = advised.getTargetSource().getTarget();
-			} catch (Exception e) {
-				return object;
-			}
-			return getServiceImpl(object);
-		}
-		return object;
-	}
-
 }

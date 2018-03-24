@@ -28,7 +28,7 @@ public abstract class RegistryConnection implements Watcher {
 	protected ZooKeeper zooKeeper = null;
 
 	private CountDownLatch countDownLatch = null;
-	protected static final int SESSION_TIMEOUT = 50;
+	protected static final int SESSION_TIMEOUT = 30 * 1000;
 
 	protected volatile static ConcurrentHashMap<String, String> REGISTRY_LEVEL_LOCK = new ConcurrentHashMap<>(8);
 

@@ -1,5 +1,9 @@
 package com.haiyiyang.light.context;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
@@ -8,8 +12,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 
 import com.haiyiyang.light.meta.LightAppMeta;
-import com.haiyiyang.light.service.LightServiceExporter;
-import com.haiyiyang.light.service.annotation.LightService;
+import com.haiyiyang.light.service.LightService;
+import com.haiyiyang.light.service.annotation.IAmALightService;
 
 public class LightServiceHandler implements ApplicationListener<ApplicationEvent> {
 
@@ -31,23 +35,15 @@ public class LightServiceHandler implements ApplicationListener<ApplicationEvent
 	}
 
 	private void publishLightService() {
-		String[] beanDefinitionNames = context.getBeanDefinitionNames();
-		Class<?> clazz = null;
-		for (String beanDefinitionName : beanDefinitionNames) {
-			Object object = context.getBean(beanDefinitionName);
-			try {
-				clazz = LightServiceExporter.getServiceImpl(object).getClass();
-			} catch (Exception e) {
-				LOGGER.warn("No class found of bean: {}.", beanDefinitionName);
-				continue;
-			}
-			LightService lightService = (LightService) clazz.getAnnotation(LightService.class);
-			if (lightService != null) {
-				LightServiceExporter serviceExport = new LightServiceExporter(lightAppMeta.getAppName(), object);
-				if (!context.getBeanFactory().containsSingleton(serviceExport.getServiceName())) {
-					context.getBeanFactory().registerSingleton(serviceExport.getServiceName(), object);
-					// TODO publish
-				}
+		Map<String, Object> objectMap = context.getBeansWithAnnotation(IAmALightService.class);
+		if (objectMap != null && !objectMap.isEmpty()) {
+			LightService lightService = LightService.SINGLETON(lightAppMeta);
+			for (Iterator<Entry<String, Object>> ite = objectMap.entrySet().iterator(); ite.hasNext();) {
+				Entry<String, Object> entry = ite.next();
+//				LightServiceExporter serviceExport = new LightServiceExporter(lightAppMeta.getAppName(),
+//						entry.getValue());
+//				lightService.addServices(serviceExport);
+				
 			}
 		}
 	}
