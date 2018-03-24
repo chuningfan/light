@@ -9,7 +9,6 @@ import com.haiyiyang.light.publish.LightPublisher;
 
 public class LightService implements LightPublisher {
 	
-	private LightServiceMeta 
 	private static final Map<String, LightService> SERVICES = new ConcurrentHashMap<>();
 
 	private static LightService LIGHT_SERVICE;
