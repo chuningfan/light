@@ -2,25 +2,24 @@ package com.haiyiyang.light.service.proxy;
 
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.exception.LightException;
-import com.haiyiyang.light.service.invocation.InvocationFactor;
+import com.haiyiyang.light.service.LightService;
 
 public class LightServiceFactory {
 
-	public static <T> T getService(Class<T> clazz, String priorityChannel) throws LightException {
-		return getServiceProxy(new InvocationFactor(clazz.getName(), priorityChannel, LightConstants.STR1));
+	public static <T> T getService(Class<T> clazz) throws LightException {
+		return getServiceProxy(clazz, LightConstants.BYTE1);
 	}
 
-	public static <T> T getAsyncService(Class<T> clazz, String priorityChannel) throws LightException {
-		return getServiceProxy(new InvocationFactor(clazz.getName(), priorityChannel, LightConstants.STR2));
+	public static <T> T getAsyncService(Class<T> clazz) throws LightException {
+		return getServiceProxy(clazz, LightConstants.BYTE2);
 	}
 
-	public static <T> T getAsyncNoResultService(Class<T> clazz, String priorityChannel) throws LightException {
-		return getServiceProxy(new InvocationFactor(clazz.getName(), priorityChannel, LightConstants.STR3));
+	public static <T> T getAsyncNoResultService(Class<T> clazz) throws LightException {
+		return getServiceProxy(clazz, LightConstants.BYTE3);
 	}
 
-	private static <T> T getServiceProxy(InvocationFactor invocationFactor) throws LightException {
-
-		return null;
+	private static <T> T getServiceProxy(Class<T> clazz, byte invokeMode) throws LightException {
+		return LightService.SINGLETON(null).getServiceProxy(clazz, invokeMode);
 	}
 
 }

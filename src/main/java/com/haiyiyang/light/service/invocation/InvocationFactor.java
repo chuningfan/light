@@ -13,12 +13,10 @@ public class InvocationFactor implements Serializable {
 	private String invokeType;
 	private String serviceName;
 	private String clientABGroup;
-	private String priorityChannel;
 
-	public InvocationFactor(String serviceName, String priorityChannel, String invokeType) {
+	public InvocationFactor(String serviceName, String invokeType) {
 		this.setAppNameByServiceName(serviceName);
 		this.serviceName = serviceName;
-		this.priorityChannel = priorityChannel;
 		this.invokeType = invokeType;
 	}
 
@@ -31,13 +29,6 @@ public class InvocationFactor implements Serializable {
 			dotCount++;
 		}
 		this.setAppName(strb.substring(0, strb.length() - 1).toString());
-	}
-
-	@Override
-	// TODO 更换成1.7 Strinbuffer
-	public String toString() {
-		return "InvocationFactor [appName=" + appName + ", invokeType=" + invokeType + ", serviceName=" + serviceName + ", clientABGroup=" + clientABGroup + ", priorityChannel=" + priorityChannel
-				+ "]";
 	}
 
 	public String getAppName() {
@@ -70,14 +61,6 @@ public class InvocationFactor implements Serializable {
 
 	public void setClientABGroup(String clientABGroup) {
 		this.clientABGroup = clientABGroup;
-	}
-
-	public String getPriorityChannel() {
-		return priorityChannel;
-	}
-
-	public void setPriorityChannel(String priorityChannel) {
-		this.priorityChannel = priorityChannel;
 	}
 
 }
