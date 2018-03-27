@@ -5,6 +5,8 @@ import java.util.List;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.haiyiyang.light.app.props.SettingsProps;
+import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.props.AppProps;
 import com.haiyiyang.light.meta.props.LightProps;
@@ -28,20 +30,29 @@ public class LightAppMeta {
 
 	private static volatile LightAppMeta LIGHT_APP_META;
 
-	private LightAppMeta(String appName) throws LightException {
-		this.appName = appName;
-		this.configRegistry = LightConfig.getLightConfigServer();
+	private LightAppMeta() throws LightException {
+		this.configRegistry = LightConfig.getConfigServer();
 		this.lightProps = LightProps.SINGLETON(this);
 		this.portProps = PortProps.SINGLETON(this);
+		this.setAppNameAndAppPort();
 		this.appProps = AppProps.SINGLETON(this);
 		this.resourceProps = ResourceProps.SINGLETON(this, this.appProps.getResources());
 	}
 
-	public static LightAppMeta SINGLETON(String appName) {
+	private void setAppNameAndAppPort() {
+		String domainPackage = SettingsProps.getDomainPackage();
+		if (domainPackage == null || domainPackage.isEmpty()) {
+			domainPackage = lightProps.getPropsValue(LightConstants.DOMAIN_PACKAGE);
+		}
+		this.appName = SettingsProps.getRootPackage().substring(domainPackage.length() + 1);
+		this.appPort = this.portProps.getPropsValue(this.getAppName());
+	}
+
+	public static LightAppMeta SINGLETON() {
 		if (LIGHT_APP_META == null) {
 			synchronized (LIGHT_APP_META) {
 				if (LIGHT_APP_META == null) {
-					LIGHT_APP_META = new LightAppMeta(appName);
+					LIGHT_APP_META = new LightAppMeta();
 				}
 			}
 		}

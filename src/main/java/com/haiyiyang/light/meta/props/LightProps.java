@@ -26,12 +26,12 @@ public class LightProps implements LightSubscriber {
 			+ LIGHT_PROPS_URL.replaceAll("/", LightConstants.FS);
 
 	private Props props;
-	private LightAppMeta lightAppMeta;
 	private static LightProps LIGHT_PROPS;
+	private static LightAppMeta LIGHT_APP_META;
 
 	private LightProps(LightAppMeta lightAppMeta) {
 		this.props = new Props();
-		this.lightAppMeta = lightAppMeta;
+		LightProps.LIGHT_APP_META = lightAppMeta;
 		initLightProps();
 	}
 
@@ -86,7 +86,7 @@ public class LightProps implements LightSubscriber {
 
 	@Override
 	public String getRegistry() {
-		return lightAppMeta.getConfigRegistry();
+		return LIGHT_APP_META.getConfigRegistry();
 	}
 
 	@Override

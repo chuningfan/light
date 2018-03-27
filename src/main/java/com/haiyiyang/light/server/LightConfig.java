@@ -18,7 +18,7 @@ public class LightConfig {
 	private static Logger logger = LoggerFactory.getLogger(LightConfig.class);
 	private static final String CONFIG_SERVER_URL = "http://config.haiyiyang.com";
 
-	public static String getLightConfigServer() throws LightException {
+	public static String getConfigServer() throws LightException {
 		String result = null;
 		CloseableHttpResponse response = null;
 		try {
@@ -60,7 +60,7 @@ public class LightConfig {
 	}
 
 	public static void main(String[] args) throws ClientProtocolException, IOException {
-		String config = getLightConfigServer();
+		String config = getConfigServer();
 		System.out.println(config);
 	}
 

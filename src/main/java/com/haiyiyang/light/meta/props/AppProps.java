@@ -32,12 +32,12 @@ public class AppProps implements LightSubscriber {
 	private String appPropsPath;
 	private String appPropsLocalPath;
 
-	private LightAppMeta lightAppMeta;
 	private static AppProps APP_PROPS;
+	private static LightAppMeta LIGHT_APP_META;
 
 	private AppProps(LightAppMeta lightAppMeta) {
-		this.props = new Props();
-		this.lightAppMeta = lightAppMeta;
+		props = new Props();
+		AppProps.LIGHT_APP_META = lightAppMeta;
 		this.appPropsPath = new StringBuilder(APP_PROPS_PATH).append(lightAppMeta.getAppName())
 				.append(LightConstants.DOT_PROPS).toString();
 		this.appPropsLocalPath = new StringBuilder(APP_PROPS_LOCAL_PATH).append(lightAppMeta.getAppName())
@@ -103,7 +103,7 @@ public class AppProps implements LightSubscriber {
 
 	@Override
 	public String getRegistry() {
-		return lightAppMeta.getConfigRegistry();
+		return LIGHT_APP_META.getConfigRegistry();
 	}
 
 	@Override

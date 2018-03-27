@@ -25,13 +25,12 @@ public class PortProps implements LightSubscriber {
 			+ APP_PORT_PROPS_URL.replaceAll("/", LightConstants.FS);
 
 	private Props props;
-
-	private LightAppMeta lightAppMeta;
 	private static PortProps PORT_PROPS;
+	private static LightAppMeta LIGHT_APP_META;
 
 	private PortProps(LightAppMeta lightAppMeta) {
-		this.props = new Props();
-		this.lightAppMeta = lightAppMeta;
+		props = new Props();
+		PortProps.LIGHT_APP_META = lightAppMeta;
 		initPortProps();
 	}
 
@@ -82,7 +81,7 @@ public class PortProps implements LightSubscriber {
 
 	@Override
 	public String getRegistry() {
-		return lightAppMeta.getConfigRegistry();
+		return LIGHT_APP_META.getConfigRegistry();
 	}
 
 	@Override

@@ -11,7 +11,7 @@ public class LightConstants {
 	public static final String SEMICOLON = ";";
 
 	public static final String LIGHT_SERVICE_PREFIX = "light:";
-	public static final String DOMAIN_PACKAGE = "com.haiyiyang";
+	public static final String DOMAIN_PACKAGE = "domainPackage";
 
 	public static final int INT0 = 0, INT1 = 1, INT2 = 2, INT3 = 3;
 	public static final byte BYTE0 = 0, BYTE1 = 1, BYTE2 = 2, BYTE3 = 3;

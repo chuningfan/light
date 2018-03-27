@@ -28,13 +28,13 @@ public class ResourceProps implements LightSubscriber {
 	public static final String RESOURCE_PROPS_LOCAL_PATH = LightConstants.USER_HOME
 			+ RESOURCE_PROPS_PATH.replaceAll("/", LightConstants.FS);
 
-	private LightAppMeta lightAppMeta;
+	private static LightAppMeta LIGHT_APP_META;
 	private static ResourceProps RESOURCE_PROPS;
 	private static Map<String, LightResources> PATH_RESOURCES = new ConcurrentHashMap<>();
 	private static Map<LightResources, Props> RESOURCES_PROPS = new ConcurrentHashMap<>();
 
 	private ResourceProps(LightAppMeta lightAppMeta, Map<String, String> resourcesMap) {
-		this.lightAppMeta = lightAppMeta;
+		ResourceProps.LIGHT_APP_META = lightAppMeta;
 		initResourceProps(resourcesMap);
 	}
 
@@ -104,7 +104,7 @@ public class ResourceProps implements LightSubscriber {
 
 	@Override
 	public String getRegistry() {
-		return lightAppMeta.getConfigRegistry();
+		return LIGHT_APP_META.getConfigRegistry();
 	}
 
 	@Override

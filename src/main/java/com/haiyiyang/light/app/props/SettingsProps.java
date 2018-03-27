@@ -18,12 +18,12 @@ public class SettingsProps {
 
 	private static Logger logger = LoggerFactory.getLogger(SettingsProps.class);
 
-	private final static String FILE_SETTINGS_PROPS = "settings.props";
-	private final static String KEY_APP_NAME = "appName";
-	private final static String KEY_APP_SERVICE_PACKAGES = "appServicePackages";
-	private final static String KEY_APP_CONFIGURABLE_CLASSES = "appConfigurableClasses";
-
 	private static Props SETTINGS_PROPS = null;
+	private final static String FILE_SETTINGS_PROPS = "settings.props";
+
+	private final static String ROOT_PACKAGE = "rootPackage";
+	private final static String DOMAIN_PACKAGE = "domainPackage";
+	private final static String ANNOTATED_CLASSES = "annotatedClasses";
 
 	private static Props getSettingsProps() {
 		if (SETTINGS_PROPS == null) {
@@ -63,21 +63,20 @@ public class SettingsProps {
 		}
 	}
 
-	public static String getAppNameValue() {
-		return getSettingsProps().getValue(KEY_APP_NAME);
+	public static String getRootPackage() {
+		return getSettingsProps().getValue(ROOT_PACKAGE);
 	}
 
-	public static String getAppServicePackagesValue() {
-		return getSettingsProps().getValue(KEY_APP_SERVICE_PACKAGES);
+	public static String getDomainPackage() {
+		return getSettingsProps().getValue(DOMAIN_PACKAGE);
 	}
 
-	private static String getAppConfigurableClassesValue() {
-		return getSettingsProps().getValue(KEY_APP_CONFIGURABLE_CLASSES);
+	private static String getAnnotatedClasses() {
+		return getSettingsProps().getValue(ANNOTATED_CLASSES);
 	}
 
-	public static Class<?>[] getAppConfigurableClasses() throws LightException {
-		String[] classesNames = StringUtils.tokenizeToStringArray(getAppConfigurableClassesValue(),
-				LightConstants.COMMA);
+	public static Class<?>[] getConfigurableClasses() throws LightException {
+		String[] classesNames = StringUtils.tokenizeToStringArray(getAnnotatedClasses(), LightConstants.COMMA);
 		Class<?>[] classes = new Class<?>[classesNames.length];
 		for (int i = 0; i < classesNames.length; i++) {
 			try {

@@ -13,14 +13,14 @@ public class LightApplicationContext extends AnnotationConfigApplicationContext 
 		if (LIGHT_APP_META == null) {
 			synchronized (LightApplicationContext.class) {
 				if (LIGHT_APP_META == null) {
-					LIGHT_APP_META = LightAppMeta.SINGLETON(SettingsProps.getAppNameValue());
-					String appServicePackages = SettingsProps.getAppServicePackagesValue();
-					if (appServicePackages != null && !appServicePackages.isEmpty()) {
-						this.scan(SettingsProps.getAppServicePackagesValue());
+					LIGHT_APP_META = LightAppMeta.SINGLETON();
+					String rootPackage = SettingsProps.getRootPackage();
+					if (rootPackage != null && !rootPackage.isEmpty()) {
+						this.scan(SettingsProps.getRootPackage());
 					}
-					Class<?>[] appConfigurableClasses = SettingsProps.getAppConfigurableClasses();
-					if (appConfigurableClasses.length > 0) {
-						this.register(appConfigurableClasses);
+					Class<?>[] classes = SettingsProps.getConfigurableClasses();
+					if (classes.length > 0) {
+						this.register(classes);
 					}
 					this.refresh();
 				}
