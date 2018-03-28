@@ -1,6 +1,7 @@
 package com.haiyiyang.light.meta;
 
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -13,6 +14,7 @@ import com.haiyiyang.light.meta.props.LightProps;
 import com.haiyiyang.light.meta.props.PortProps;
 import com.haiyiyang.light.meta.props.ResourceProps;
 import com.haiyiyang.light.server.LightConfig;
+import com.haiyiyang.light.utils.NetworkUtil;
 
 public class LightAppMeta {
 
@@ -24,6 +26,8 @@ public class LightAppMeta {
 	private AppProps appProps;
 	private ResourceProps resourceProps;
 
+	private static String ZERO_ONE_GROUPING;
+	private static String MACHINE_IP = LightConstants.IP_127_0_0_1;
 	private static List<String> PUBLISH_REGISTRIES = Lists.newArrayListWithCapacity(3);
 	private static Multimap<String, String> SUBSCRIBER_REGISTRIES_MAP = ArrayListMultimap.create();;
 	private static final String DEFAULT_SUBSCRIBER_REGISTRY = "DEFAULT_SUBSCRIBER_REGISTRY";
@@ -37,6 +41,7 @@ public class LightAppMeta {
 		this.setAppNameAndAppPort();
 		this.appProps = AppProps.SINGLETON(this);
 		this.resourceProps = ResourceProps.SINGLETON(this, this.appProps.getResources());
+		this.setMachineIPAndZeroOneGrouping();
 	}
 
 	private void setAppNameAndAppPort() {
@@ -46,6 +51,23 @@ public class LightAppMeta {
 		}
 		this.appName = SettingsProps.getRootPackage().substring(domainPackage.length() + 1);
 		this.appPort = this.portProps.getPropsValue(this.getAppName());
+	}
+
+	private void setMachineIPAndZeroOneGrouping() {
+		Set<String> ips = NetworkUtil.getLocalIps();
+		String ipSegmentPrefix = lightProps.getIpSegmentPrefix();
+		for (String ip : ips) {
+			if (ipSegmentPrefix == null) {
+				MACHINE_IP = ip;
+				break;
+			} else if (ip.startsWith(ipSegmentPrefix)) {
+				MACHINE_IP = ip;
+				break;
+			}
+		}
+		if (!LightConstants.IP_127_0_0_1.equals(MACHINE_IP)) {
+			ZERO_ONE_GROUPING = MACHINE_IP.substring(MACHINE_IP.length() - 1, MACHINE_IP.length());
+		}
 	}
 
 	public static LightAppMeta SINGLETON() {
@@ -67,8 +89,21 @@ public class LightAppMeta {
 		return appPort;
 	}
 
+	public Integer getAppWeight() {
+		// TODO lightProps.getPropsValue("");
+		return null;
+	}
+
 	public String getConfigRegistry() {
 		return configRegistry;
+	}
+
+	public String getMachineIp() {
+		return MACHINE_IP;
+	}
+
+	public String getZeroOneGrouping() {
+		return ZERO_ONE_GROUPING;
 	}
 
 }

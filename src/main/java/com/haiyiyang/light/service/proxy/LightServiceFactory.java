@@ -19,7 +19,7 @@ public class LightServiceFactory {
 	}
 
 	private static <T> T getServiceProxy(Class<T> clazz, byte invokeMode) throws LightException {
-		return LightService.SINGLETON(null).getServiceProxy(clazz, invokeMode);
+		return LightService.SINGLETON().getServiceProxy(clazz, invokeMode);
 	}
 
 }

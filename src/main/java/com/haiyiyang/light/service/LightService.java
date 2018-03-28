@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.haiyiyang.light.context.LightApplicationContext;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.publish.LightPublisher;
 import com.haiyiyang.light.subscription.LightSubscriber;
@@ -15,21 +16,19 @@ public class LightService implements LightPublisher, LightSubscriber {
 
 	private static LightService LIGHT_SERVICE;
 
-	private LightAppMeta lightAppMeta;
+	private static LightAppMeta LIGHT_APP_META;
 
-	private LightService(LightAppMeta lightAppMeta) {
-		if (lightAppMeta != null) {
-			this.lightAppMeta = lightAppMeta;
-		}
+	private LightService() {
+		LIGHT_APP_META = LightApplicationContext.getLightAppMeta();
 	}
 
-	public static LightService SINGLETON(LightAppMeta lightAppMeta) {
+	public static LightService SINGLETON() {
 		if (LIGHT_SERVICE != null) {
 			return LIGHT_SERVICE;
 		}
 		synchronized (LIGHT_SERVICE) {
 			if (LIGHT_SERVICE == null) {
-				LIGHT_SERVICE = new LightService(lightAppMeta);
+				LIGHT_SERVICE = new LightService();
 			}
 		}
 		return LIGHT_SERVICE;
@@ -39,33 +38,37 @@ public class LightService implements LightPublisher, LightSubscriber {
 		return null;
 	}
 
-	public void publishService(Object object) {
-		Service service = new Service(object);
-		if (service != PUBLISHED_SERVICES.putIfAbsent(service.serviceName, service)) {
-			// TODO publish service.
-		}
+	public void publishService() {
+		// if (service != PUBLISHED_SERVICES.putIfAbsent(service.serviceName, service))
+		// {
+		// // TODO publish service.
+		// }
 	}
 
 	public void subscribeService(Object object) {
-		Service service = new Service(object);
-		if (service != SUBSCRIBED_SERVICES.putIfAbsent(service.serviceName, service)) {
-			// TODO publish service.
-		}
+		// if (service != SUBSCRIBED_SERVICES.putIfAbsent(service.serviceName, service))
+		// {
+		// // TODO publish service.
+		// }
 	}
 
-	static class Service {
+	public void addService(String beanName, Object object) {
+		Service service = new Service(beanName, object);
+		PUBLISHED_SERVICES.put(service.serviceName, service);
+	}
+
+	@SuppressWarnings("unused")
+	public static class Service {
+		private String beanName;
 		private String serviceName;
-
 		private Object serviceImpl;
-		private String serviceImplName;
+		private Integer weight = 1;
 
-		private byte group;
-		private byte invokeMode;
-
-		public Service(Object object) {
+		Service(String beanName, Object object) {
+			this.beanName = beanName;
 			this.serviceImpl = object;
-			this.serviceName = getServiceName(this.serviceImpl);
-			this.serviceImplName = serviceImpl.getClass().getName();
+			this.serviceName = getInterfaceName(this.serviceImpl);
+			this.weight = LIGHT_APP_META.getAppWeight();
 		}
 	}
 
@@ -88,7 +91,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 		private byte group;
 	}
 
-	private static String getServiceName(Object serviceImpl) {
+	private static String getInterfaceName(Object serviceImpl) {
 		String sampleName = serviceImpl.getClass().getSimpleName();
 		Class<?>[] classes = serviceImpl.getClass().getInterfaces();
 		if (classes != null && classes.length > 0) {
@@ -117,15 +120,6 @@ public class LightService implements LightPublisher, LightSubscriber {
 	public void processData(String path, byte[] data) {
 		// TODO Auto-generated method stub
 
-	}
-	
-	public static void main (String[] args) throws ClassNotFoundException {
-		Class a = Class.forName("java.lang.Object");
-		Class b = Class.forName("java.lang.Object");
-		System.out.println(a);
-		System.out.println(b);
-		System.out.println(a==b);
-		System.out.println(a.equals(b));
 	}
 
 }

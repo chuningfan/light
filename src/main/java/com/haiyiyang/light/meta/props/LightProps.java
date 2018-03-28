@@ -21,6 +21,7 @@ public class LightProps implements LightSubscriber {
 	private static Logger LOGGER = LoggerFactory.getLogger(LightProps.class);
 
 	private static final String OPEN_GROUP = "openGroup";
+	private static final String IP_SEGMENT_PREFIX = "ipSegmentPrefix";
 	public static final String LIGHT_PROPS_URL = "/light/light.props";
 	public static final String LIGHT_PROPS_LOCAL_URL = LightConstants.USER_HOME
 			+ LIGHT_PROPS_URL.replaceAll("/", LightConstants.FS);
@@ -74,6 +75,10 @@ public class LightProps implements LightSubscriber {
 
 	public boolean isOpenGroup() {
 		return LightConstants.STR1.equals(props.getValue(OPEN_GROUP));
+	}
+
+	public String getIpSegmentPrefix() {
+		return props.getValue(IP_SEGMENT_PREFIX);
 	}
 
 	public String getPropsValue(String key) {
