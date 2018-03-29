@@ -15,7 +15,7 @@ import com.haiyiyang.light.exception.LightException;
 
 public class LightConfig {
 
-	private static Logger logger = LoggerFactory.getLogger(LightConfig.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(LightConfig.class);
 	private static final String CONFIG_SERVER_URL = "http://config.haiyiyang.com";
 
 	public static String getConfigServer() throws LightException {
@@ -24,7 +24,7 @@ public class LightConfig {
 		try {
 			response = HttpClients.createDefault().execute(new HttpGet(CONFIG_SERVER_URL));
 		} catch (IOException e) {
-			logger.info("Light config server is not available: {}", CONFIG_SERVER_URL);
+			LOGGER.info("Light config server is not available: {}", CONFIG_SERVER_URL);
 		}
 		if (response != null) {
 			try {
@@ -43,19 +43,19 @@ public class LightConfig {
 					}
 				}
 			} catch (UnsupportedOperationException | IOException e) {
-				logger.info("Parse Light config server URL error.");
+				LOGGER.info("Parse Light config server URL error.");
 			} finally {
 				try {
 					response.close();
 				} catch (IOException e) {
-					logger.info("Close Http Response error.");
+					LOGGER.info("Close Http Response error.");
 				}
 			}
 		}
 		if (result == null) {
 			throw new LightException(LightException.Code.UNDEFINED, "Light config server URL is invalid.");
 		}
-		logger.info("Light config server URL: {}", result);
+		LOGGER.info("Light config server URL: {}", result);
 		return result;
 	}
 

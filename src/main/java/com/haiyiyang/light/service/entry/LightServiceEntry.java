@@ -1,21 +1,93 @@
 package com.haiyiyang.light.service.entry;
 
-public class LightServiceEntry {
-
+public class LightServiceEntry implements Cloneable {
 	private String ip;
-	private String port;
-
+	private int port;
 	private String serviceName;
+	private Integer grouping;
+	private int weight = 5;
 
-	private String clientABGroup;
-	private String priorityChannel;
+	public LightServiceEntry(String ip, int port, String serviceName, Integer grouping, int weight) {
+		super();
+		this.ip = ip;
+		this.port = port;
+		this.serviceName = serviceName;
+		this.grouping = grouping;
+		this.weight = weight;
+	}
 
-	private String ifName;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((grouping == null) ? 0 : grouping.hashCode());
+		result = prime * result + ((ip == null) ? 0 : ip.hashCode());
+		result = prime * result + port;
+		result = prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
+		return result;
+	}
 
-	private String appName;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LightServiceEntry other = (LightServiceEntry) obj;
+		if (grouping == null) {
+			if (other.grouping != null)
+				return false;
+		} else if (!grouping.equals(other.grouping))
+			return false;
+		if (ip == null) {
+			if (other.ip != null)
+				return false;
+		} else if (!ip.equals(other.ip))
+			return false;
+		if (port != other.port)
+			return false;
+		if (serviceName == null) {
+			if (other.serviceName != null)
+				return false;
+		} else if (!serviceName.equals(other.serviceName))
+			return false;
+		return true;
+	}
 
-	private String stack;
+	public LightServiceEntry clone() {
+		LightServiceEntry o = null;
+		try {
+			o = (LightServiceEntry) super.clone();
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+		return o;
+	}
 
-	private String group;
+	public void setWeight(int weight) {
+		this.weight = weight;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public String getServiceName() {
+		return serviceName;
+	}
+
+	public Integer getGrouping() {
+		return grouping;
+	}
+
+	public int getWeight() {
+		return weight;
+	}
 
 }

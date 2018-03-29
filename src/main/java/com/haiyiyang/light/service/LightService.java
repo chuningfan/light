@@ -7,12 +7,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.haiyiyang.light.context.LightApplicationContext;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.publish.LightPublisher;
+import com.haiyiyang.light.service.invocation.InvocationFactor;
+import com.haiyiyang.light.service.invocation.LightInvocationHandler;
 import com.haiyiyang.light.subscription.LightSubscriber;
 
 public class LightService implements LightPublisher, LightSubscriber {
 
 	private static final Map<String, Service> PUBLISHED_SERVICES = new ConcurrentHashMap<>();
-	private static final Map<String, Service> SUBSCRIBED_SERVICES = new ConcurrentHashMap<>();
 
 	private static LightService LIGHT_SERVICE;
 
@@ -34,8 +35,13 @@ public class LightService implements LightPublisher, LightSubscriber {
 		return LIGHT_SERVICE;
 	}
 
-	public <T> T getServiceProxy(Class<T> clazz, byte invokeMode) {
-		return null;
+	@SuppressWarnings("unchecked")
+	public <T> T getServiceProxy(InvocationFactor factor) {
+		String className = factor.getClazz().getName();
+		if (PUBLISHED_SERVICES.containsKey(className)) {
+			return (T) PUBLISHED_SERVICES.get(className).serviceImpl;
+		}
+		return (T) LightInvocationHandler.getProxyService(factor);
 	}
 
 	public void publishService() {
@@ -69,16 +75,6 @@ public class LightService implements LightPublisher, LightSubscriber {
 			this.serviceImpl = object;
 			this.serviceName = getInterfaceName(this.serviceImpl);
 			this.weight = LIGHT_APP_META.getAppWeight();
-		}
-	}
-
-	static class InvokeFactor {
-		private Class<?> clazz;
-		private byte invokeMode;
-
-		public InvokeFactor(Class<?> clazz, byte invokeMode) {
-			this.clazz = clazz;
-			this.invokeMode = invokeMode;
 		}
 	}
 

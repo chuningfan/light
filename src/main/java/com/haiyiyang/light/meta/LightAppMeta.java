@@ -26,7 +26,7 @@ public class LightAppMeta {
 	private AppProps appProps;
 	private ResourceProps resourceProps;
 
-	private static String ZERO_ONE_GROUPING;
+	private static Integer ZERO_ONE_GROUPING;
 	private static String MACHINE_IP = LightConstants.IP_127_0_0_1;
 	private static List<String> PUBLISH_REGISTRIES = Lists.newArrayListWithCapacity(3);
 	private static Multimap<String, String> SUBSCRIBER_REGISTRIES_MAP = ArrayListMultimap.create();;
@@ -66,7 +66,7 @@ public class LightAppMeta {
 			}
 		}
 		if (!LightConstants.IP_127_0_0_1.equals(MACHINE_IP)) {
-			ZERO_ONE_GROUPING = MACHINE_IP.substring(MACHINE_IP.length() - 1, MACHINE_IP.length());
+			ZERO_ONE_GROUPING = Integer.parseInt(MACHINE_IP.substring(MACHINE_IP.length() - 1, MACHINE_IP.length()));
 		}
 	}
 
@@ -102,7 +102,7 @@ public class LightAppMeta {
 		return MACHINE_IP;
 	}
 
-	public String getZeroOneGrouping() {
+	public Integer getZeroOneGrouping() {
 		return ZERO_ONE_GROUPING;
 	}
 
