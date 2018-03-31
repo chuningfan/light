@@ -14,7 +14,7 @@ import com.haiyiyang.light.meta.props.LightProps;
 import com.haiyiyang.light.meta.props.PortProps;
 import com.haiyiyang.light.meta.props.ResourceProps;
 import com.haiyiyang.light.server.LightConfig;
-import com.haiyiyang.light.utils.NetworkUtil;
+import com.haiyiyang.light.utils.NetworkUtils;
 
 public class LightAppMeta {
 
@@ -25,7 +25,7 @@ public class LightAppMeta {
 	private AppProps appProps;
 	private ResourceProps resourceProps;
 
-	private static Integer ZERO_ONE_GROUPING;
+	private static byte ZERO_ONE_GROUPING;
 	private static List<String> PUBLISH_REGISTRIES = new ArrayList<>(3);
 	private static String MACHINE_IP = LightConstants.IP_127_0_0_1;
 
@@ -59,7 +59,7 @@ public class LightAppMeta {
 	}
 
 	private void setMachineIPAndZeroOneGrouping() {
-		Set<String> ips = NetworkUtil.getLocalIps();
+		Set<String> ips = NetworkUtils.getLocalIps();
 		String ipSegmentPrefix = lightProps.getIpSegmentPrefix();
 		for (String ip : ips) {
 			if (ipSegmentPrefix == null) {
@@ -70,9 +70,7 @@ public class LightAppMeta {
 				break;
 			}
 		}
-		if (!LightConstants.IP_127_0_0_1.equals(MACHINE_IP)) {
-			ZERO_ONE_GROUPING = Integer.parseInt(MACHINE_IP.substring(MACHINE_IP.length() - 1, MACHINE_IP.length()));
-		}
+		ZERO_ONE_GROUPING = Byte.parseByte(MACHINE_IP.substring(MACHINE_IP.length() - 1, MACHINE_IP.length()));
 	}
 
 	public static LightAppMeta SINGLETON() {
@@ -114,7 +112,7 @@ public class LightAppMeta {
 		return MACHINE_IP;
 	}
 
-	public Integer getZeroOneGrouping() {
+	public byte getZeroOneGrouping() {
 		return ZERO_ONE_GROUPING;
 	}
 

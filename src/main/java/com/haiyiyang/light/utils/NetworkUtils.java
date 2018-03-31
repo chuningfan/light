@@ -7,7 +7,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NetworkUtil {
+public class NetworkUtils {
 
 	private static Set<InetAddress> getInetAddresses() {
 		Set<InetAddress> inetAddressSet = new HashSet<InetAddress>();
