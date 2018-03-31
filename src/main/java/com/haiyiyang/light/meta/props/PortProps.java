@@ -18,10 +18,11 @@ import jodd.props.Props;
 
 public class PortProps implements LightSubscriber {
 
-	protected static Logger LOGGER = LoggerFactory.getLogger(PortProps.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(PortProps.class);
 
-	public static final String APP_PORT_PROPS_URL = "/light/appPort.props";
-	public static final String APP_PORT_PROPS_LOCAL_URL = LightConstants.USER_HOME
+	private static final int DEFAULT_APP_PORT = 5001;
+	private static final String APP_PORT_PROPS_URL = "/light/appPort.props";
+	private static final String APP_PORT_PROPS_LOCAL_URL = LightConstants.USER_HOME
 			+ APP_PORT_PROPS_URL.replaceAll("/", LightConstants.FS);
 
 	private Props props;
@@ -71,12 +72,12 @@ public class PortProps implements LightSubscriber {
 		}
 	}
 
-	public String getPropsValue(String key) {
-		return props.getValue(key);
-	}
-
-	public String getPropsValue(final String key, String profiles) {
-		return props.getValue(key, profiles);
+	public int getAppPort(String appName) {
+		Integer appPort = props.getIntegerValue(appName);
+		if (appPort != null) {
+			return appPort.intValue();
+		}
+		return DEFAULT_APP_PORT;
 	}
 
 	@Override

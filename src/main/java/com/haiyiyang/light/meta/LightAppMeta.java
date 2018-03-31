@@ -1,11 +1,11 @@
 package com.haiyiyang.light.meta;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import org.springframework.util.StringUtils;
+
 import com.haiyiyang.light.app.props.SettingsProps;
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.exception.LightException;
@@ -19,7 +19,6 @@ import com.haiyiyang.light.utils.NetworkUtil;
 public class LightAppMeta {
 
 	private String appName;
-	private String appPort;
 	private String configRegistry;
 	private LightProps lightProps;
 	private PortProps portProps;
@@ -27,30 +26,36 @@ public class LightAppMeta {
 	private ResourceProps resourceProps;
 
 	private static Integer ZERO_ONE_GROUPING;
+	private static List<String> PUBLISH_REGISTRIES = new ArrayList<>(3);
 	private static String MACHINE_IP = LightConstants.IP_127_0_0_1;
-	private static List<String> PUBLISH_REGISTRIES = Lists.newArrayListWithCapacity(3);
-	private static Multimap<String, String> SUBSCRIBER_REGISTRIES_MAP = ArrayListMultimap.create();;
-	private static final String DEFAULT_SUBSCRIBER_REGISTRY = "DEFAULT_SUBSCRIBER_REGISTRY";
 
 	private static volatile LightAppMeta LIGHT_APP_META;
 
 	private LightAppMeta() throws LightException {
 		this.configRegistry = LightConfig.getConfigServer();
 		this.lightProps = LightProps.SINGLETON(this);
+		this.initAppName();
+		this.initPublishRegistries();
 		this.portProps = PortProps.SINGLETON(this);
-		this.setAppNameAndAppPort();
 		this.appProps = AppProps.SINGLETON(this);
 		this.resourceProps = ResourceProps.SINGLETON(this, this.appProps.getResources());
 		this.setMachineIPAndZeroOneGrouping();
 	}
 
-	private void setAppNameAndAppPort() {
+	private void initAppName() {
 		String domainPackage = SettingsProps.getDomainPackage();
 		if (domainPackage == null || domainPackage.isEmpty()) {
 			domainPackage = lightProps.getPropsValue(LightConstants.DOMAIN_PACKAGE);
 		}
 		this.appName = SettingsProps.getRootPackage().substring(domainPackage.length() + 1);
-		this.appPort = this.portProps.getPropsValue(this.getAppName());
+	}
+
+	private void initPublishRegistries() {
+		String publishRegistry = lightProps.getPublishRegistry();
+		String[] registrys = StringUtils.tokenizeToStringArray(publishRegistry, LightConstants.SEMICOLON);
+		for (String registry : registrys) {
+			PUBLISH_REGISTRIES.add(registry);
+		}
 	}
 
 	private void setMachineIPAndZeroOneGrouping() {
@@ -81,17 +86,24 @@ public class LightAppMeta {
 		return LIGHT_APP_META;
 	}
 
+	public LightProps getLightProps() {
+		return lightProps;
+	}
+
+	public PortProps getPortProps() {
+		return portProps;
+	}
+
+	public AppProps getAppProps() {
+		return appProps;
+	}
+
+	public ResourceProps getResourceProps() {
+		return resourceProps;
+	}
+
 	public String getAppName() {
 		return appName;
-	}
-
-	public String getAppPort() {
-		return appPort;
-	}
-
-	public Integer getAppWeight() {
-		// TODO lightProps.getPropsValue("");
-		return null;
 	}
 
 	public String getConfigRegistry() {

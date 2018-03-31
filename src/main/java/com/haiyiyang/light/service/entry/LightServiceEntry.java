@@ -4,10 +4,10 @@ public class LightServiceEntry implements Cloneable {
 	private String ip;
 	private int port;
 	private String serviceName;
-	private Integer grouping;
-	private int weight = 5;
+	private int grouping;
+	private int weight;
 
-	public LightServiceEntry(String ip, int port, String serviceName, Integer grouping, int weight) {
+	public LightServiceEntry(String ip, int port, String serviceName, int grouping, int weight) {
 		super();
 		this.ip = ip;
 		this.port = port;
@@ -20,7 +20,7 @@ public class LightServiceEntry implements Cloneable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((grouping == null) ? 0 : grouping.hashCode());
+		result = prime * result + grouping;
 		result = prime * result + ((ip == null) ? 0 : ip.hashCode());
 		result = prime * result + port;
 		result = prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
@@ -36,10 +36,7 @@ public class LightServiceEntry implements Cloneable {
 		if (getClass() != obj.getClass())
 			return false;
 		LightServiceEntry other = (LightServiceEntry) obj;
-		if (grouping == null) {
-			if (other.grouping != null)
-				return false;
-		} else if (!grouping.equals(other.grouping))
+		if (grouping != other.grouping)
 			return false;
 		if (ip == null) {
 			if (other.ip != null)
@@ -66,10 +63,6 @@ public class LightServiceEntry implements Cloneable {
 		return o;
 	}
 
-	public void setWeight(int weight) {
-		this.weight = weight;
-	}
-
 	public String getIp() {
 		return ip;
 	}
@@ -82,12 +75,16 @@ public class LightServiceEntry implements Cloneable {
 		return serviceName;
 	}
 
-	public Integer getGrouping() {
+	public int getGrouping() {
 		return grouping;
 	}
 
 	public int getWeight() {
 		return weight;
+	}
+
+	public void setWeight(int weight) {
+		this.weight = weight;
 	}
 
 }

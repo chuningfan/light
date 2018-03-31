@@ -20,10 +20,15 @@ public class LightProps implements LightSubscriber {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(LightProps.class);
 
-	private static final String OPEN_GROUP = "openGroup";
+	private static final int DEFAULT_SERVER_LOAD_WEIGHT = 3;
 	private static final String IP_SEGMENT_PREFIX = "ipSegmentPrefix";
-	public static final String LIGHT_PROPS_URL = "/light/light.props";
-	public static final String LIGHT_PROPS_LOCAL_URL = LightConstants.USER_HOME
+	private static final String PUBLISH_REGISTRY = "publishRegistry";
+	private static final String SUBSCRIPTION_REGISTRY = "subscriptionRegistry";
+	private static final String SERVER_LOAD_WEIGHT = "serverLoadWeight";
+
+	private static final String OPEN_GROUP = "openGroup";
+	private static final String LIGHT_PROPS_URL = "/light/light.props";
+	private static final String LIGHT_PROPS_LOCAL_URL = LightConstants.USER_HOME
 			+ LIGHT_PROPS_URL.replaceAll("/", LightConstants.FS);
 
 	private Props props;
@@ -71,6 +76,22 @@ public class LightProps implements LightSubscriber {
 				LOGGER.error(e.getMessage(), e);
 			}
 		}
+	}
+
+	public String getPublishRegistry() {
+		return props.getValue(PUBLISH_REGISTRY, LIGHT_APP_META.getAppName());
+	}
+
+	public String getSubscriptionRegistry(String subscriptionAppName) {
+		return props.getValue(SUBSCRIPTION_REGISTRY, subscriptionAppName);
+	}
+
+	public int getServerLoadWeight() {
+		Integer weight = props.getIntegerValue(SERVER_LOAD_WEIGHT, LIGHT_APP_META.getMachineIp());
+		if (weight != null) {
+			return weight.intValue();
+		}
+		return DEFAULT_SERVER_LOAD_WEIGHT;
 	}
 
 	public boolean isOpenGroup() {

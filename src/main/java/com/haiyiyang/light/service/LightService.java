@@ -35,13 +35,12 @@ public class LightService implements LightPublisher, LightSubscriber {
 		return LIGHT_SERVICE;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> T getServiceProxy(InvocationFactor factor) {
+	public Object getServiceProxy(InvocationFactor factor) {
 		String className = factor.getClazz().getName();
 		if (PUBLISHED_SERVICES.containsKey(className)) {
-			return (T) PUBLISHED_SERVICES.get(className).serviceImpl;
+			return PUBLISHED_SERVICES.get(className).serviceImpl;
 		}
-		return (T) LightInvocationHandler.getProxyService(factor);
+		return LightInvocationHandler.getProxyService(factor);
 	}
 
 	public void publishService() {
@@ -68,23 +67,23 @@ public class LightService implements LightPublisher, LightSubscriber {
 		private String beanName;
 		private String serviceName;
 		private Object serviceImpl;
-		private Integer weight = 1;
+		private int weight;
 
 		Service(String beanName, Object object) {
 			this.beanName = beanName;
 			this.serviceImpl = object;
 			this.serviceName = getInterfaceName(this.serviceImpl);
-			this.weight = LIGHT_APP_META.getAppWeight();
+			this.weight = LIGHT_APP_META.getLightProps().getServerLoadWeight();
 		}
 	}
 
 	class ServiceEntry implements Cloneable {
-		private String IP;
+		private String ip;
 		private int port;
-		private int weight = 1;
-		private String serviceName;
-		private String appName;
+		private String name;
 		private byte group;
+		private int weight;
+
 	}
 
 	private static String getInterfaceName(Object serviceImpl) {

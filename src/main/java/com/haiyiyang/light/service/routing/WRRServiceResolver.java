@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.haiyiyang.light.service.entry.LightServiceEntry;
 
-public class WRRRouter {
+public class WRRServiceResolver {
 	private static Map<String, LightServiceEntry> LATEST_ENTRIES = new ConcurrentHashMap<>();
 
 	private static int GCD(int m, int n) {
