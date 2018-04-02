@@ -2,58 +2,62 @@ package com.haiyiyang.light.protocol;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.serialize.SerializerContext;
+import com.haiyiyang.light.utils.LightClassUtils;
 
 public class PayloadMessage implements Serializable {
 
 	private static final long serialVersionUID = -1L;
+	private static final int FIELDS_COUNT = 7;
 
 	private String requestId;
 	private String serviceName;
 	private String method;
-	private Class<?>[] paramsTypes;
 	private String clientIP;
 	private String clientAppName;
 	private String datetime;
 	private String signature;
+	private Class<?>[] paramsTypes;
 
-	public String getClientAppName() {
-		return clientAppName;
+	public PayloadMessage() {
+
 	}
 
-	public void setClientAppName(String clientAppName) {
+	public PayloadMessage(String requestId, String serviceName, String method, Class<?>[] paramsTypes, String clientIP,
+			String clientAppName, String datetime, String signature) {
+		super();
+		this.requestId = requestId;
+		this.serviceName = serviceName;
+		this.method = method;
+		this.paramsTypes = paramsTypes;
+		this.clientIP = clientIP;
 		this.clientAppName = clientAppName;
+		this.datetime = datetime;
+		this.signature = signature;
 	}
 
-	public Class<?>[] getParamType() {
-		return paramsTypes;
-	}
-
-	public void setParamType(Class<?>[] paramType) {
-		this.paramsTypes = paramType;
-	}
-
-	public ByteBuffer serialize(Object obj, SerializerContext context) {
-		int len = this.serviceName.length() + 4 + this.method.length() + 4 + this.requestId.length() + 4
-				+ this.clientIP.length() + 4 + this.clientAppName.length() + 4 + this.datetime.length() + 4
-				+ this.signature.length() + 4;
+	public ByteBuffer serialize() {
+		int len = 0;
+		List<String> fieldsValues = Lists.newArrayList(requestId, serviceName, method, clientIP, clientAppName,
+				datetime, signature);
+		for (int i = 0; i < FIELDS_COUNT; i++) {
+			len += (4 + fieldsValues.get(i).length());
+		}
 		len = len + 4;
 		if (paramsTypes != null) {
 			for (Class<?> param : paramsTypes) {
-				len = len + param.toString().length() + 4;
+				len += (4 + param.getName().length());
 			}
 		}
-
 		ByteBuffer buffer = ByteBuffer.allocate(len);
-		buffer.putInt(serviceName.length()).put(serviceName.getBytes(LightConstants.CHARSET_UTF8));
-		buffer.putInt(method.length()).put(method.getBytes(LightConstants.CHARSET_UTF8));
-		buffer.putInt(requestId.length()).put(requestId.getBytes(LightConstants.CHARSET_UTF8));
-		buffer.putInt(clientIP.length()).put(clientIP.getBytes(LightConstants.CHARSET_UTF8));
-		buffer.putInt(clientAppName.length()).put(clientAppName.getBytes(LightConstants.CHARSET_UTF8));
-		buffer.putInt(datetime.length()).put(datetime.getBytes(LightConstants.CHARSET_UTF8));
-		buffer.putInt(signature.length()).put(signature.getBytes(LightConstants.CHARSET_UTF8));
+		for (int j = 0; j < FIELDS_COUNT; j++) {
+			buffer.putInt(fieldsValues.get(j).length()).put(fieldsValues.get(j).getBytes(LightConstants.CHARSET_UTF8));
+		}
 		if (paramsTypes == null) {
 			buffer.putInt(0);
 		} else {
@@ -67,94 +71,31 @@ public class PayloadMessage implements Serializable {
 		return buffer;
 	}
 
-	public PayloadMessage deserialize(ByteBuffer buffer, SerializerContext context) {
-		int len = buffer.getInt();
-		byte[] data = new byte[len];
-		buffer.get(data);
-		this.setServiceName(new String(data, LightConstants.CHARSET_UTF8));
-
-		len = buffer.getInt();
-		data = new byte[len];
-		buffer.get(data);
-		this.setMethod(new String(data, LightConstants.CHARSET_UTF8));
-
-		len = buffer.getInt();
-		data = new byte[len];
-		buffer.get(data);
-		this.setRequestId(new String(data, LightConstants.CHARSET_UTF8));
-
-		len = buffer.getInt();
-		data = new byte[len];
-		buffer.get(data);
-		this.setClientIP(new String(data, LightConstants.CHARSET_UTF8));
-
-		len = buffer.getInt();
-		data = new byte[len];
-		buffer.get(data);
-		this.setClientAppName(new String(data, LightConstants.CHARSET_UTF8));
-
-		len = buffer.getInt();
-		data = new byte[len];
-		buffer.get(data);
-		this.setDatetime(new String(data, LightConstants.CHARSET_UTF8));
-
-		len = buffer.getInt();
-		data = new byte[len];
-		buffer.get(data);
-		this.setSignature(new String(data, LightConstants.CHARSET_UTF8));
-
+	public PayloadMessage deserialize(ByteBuffer buffer) {
+		List<String> fieldsValues = new ArrayList<>(FIELDS_COUNT);
+		byte[] data;
+		for (int i = 0; i < FIELDS_COUNT; i++) {
+			data = new byte[buffer.getInt()];
+			buffer.get(data);
+			fieldsValues.add(new String(data, LightConstants.CHARSET_UTF8));
+		}
+		this.requestId = fieldsValues.get(0);
+		this.serviceName = fieldsValues.get(1);
+		this.method = fieldsValues.get(2);
+		this.clientIP = fieldsValues.get(3);
+		this.clientAppName = fieldsValues.get(4);
+		this.datetime = fieldsValues.get(5);
+		this.signature = fieldsValues.get(6);
 		if (buffer.hasRemaining()) {
 			int paramConut = buffer.getInt();
 			if (paramConut != 0) {
-				Class<?>[] paramTypeSer = new Class[paramConut];
-				for (int i = 0; i < paramConut; i++) {
-					len = buffer.getInt();
-					data = new byte[len];
+				Class<?>[] classArray = new Class[paramConut];
+				for (int j = 0; j < paramConut; j++) {
+					data = new byte[buffer.getInt()];
 					buffer.get(data);
-					try {
-						String paramType = new String(data, LightConstants.CHARSET_UTF8);
-						if ("int".equals(paramType)) {
-							paramTypeSer[i] = int.class;
-						} else if ("double".equals(paramType)) {
-							paramTypeSer[i] = double.class;
-						} else if ("byte".equals(paramType)) {
-							paramTypeSer[i] = byte.class;
-						} else if ("short".equals(paramType)) {
-							paramTypeSer[i] = short.class;
-						} else if ("float".equals(paramType)) {
-							paramTypeSer[i] = float.class;
-						} else if ("long".equals(paramType)) {
-							paramTypeSer[i] = long.class;
-						} else if ("char".equals(paramType)) {
-							paramTypeSer[i] = char.class;
-						} else if ("boolean".equals(paramType)) {
-							paramTypeSer[i] = boolean.class;
-						}
-
-						else if ("[I".equals(paramType)) {
-							paramTypeSer[i] = int[].class;
-						} else if ("[D".equals(paramType)) {
-							paramTypeSer[i] = double[].class;
-						} else if ("[B".equals(paramType)) {
-							paramTypeSer[i] = byte[].class;
-						} else if ("[S".equals(paramType)) {
-							paramTypeSer[i] = short[].class;
-						} else if ("[F".equals(paramType)) {
-							paramTypeSer[i] = float[].class;
-						} else if ("[L".equals(paramType)) {
-							paramTypeSer[i] = long[].class;
-						} else if ("[C".equals(paramType)) {
-							paramTypeSer[i] = char[].class;
-						} else if ("[B".equals(paramType)) {
-							paramTypeSer[i] = boolean[].class;
-						} else {
-							paramTypeSer[i] = Class.forName(new String(data, LightConstants.CHARSET_UTF8));
-						}
-
-					} catch (ClassNotFoundException e) {
-					}
+					classArray[j] = LightClassUtils.forName(new String(data, LightConstants.CHARSET_UTF8));
 				}
-				this.setParamType(paramTypeSer);
+				this.paramsTypes = classArray;
 			}
 		}
 		return this;
@@ -184,20 +125,20 @@ public class PayloadMessage implements Serializable {
 		this.method = method;
 	}
 
-	public Class<?>[] getParamsTypes() {
-		return paramsTypes;
-	}
-
-	public void setParamsTypes(Class<?>[] paramsTypes) {
-		this.paramsTypes = paramsTypes;
-	}
-
 	public String getClientIP() {
 		return clientIP;
 	}
 
 	public void setClientIP(String clientIP) {
 		this.clientIP = clientIP;
+	}
+
+	public String getClientAppName() {
+		return clientAppName;
+	}
+
+	public void setClientAppName(String clientAppName) {
+		this.clientAppName = clientAppName;
 	}
 
 	public String getDatetime() {
@@ -214,6 +155,14 @@ public class PayloadMessage implements Serializable {
 
 	public void setSignature(String signature) {
 		this.signature = signature;
+	}
+
+	public Class<?>[] getParamsTypes() {
+		return paramsTypes;
+	}
+
+	public void setParamsTypes(Class<?>[] paramsTypes) {
+		this.paramsTypes = paramsTypes;
 	}
 
 }

@@ -20,6 +20,7 @@ public class LightProps implements LightSubscriber {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(LightProps.class);
 
+	private static final String SERIALIZER = "serializer";
 	private static final int DEFAULT_SERVER_LOAD_WEIGHT = 3;
 	private static final String IP_SEGMENT_PREFIX = "ipSegmentPrefix";
 	private static final String PUBLISH_REGISTRY = "publishRegistry";
@@ -27,6 +28,7 @@ public class LightProps implements LightSubscriber {
 	private static final String SERVER_LOAD_WEIGHT = "serverLoadWeight";
 
 	private static final String OPEN_GROUP = "openGroup";
+	private static final String NEED_SIGNATURE = "needSignature";
 	private static final String LIGHT_PROPS_URL = "/light/light.props";
 	private static final String LIGHT_PROPS_LOCAL_URL = LightConstants.USER_HOME
 			+ LIGHT_PROPS_URL.replaceAll("/", LightConstants.FS);
@@ -94,8 +96,16 @@ public class LightProps implements LightSubscriber {
 		return DEFAULT_SERVER_LOAD_WEIGHT;
 	}
 
+	public String getSerializer() {
+		return props.getValue(SERIALIZER, LIGHT_APP_META.getAppName());
+	}
+
 	public boolean isOpenGroup() {
 		return LightConstants.STR1.equals(props.getValue(OPEN_GROUP));
+	}
+
+	public boolean needSignature() {
+		return LightConstants.STR1.equals(props.getValue(NEED_SIGNATURE, LIGHT_APP_META.getAppName()));
 	}
 
 	public String getIpSegmentPrefix() {

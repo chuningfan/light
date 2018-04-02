@@ -32,6 +32,7 @@ public class ProtocolDecoder extends ByteToMessageDecoder {
 		ByteBuffer buffer = ByteBuffer.wrap(decoded);
 		int packetId = buffer.getInt();
 		byte invokeMode = buffer.get();
+		byte serializerType = buffer.get();
 		int argumentsSize = buffer.getInt();
 		List<ByteBuffer> datas = new ArrayList<ByteBuffer>();
 		for (int i = 0; i < argumentsSize; i++) {
@@ -41,7 +42,7 @@ public class ProtocolDecoder extends ByteToMessageDecoder {
 			buffer.position(buffer.position() + length);
 			datas.add(buf);
 		}
-		out.add(new ProtocolPacket(packetId, invokeMode, datas));
+		out.add(new ProtocolPacket(packetId, invokeMode, serializerType, datas));
 	}
 
 }

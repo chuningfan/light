@@ -7,8 +7,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.haiyiyang.light.client.LightRpcClient;
+import com.haiyiyang.light.meta.LightAppMeta;
+import com.haiyiyang.light.meta.props.LightProps;
+import com.haiyiyang.light.protocol.PacketIdFacotry;
+import com.haiyiyang.light.protocol.PayloadMessage;
+import com.haiyiyang.light.protocol.ProtocolPacket;
+import com.haiyiyang.light.serialize.SerializerType;
 import com.haiyiyang.light.server.IpPortGroupWeight;
 import com.haiyiyang.light.service.ServiceServerResolver;
+import com.haiyiyang.light.utils.RequestUtil;
 
 import io.netty.channel.Channel;
 
@@ -49,9 +56,22 @@ public class LightInvocationHandler implements InvocationHandler {
 				// TODO
 			}
 		}
-		return channel;
+		LightProps lightProps = LightAppMeta.SINGLETON().getLightProps();
+		SerializerType serializerType = SerializerType.valueOf(lightProps.getSerializer());
+		ProtocolPacket protocolPacket = new ProtocolPacket(PacketIdFacotry.getPacketId(),
+				invocationFactor.getInvokeMode(), serializerType.getValue());
 
-		// ProtocolPacket protocolPacket = new ProtocolPacket();
+		PayloadMessage message = new PayloadMessage();
+		String requestId = RequestUtil.getThreadLocalUUID();
+        if (requestId == null) {
+            message.setRequestId(RequestUtil.getRequestUUID());
+        } else {
+            message.setRequestId(requestId);
+        }
+        LightAppMeta.SINGLETON().getMachineIp();
+        LightAppMeta.SINGLETON().getAppName();
+        LightAppMeta.SINGLETON().getAppName();
+		return channel;
 
 	}
 
