@@ -5,11 +5,11 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
-public class LightChannelHandler extends ChannelInboundHandlerAdapter {
+public class LightClientChannelHandler extends ChannelInboundHandlerAdapter {
 
 	private LightRpcClient lightRpcClient;
 
-	public LightChannelHandler(LightRpcClient lightRpcClient) {
+	public LightClientChannelHandler(LightRpcClient lightRpcClient) {
 		this.lightRpcClient = lightRpcClient;
 	}
 

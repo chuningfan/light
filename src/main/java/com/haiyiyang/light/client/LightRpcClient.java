@@ -21,7 +21,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 
 public class LightRpcClient {
-	private LightChannelHandler lightClienHandler;
+	private LightClientChannelHandler lightClienHandler;
 	private static Map<IpPort, Channel> CHANNELS = new ConcurrentHashMap<>();
 	private static Map<IpPort, EventLoopGroup> EVENT_LOOP_GROUPS = new ConcurrentHashMap<>();
 
@@ -39,7 +39,7 @@ public class LightRpcClient {
 		try {
 			Bootstrap b = new Bootstrap();
 			EventLoopGroup group = new NioEventLoopGroup();
-			lightClienHandler = new LightChannelHandler(this);
+			lightClienHandler = new LightClientChannelHandler(this);
 			b.group(group).channel(NioSocketChannel.class).option(ChannelOption.SO_KEEPALIVE, true)
 					.option(ChannelOption.TCP_NODELAY, true).handler(new ChannelInitializer<SocketChannel>() {
 						@Override
