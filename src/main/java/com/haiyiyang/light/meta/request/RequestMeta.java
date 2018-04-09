@@ -1,4 +1,4 @@
-package com.haiyiyang.light.protocol;
+package com.haiyiyang.light.meta.request;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
@@ -7,10 +7,9 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import com.haiyiyang.light.constant.LightConstants;
-import com.haiyiyang.light.serialize.SerializerContext;
 import com.haiyiyang.light.utils.LightClassUtils;
 
-public class PayloadMessage implements Serializable {
+public class RequestMeta implements Serializable {
 
 	private static final long serialVersionUID = -1L;
 	private static final int FIELDS_COUNT = 7;
@@ -21,15 +20,13 @@ public class PayloadMessage implements Serializable {
 	private String clientIP;
 	private String clientAppName;
 	private String datetime;
-	private String signature;
 	private Class<?>[] paramsTypes;
 
-	public PayloadMessage() {
-
+	public RequestMeta() {
 	}
 
-	public PayloadMessage(String requestId, String serviceName, String method, Class<?>[] paramsTypes, String clientIP,
-			String clientAppName, String datetime, String signature) {
+	public RequestMeta(String requestId, String serviceName, String method, Class<?>[] paramsTypes, String clientIP,
+			String clientAppName, String datetime) {
 		super();
 		this.requestId = requestId;
 		this.serviceName = serviceName;
@@ -38,13 +35,12 @@ public class PayloadMessage implements Serializable {
 		this.clientIP = clientIP;
 		this.clientAppName = clientAppName;
 		this.datetime = datetime;
-		this.signature = signature;
 	}
 
 	public ByteBuffer serialize() {
 		int len = 0;
 		List<String> fieldsValues = Lists.newArrayList(requestId, serviceName, method, clientIP, clientAppName,
-				datetime, signature);
+				datetime);
 		for (int i = 0; i < FIELDS_COUNT; i++) {
 			len += (4 + fieldsValues.get(i).length());
 		}
@@ -71,7 +67,7 @@ public class PayloadMessage implements Serializable {
 		return buffer;
 	}
 
-	public PayloadMessage deserialize(ByteBuffer buffer) {
+	public RequestMeta deserialize(ByteBuffer buffer) {
 		List<String> fieldsValues = new ArrayList<>(FIELDS_COUNT);
 		byte[] data;
 		for (int i = 0; i < FIELDS_COUNT; i++) {
@@ -85,7 +81,6 @@ public class PayloadMessage implements Serializable {
 		this.clientIP = fieldsValues.get(3);
 		this.clientAppName = fieldsValues.get(4);
 		this.datetime = fieldsValues.get(5);
-		this.signature = fieldsValues.get(6);
 		if (buffer.hasRemaining()) {
 			int paramConut = buffer.getInt();
 			if (paramConut != 0) {
@@ -147,14 +142,6 @@ public class PayloadMessage implements Serializable {
 
 	public void setDatetime(String datetime) {
 		this.datetime = datetime;
-	}
-
-	public String getSignature() {
-		return signature;
-	}
-
-	public void setSignature(String signature) {
-		this.signature = signature;
 	}
 
 	public Class<?>[] getParamsTypes() {

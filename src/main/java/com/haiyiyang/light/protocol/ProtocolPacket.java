@@ -9,33 +9,25 @@ public class ProtocolPacket {
 	private int packetId;
 	private byte invokeMode;
 	private byte serializerType;
-	private List<ByteBuffer> arguments;
+	private List<ByteBuffer> requestMeta;
 
-	public ProtocolPacket(int packetId, byte invokeMode, byte serializerType) {
-		super();
+	public ProtocolPacket(int packetId, byte invokeMode, byte serializerType, List<ByteBuffer> requestMeta) {
 		this.packetId = packetId;
 		this.invokeMode = invokeMode;
 		this.serializerType = serializerType;
-	}
-
-	public ProtocolPacket(int packetId, byte invokeMode, byte serializerType, List<ByteBuffer> arguments) {
-		super();
-		this.packetId = packetId;
-		this.invokeMode = invokeMode;
-		this.serializerType = serializerType;
-		this.arguments = arguments;
+		this.requestMeta = requestMeta;
 	}
 
 	public ByteBuffer encode() {
 		int totalLenght = headerLength;
-		int datasize = arguments.size();
+		int datasize = requestMeta.size();
 		for (int i = 0; i < datasize; i++) {
-			totalLenght += (4 + arguments.get(i).limit());
+			totalLenght += (4 + requestMeta.get(i).limit());
 		}
 		ByteBuffer byteBuffer = ByteBuffer.allocate(totalLenght);
 		byteBuffer.putInt(packetId).put(invokeMode).put(serializerType).putInt(datasize);
 		for (int i = 0; i < datasize; i++) {
-			ByteBuffer data = arguments.get(i);
+			ByteBuffer data = requestMeta.get(i);
 			int lenli = data.limit();
 			byteBuffer.putInt(lenli);
 			System.arraycopy(data.array(), 0, byteBuffer.array(), byteBuffer.position(), lenli);

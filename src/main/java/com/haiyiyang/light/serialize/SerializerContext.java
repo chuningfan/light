@@ -8,8 +8,14 @@ public class SerializerContext {
 
 	private Class<?> returnType;
 
+	public SerializerContext() {
+	}
+
+	public SerializerContext(Class<?> returnType) {
+		this.returnType = returnType;
+	}
+
 	public SerializerContext(boolean isRequest, Class<?>[] paramsTypes, Class<?> returnType) {
-		super();
 		this.isRequest = isRequest;
 		this.paramsTypes = paramsTypes;
 		this.returnType = returnType;

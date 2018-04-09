@@ -7,6 +7,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.haiyiyang.light.protocol.ProtocolDecoder;
 import com.haiyiyang.light.protocol.ProtocolEncoder;
+import com.haiyiyang.light.protocol.ProtocolPacket;
+import com.haiyiyang.light.serialize.SerializerContext;
 import com.haiyiyang.light.server.IpPort;
 
 import io.netty.bootstrap.Bootstrap;
@@ -62,5 +64,9 @@ public class LightRpcClient {
 			REENTRANT_LOCK.unlock();
 		}
 		return CHANNELS.get(ipPort);
+	}
+
+	public Object sendMessage(ProtocolPacket packet, SerializerContext context, Channel channel) throws Exception {
+		return null;
 	}
 }

@@ -15,7 +15,6 @@ public class RequestUtil {
 
 	public static void setRequestUUID(String requestId) {
 		THREAD_LOCAL.set(requestId);
-
 	}
 
 	public static String getThreadLocalUUID() {
