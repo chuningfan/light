@@ -95,7 +95,7 @@ public class LightProps implements LightSubscriber {
 		}
 		return DEFAULT_MIN_THREAD;
 	}
-	
+
 	public int getMaxThread() {
 		Integer maxThread = props.getIntegerValue(MAX_THREAD, LIGHT_APP_META.getAppName());
 		if (maxThread != null) {
