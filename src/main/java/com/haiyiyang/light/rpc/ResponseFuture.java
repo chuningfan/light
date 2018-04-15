@@ -96,13 +96,22 @@ public class ResponseFuture<V> implements Future<V> {
 				result = buffer.get(1);
 			}
 			if (bf0.get() == LightConstants.BYTE0) {
-
+				// TODO
 			} else {
 				context.setRequest(false);
 				return SerializerFactory.getSerializer(packet.getSerializerType()).deserialize(result, context);
 			}
 		}
 		return null;
+	}
+
+	public void receiveProtocolPacket(ProtocolPacket packet) {
+		lock.lock();
+		this.packet = packet;
+		if (condition != null) {
+			condition.signal();
+		}
+		lock.unlock();
 	}
 
 }

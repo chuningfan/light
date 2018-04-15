@@ -4,17 +4,19 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public class ProtocolPacket {
-	public final static int headerLength = 10;
+	public final static int headerLength = 18;
 
 	private int packetId;
 	private byte invokeMode;
 	private byte serializerType;
+	private long startTime;
 	private List<ByteBuffer> requestMeta;
 
 	public ProtocolPacket(int packetId, byte invokeMode, byte serializerType, List<ByteBuffer> requestMeta) {
 		this.packetId = packetId;
 		this.invokeMode = invokeMode;
 		this.serializerType = serializerType;
+		this.startTime = System.currentTimeMillis();
 		this.requestMeta = requestMeta;
 	}
 
@@ -25,7 +27,7 @@ public class ProtocolPacket {
 			totalLenght += (4 + requestMeta.get(i).limit());
 		}
 		ByteBuffer byteBuffer = ByteBuffer.allocate(totalLenght);
-		byteBuffer.putInt(packetId).put(invokeMode).put(serializerType).putInt(datasize);
+		byteBuffer.putInt(packetId).put(invokeMode).put(serializerType).putLong(startTime).putInt(datasize);
 		for (int i = 0; i < datasize; i++) {
 			ByteBuffer data = requestMeta.get(i);
 			int lenli = data.limit();
@@ -35,10 +37,6 @@ public class ProtocolPacket {
 		}
 		byteBuffer.flip();
 		return byteBuffer;
-	}
-
-	public static int getHeaderlength() {
-		return headerLength;
 	}
 
 	public int getPacketId() {
@@ -51,6 +49,10 @@ public class ProtocolPacket {
 
 	public byte getSerializerType() {
 		return serializerType;
+	}
+
+	public long getStartTime() {
+		return startTime;
 	}
 
 	public List<ByteBuffer> getRequestMeta() {

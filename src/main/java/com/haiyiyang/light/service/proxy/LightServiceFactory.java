@@ -21,7 +21,7 @@ public class LightServiceFactory {
 	}
 
 	public static <T> T getAsyncNoResultService(Class<T> clazz) throws LightException {
-		return getServiceProxy(clazz, LightConstants.BYTE3);
+		return getServiceProxy(clazz, LightConstants.BYTE0);
 	}
 
 	@SuppressWarnings("unchecked")

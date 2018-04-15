@@ -17,4 +17,28 @@ public class LightRequest {
 		this.lightRpcServer = lightRpcServer;
 	}
 
+	public ProtocolPacket getProtocolPacket() {
+		return protocolPacket;
+	}
+
+	public void setProtocolPacket(ProtocolPacket protocolPacket) {
+		this.protocolPacket = protocolPacket;
+	}
+
+	public ChannelHandlerContext getContext() {
+		return context;
+	}
+
+	public void setContext(ChannelHandlerContext context) {
+		this.context = context;
+	}
+
+	public LightRpcServer getLightRpcServer() {
+		return lightRpcServer;
+	}
+
+	public void setLightRpcServer(LightRpcServer lightRpcServer) {
+		this.lightRpcServer = lightRpcServer;
+	}
+
 }
