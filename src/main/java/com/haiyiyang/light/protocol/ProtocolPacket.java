@@ -37,4 +37,24 @@ public class ProtocolPacket {
 		return byteBuffer;
 	}
 
+	public static int getHeaderlength() {
+		return headerLength;
+	}
+
+	public int getPacketId() {
+		return packetId;
+	}
+
+	public byte getInvokeMode() {
+		return invokeMode;
+	}
+
+	public byte getSerializerType() {
+		return serializerType;
+	}
+
+	public List<ByteBuffer> getRequestMeta() {
+		return requestMeta;
+	}
+
 }

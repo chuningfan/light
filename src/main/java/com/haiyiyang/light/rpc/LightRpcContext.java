@@ -1,6 +1,7 @@
 package com.haiyiyang.light.rpc;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
@@ -15,6 +16,19 @@ public class LightRpcContext {
 		}
 	};
 
+	public <T> Future<T> asyncCall(Callable<T> callable) {
+
+		return null;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+
 	public static LightRpcContext getContext() {
 		return THREAD_LOCAL.get();
 	}
@@ -22,23 +36,22 @@ public class LightRpcContext {
 	public static void removeContext() {
 		THREAD_LOCAL.remove();
 	}
-	
-//	public static <T> Future<T> getFuture() {
-//        return (Future<T>) THREAD_LOCAL.get().futureMap.get();
-//    }
-//
-//    public void setFuture(Future<?> future) {
-//        this.THREAD_LOCAL = future;
-//    }
-	
-	
+
+	// public static <T> Future<T> getFuture() {
+	// return (Future<T>) THREAD_LOCAL.get().futureMap.get();
+	// }
+	//
+	// public void setFuture(Future<?> future) {
+	// this.THREAD_LOCAL = future;
+	// }
+
 	public static void main(String[] args) {
 		Object x = new Object();
 		System.out.println(x);
-		
+
 		Object x1 = new Object();
-		System.out.println((Integer)null);
-		
+		System.out.println((Integer) null);
+
 	}
 
 }
