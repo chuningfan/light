@@ -29,6 +29,12 @@ public class LightProps implements LightSubscriber {
 
 	private static final String TIMEOUT = "timeout";
 	private static final long DEFAULT_TIMEOUT = 10000;
+
+	private static final String MIN_THREAD = "minThread";
+	private static final int DEFAULT_MIN_THREAD = 10;
+	private static final String MAX_THREAD = "maxThread";
+	private static final int DEFAULT_MAX_THREAD = 100;
+
 	private static final String OPEN_GROUP = "openGroup";
 	private static final String NEED_SIGNATURE = "needSignature";
 	private static final String LIGHT_PROPS_URL = "/light/light.props";
@@ -80,6 +86,22 @@ public class LightProps implements LightSubscriber {
 				LOGGER.error(e.getMessage(), e);
 			}
 		}
+	}
+
+	public int getMinThread() {
+		Integer minThread = props.getIntegerValue(MIN_THREAD, LIGHT_APP_META.getAppName());
+		if (minThread != null) {
+			return minThread.intValue();
+		}
+		return DEFAULT_MIN_THREAD;
+	}
+
+	public int getMaxThread() {
+		Integer maxThread = props.getIntegerValue(MAX_THREAD, LIGHT_APP_META.getAppName());
+		if (maxThread != null) {
+			return maxThread.intValue();
+		}
+		return DEFAULT_MAX_THREAD;
 	}
 
 	public long getTimeout() {
