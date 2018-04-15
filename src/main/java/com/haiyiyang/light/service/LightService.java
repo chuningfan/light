@@ -1,7 +1,9 @@
 package com.haiyiyang.light.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.haiyiyang.light.context.LightApplicationContext;
@@ -13,6 +15,7 @@ import com.haiyiyang.light.subscription.LightSubscriber;
 
 public class LightService implements LightPublisher, LightSubscriber {
 
+	private static final Set<Object> LOCAL_SERVICE = new HashSet<>();
 	private static final Map<String, Service> PUBLISHED_SERVICES = new ConcurrentHashMap<>();
 
 	private static LightService LIGHT_SERVICE;
@@ -38,6 +41,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 	public Object getServiceProxy(InvocationFactor factor) {
 		String className = factor.getClazz().getName();
 		if (PUBLISHED_SERVICES.containsKey(className)) {
+			LOCAL_SERVICE.add(PUBLISHED_SERVICES.get(className).serviceImpl);
 			return PUBLISHED_SERVICES.get(className).serviceImpl;
 		}
 		return LightInvocationHandler.getProxyService(factor);
@@ -97,6 +101,10 @@ public class LightService implements LightPublisher, LightSubscriber {
 			}
 		}
 		return serviceImpl.getClass().getName();
+	}
+
+	public static boolean isLocalService(Object service) {
+		return LOCAL_SERVICE.contains(service);
 	}
 
 	@Override

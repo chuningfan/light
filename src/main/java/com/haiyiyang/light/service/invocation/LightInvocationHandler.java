@@ -20,6 +20,7 @@ import com.haiyiyang.light.serialize.SerializerContext;
 import com.haiyiyang.light.serialize.SerializerFactory;
 import com.haiyiyang.light.serialize.SerializerType;
 import com.haiyiyang.light.server.IpPortGroupWeight;
+import com.haiyiyang.light.service.LightService;
 import com.haiyiyang.light.service.ServiceServerResolver;
 import com.haiyiyang.light.utils.RequestUtil;
 
@@ -52,7 +53,10 @@ public class LightInvocationHandler implements InvocationHandler {
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if (TO_STRING.equals(method.getName())) {
 			return proxy.getClass().getName();
+		} else if (LightService.isLocalService(proxy)) {
+			return method.invoke(proxy, args);
 		}
+
 		IpPortGroupWeight ipgw = ServiceServerResolver.getServer(invocationFactor.getClazz().getName());
 		Channel channel = client.getChannel(ipgw);
 		while (channel == null) {
@@ -91,7 +95,7 @@ public class LightInvocationHandler implements InvocationHandler {
 			context = new SerializerContext(method.getReturnType());
 		} else if (invocationFactor.getInvokeMode() == LightConstants.BYTE2) {
 			context = new SerializerContext(method.getReturnType());
-		} else {
+		} else if (invocationFactor.getInvokeMode() == LightConstants.BYTE0) {
 			context = new SerializerContext();
 		}
 		return client.sendMessage(protocolPacket, context, channel);

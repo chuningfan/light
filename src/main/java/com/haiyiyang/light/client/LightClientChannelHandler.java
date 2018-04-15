@@ -15,7 +15,7 @@ public class LightClientChannelHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		// lightRpcClient.receivedMessage(msg);
+		lightRpcClient.receiveMessage(msg);
 	}
 
 	@Override

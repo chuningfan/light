@@ -5,9 +5,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.haiyiyang.light.constant.LightConstants;
+import com.haiyiyang.light.meta.LightAppMeta;
+import com.haiyiyang.light.meta.props.LightProps;
 import com.haiyiyang.light.protocol.ProtocolDecoder;
 import com.haiyiyang.light.protocol.ProtocolEncoder;
 import com.haiyiyang.light.protocol.ProtocolPacket;
+import com.haiyiyang.light.rpc.LightRpcContext;
+import com.haiyiyang.light.rpc.ResponseFuture;
 import com.haiyiyang.light.serialize.SerializerContext;
 import com.haiyiyang.light.server.IpPort;
 
@@ -67,6 +72,30 @@ public class LightRpcClient {
 	}
 
 	public Object sendMessage(ProtocolPacket packet, SerializerContext context, Channel channel) throws Exception {
+		LightProps lightProps = LightAppMeta.SINGLETON().getLightProps();
+		if (packet.getInvokeMode() != LightConstants.BYTE0) {
+			LightRpcContext.setResponseFuture(packet.getPacketId(),
+					new ResponseFuture<Object>(lightProps.getTimeout(), TimeUnit.MILLISECONDS));
+		}
+		channelWrite(packet, channel);
+		if (packet.getInvokeMode() == LightConstants.BYTE1) {
+			return LightRpcContext.getFuture(packet.getPacketId()).get();
+		}
 		return null;
+	}
+
+	private void channelWrite(ProtocolPacket packet, Channel channel) throws Exception {
+		if (isconnect(channel)) {
+			channel.writeAndFlush(packet);
+		}
+	}
+
+	public boolean isconnect(Channel channel) throws Exception {
+		return channel != null && channel.isActive() && channel.isOpen();
+	}
+
+	public void receiveMessage(Object msg) {
+		ProtocolPacket packet = (ProtocolPacket) msg;
+		LightRpcContext.getResponseFuture(packet.getPacketId()).receiveProtocolPacket(packet);
 	}
 }

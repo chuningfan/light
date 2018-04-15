@@ -27,6 +27,8 @@ public class LightProps implements LightSubscriber {
 	private static final String SUBSCRIPTION_REGISTRY = "subscriptionRegistry";
 	private static final String SERVER_LOAD_WEIGHT = "serverLoadWeight";
 
+	private static final String TIMEOUT = "timeout";
+	private static final long DEFAULT_TIMEOUT = 10000;
 	private static final String OPEN_GROUP = "openGroup";
 	private static final String NEED_SIGNATURE = "needSignature";
 	private static final String LIGHT_PROPS_URL = "/light/light.props";
@@ -78,6 +80,14 @@ public class LightProps implements LightSubscriber {
 				LOGGER.error(e.getMessage(), e);
 			}
 		}
+	}
+
+	public long getTimeout() {
+		Long timeout = props.getLongValue(TIMEOUT, LIGHT_APP_META.getAppName());
+		if (timeout != null) {
+			return timeout.longValue();
+		}
+		return DEFAULT_TIMEOUT;
 	}
 
 	public String getPublishRegistry() {
