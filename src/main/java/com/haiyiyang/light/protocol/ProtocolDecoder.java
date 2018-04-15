@@ -20,7 +20,7 @@ public class ProtocolDecoder extends ByteToMessageDecoder {
 		}
 		in.markReaderIndex();
 		if (in.readByte() != LightConstants.PROTOCOL_MAGIC_NUMBER) {
-			throw new CorruptedFrameException("Invalid protocol magic number");
+			throw new CorruptedFrameException("Invalid protocol magic number.");
 		}
 		int dataLength = in.readInt();
 		if (in.readableBytes() < dataLength) {
@@ -33,6 +33,7 @@ public class ProtocolDecoder extends ByteToMessageDecoder {
 		int packetId = buffer.getInt();
 		byte invokeMode = buffer.get();
 		byte serializerType = buffer.get();
+		long startTime = buffer.getLong();
 		int argumentsSize = buffer.getInt();
 		List<ByteBuffer> datas = new ArrayList<ByteBuffer>();
 		for (int i = 0; i < argumentsSize; i++) {
@@ -42,7 +43,7 @@ public class ProtocolDecoder extends ByteToMessageDecoder {
 			buffer.position(buffer.position() + length);
 			datas.add(buf);
 		}
-		out.add(new ProtocolPacket(packetId, invokeMode, serializerType, datas));
+		out.add(new ProtocolPacket(packetId, invokeMode, serializerType, startTime, datas));
 	}
 
 }

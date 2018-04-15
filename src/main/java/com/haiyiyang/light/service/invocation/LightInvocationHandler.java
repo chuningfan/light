@@ -89,7 +89,7 @@ public class LightInvocationHandler implements InvocationHandler {
 			buffers.add(SerializerFactory.getSerializer(serializerType.getValue()).serialize(args, null));
 		}
 		ProtocolPacket protocolPacket = new ProtocolPacket(PacketIdFacotry.getPacketId(),
-				invocationFactor.getInvokeMode(), serializerType.getValue(), buffers);
+				invocationFactor.getInvokeMode(), serializerType.getValue(), System.currentTimeMillis(), buffers);
 		SerializerContext context = null;
 		if (invocationFactor.getInvokeMode() == LightConstants.BYTE1) {
 			context = new SerializerContext(method.getReturnType());

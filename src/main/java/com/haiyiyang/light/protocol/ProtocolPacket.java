@@ -12,11 +12,12 @@ public class ProtocolPacket {
 	private long startTime;
 	private List<ByteBuffer> requestMeta;
 
-	public ProtocolPacket(int packetId, byte invokeMode, byte serializerType, List<ByteBuffer> requestMeta) {
+	public ProtocolPacket(int packetId, byte invokeMode, byte serializerType, long startTime,
+			List<ByteBuffer> requestMeta) {
 		this.packetId = packetId;
 		this.invokeMode = invokeMode;
 		this.serializerType = serializerType;
-		this.startTime = System.currentTimeMillis();
+		this.startTime = startTime;
 		this.requestMeta = requestMeta;
 	}
 
