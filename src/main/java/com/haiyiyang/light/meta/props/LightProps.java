@@ -20,13 +20,6 @@ public class LightProps implements LightSubscriber {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(LightProps.class);
 
-	private static final String SERIALIZER = "serializer";
-	private static final int DEFAULT_SERVER_LOAD_WEIGHT = 3;
-	private static final String IP_SEGMENT_PREFIX = "ipSegmentPrefix";
-	private static final String PUBLISH_REGISTRY = "publishRegistry";
-	private static final String SUBSCRIPTION_REGISTRY = "subscriptionRegistry";
-	private static final String SERVER_LOAD_WEIGHT = "serverLoadWeight";
-
 	private static final String TIMEOUT = "timeout";
 	private static final long DEFAULT_TIMEOUT = 10000;
 
@@ -35,8 +28,24 @@ public class LightProps implements LightSubscriber {
 	private static final String MAX_THREAD = "maxThread";
 	private static final int DEFAULT_MAX_THREAD = 100;
 
+	private static final String PROXY_TYPE = "proxyType";
+	private static final String DEFAULT_PROXY_TYPE = "JDK";
+
+	private static final String SERIALIZER = "serializer";
+	private static final String DEFAULT_SERIALIZER = "PROTOBUF";
+
+	private static final String IP_SEGMENT_PREFIX = "ipSegmentPrefix";
+
+	private static final String PUBLISH_REGISTRY = "publishRegistry";
+	private static final String SUBSCRIPTION_REGISTRY = "subscriptionRegistry";
+	private static final String DEFAULT_REGISTRY = "127.0.0.1:2181";
+
 	private static final String OPEN_GROUP = "openGroup";
 	private static final String NEED_SIGNATURE = "needSignature";
+
+	private static final int DEFAULT_SERVER_LOAD_WEIGHT = 3;
+	private static final String SERVER_LOAD_WEIGHT = "serverLoadWeight";
+
 	private static final String LIGHT_PROPS_URL = "/light/light.props";
 	private static final String LIGHT_PROPS_LOCAL_URL = LightConstants.USER_HOME
 			+ LIGHT_PROPS_URL.replaceAll("/", LightConstants.FS);
@@ -113,11 +122,19 @@ public class LightProps implements LightSubscriber {
 	}
 
 	public String getPublishRegistry() {
-		return props.getValue(PUBLISH_REGISTRY, LIGHT_APP_META.getAppName());
+		String publishRegistry = props.getValue(PUBLISH_REGISTRY, LIGHT_APP_META.getAppName());
+		if (publishRegistry != null) {
+			return publishRegistry;
+		}
+		return DEFAULT_REGISTRY;
 	}
 
 	public String getSubscriptionRegistry(String subscriptionAppName) {
-		return props.getValue(SUBSCRIPTION_REGISTRY, subscriptionAppName);
+		String subscriptionRegistry = props.getValue(SUBSCRIPTION_REGISTRY, subscriptionAppName);
+		if (subscriptionRegistry != null) {
+			return subscriptionRegistry;
+		}
+		return DEFAULT_REGISTRY;
 	}
 
 	public int getServerLoadWeight() {
@@ -128,8 +145,20 @@ public class LightProps implements LightSubscriber {
 		return DEFAULT_SERVER_LOAD_WEIGHT;
 	}
 
+	public String getProxyType() {
+		String proxyType = props.getValue(PROXY_TYPE, LIGHT_APP_META.getAppName());
+		if (proxyType != null) {
+			return proxyType;
+		}
+		return DEFAULT_PROXY_TYPE;
+	}
+
 	public String getSerializer() {
-		return props.getValue(SERIALIZER, LIGHT_APP_META.getAppName());
+		String serializer = props.getValue(SERIALIZER, LIGHT_APP_META.getAppName());
+		if (serializer != null) {
+			return serializer;
+		}
+		return DEFAULT_SERIALIZER;
 	}
 
 	public boolean isOpenGroup() {

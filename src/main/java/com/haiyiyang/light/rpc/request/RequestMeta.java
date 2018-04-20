@@ -42,7 +42,7 @@ public class RequestMeta implements Serializable {
 		List<String> fieldsValues = Lists.newArrayList(requestId, serviceName, method, clientIP, clientAppName,
 				datetime);
 		for (int i = 0; i < FIELDS_COUNT; i++) {
-			len += (4 + fieldsValues.get(i).length());
+			len += (4 + getFieldLength(fieldsValues.get(i)));
 		}
 		len = len + 4;
 		if (paramsTypes != null) {
@@ -52,7 +52,7 @@ public class RequestMeta implements Serializable {
 		}
 		ByteBuffer buffer = ByteBuffer.allocate(len);
 		for (int j = 0; j < FIELDS_COUNT; j++) {
-			buffer.putInt(fieldsValues.get(j).length()).put(fieldsValues.get(j).getBytes(LightConstants.CHARSET_UTF8));
+			buffer.putInt(getFieldLength(fieldsValues.get(j))).put(getFieldValue(fieldsValues.get(j)));
 		}
 		if (paramsTypes == null) {
 			buffer.putInt(0);
@@ -94,6 +94,14 @@ public class RequestMeta implements Serializable {
 			}
 		}
 		return this;
+	}
+
+	private static int getFieldLength(String field) {
+		return field == null ? 0 : field.length();
+	}
+
+	private static byte[] getFieldValue(String fieldValue) {
+		return fieldValue == null ? new byte[0] : fieldValue.getBytes(LightConstants.CHARSET_UTF8);
 	}
 
 	public String getRequestId() {

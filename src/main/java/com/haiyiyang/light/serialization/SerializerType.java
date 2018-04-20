@@ -15,5 +15,4 @@ public enum SerializerType {
 	public byte getValue() {
 		return this.value;
 	}
-
 }

@@ -1,6 +1,6 @@
 package com.haiyiyang.light.protocol;
 
-public class PacketIdFacotry {
+public class PacketIdGenerator {
 	private static int packetId = 0;
 
 	public synchronized static int getPacketId() {

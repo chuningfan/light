@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import com.haiyiyang.light.rpc.response.ResponseFuture;
 import com.haiyiyang.light.service.LightService;
 
 public class LightRpcContext {

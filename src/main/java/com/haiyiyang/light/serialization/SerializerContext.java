@@ -45,4 +45,8 @@ public class SerializerContext {
 		this.returnType = returnType;
 	}
 
+	public static void test(Class<?>[] paramsTypes, Class<?> returnType) {
+
+	}
+
 }

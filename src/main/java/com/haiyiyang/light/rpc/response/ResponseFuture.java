@@ -1,4 +1,4 @@
-package com.haiyiyang.light.rpc;
+package com.haiyiyang.light.rpc.response;
 
 import java.nio.ByteBuffer;
 import java.util.List;

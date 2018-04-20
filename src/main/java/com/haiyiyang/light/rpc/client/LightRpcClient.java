@@ -12,8 +12,8 @@ import com.haiyiyang.light.protocol.ProtocolPacket;
 import com.haiyiyang.light.protocol.codec.ProtocolDecoder;
 import com.haiyiyang.light.protocol.codec.ProtocolEncoder;
 import com.haiyiyang.light.rpc.LightRpcContext;
-import com.haiyiyang.light.rpc.ResponseFuture;
 import com.haiyiyang.light.rpc.client.channel.InboundHandler;
+import com.haiyiyang.light.rpc.response.ResponseFuture;
 import com.haiyiyang.light.rpc.server.IpPort;
 import com.haiyiyang.light.serialization.SerializerContext;
 
@@ -29,7 +29,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 
 public class LightRpcClient {
-	private InboundHandler lightClienHandler;
+	private InboundHandler inboundHandler;
 	private static Map<IpPort, Channel> CHANNELS = new ConcurrentHashMap<>();
 	private static Map<IpPort, EventLoopGroup> EVENT_LOOP_GROUPS = new ConcurrentHashMap<>();
 
@@ -47,7 +47,7 @@ public class LightRpcClient {
 		try {
 			Bootstrap b = new Bootstrap();
 			EventLoopGroup group = new NioEventLoopGroup();
-			lightClienHandler = new InboundHandler(this);
+			inboundHandler = new InboundHandler(this);
 			b.group(group).channel(NioSocketChannel.class).option(ChannelOption.SO_KEEPALIVE, true)
 					.option(ChannelOption.TCP_NODELAY, true).handler(new ChannelInitializer<SocketChannel>() {
 						@Override
@@ -55,7 +55,7 @@ public class LightRpcClient {
 							ch.pipeline().addLast("decoder", new ProtocolDecoder());
 							ch.pipeline().addLast("encoder", new ProtocolEncoder());
 							ch.pipeline().addLast(new IdleStateHandler(0, 0, 10/** TODO */
-							), lightClienHandler);
+							), inboundHandler);
 						}
 					});
 			ChannelFuture channelFuture = b.connect(ipPort.getIp(), ipPort.getPort());
@@ -78,20 +78,20 @@ public class LightRpcClient {
 			LightRpcContext.setResponseFuture(packet.getPacketId(),
 					new ResponseFuture<Object>(lightProps.getTimeout(), TimeUnit.MILLISECONDS));
 		}
-		channelWrite(packet, channel);
+		writeChannel(packet, channel);
 		if (packet.getInvokeMode() == LightConstants.BYTE1) {
 			return LightRpcContext.getFuture(packet.getPacketId()).get();
 		}
 		return null;
 	}
 
-	private void channelWrite(ProtocolPacket packet, Channel channel) throws Exception {
-		if (isconnect(channel)) {
+	private void writeChannel(ProtocolPacket packet, Channel channel) throws Exception {
+		if (isChannelActive(channel)) {
 			channel.writeAndFlush(packet);
 		}
 	}
 
-	public boolean isconnect(Channel channel) throws Exception {
+	public boolean isChannelActive(Channel channel) throws Exception {
 		return channel != null && channel.isActive() && channel.isOpen();
 	}
 
