@@ -13,7 +13,7 @@ import com.haiyiyang.light.meta.props.AppProps;
 import com.haiyiyang.light.meta.props.LightProps;
 import com.haiyiyang.light.meta.props.PortProps;
 import com.haiyiyang.light.meta.props.ResourceProps;
-import com.haiyiyang.light.server.LightConfig;
+import com.haiyiyang.light.rpc.server.LightConfig;
 import com.haiyiyang.light.utils.NetworkUtils;
 
 public class LightAppMeta {

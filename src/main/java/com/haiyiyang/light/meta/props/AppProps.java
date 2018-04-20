@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.meta.LightAppMeta;
-import com.haiyiyang.light.subscription.LightSubscriber;
-import com.haiyiyang.light.subscription.LightSubscription;
+import com.haiyiyang.light.service.subscription.LightSubscriber;
+import com.haiyiyang.light.service.subscription.LightSubscription;
 
 import jodd.props.Props;
 import jodd.props.PropsEntry;

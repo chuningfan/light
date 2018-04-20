@@ -12,8 +12,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.protocol.ProtocolPacket;
-import com.haiyiyang.light.serialize.SerializerContext;
-import com.haiyiyang.light.serialize.SerializerFactory;
+import com.haiyiyang.light.serialization.SerializerContext;
+import com.haiyiyang.light.serialization.SerializerFactory;
 
 public class ResponseFuture<V> implements Future<V> {
 

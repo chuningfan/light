@@ -5,8 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.exception.LightException;
+import com.haiyiyang.light.rpc.invocation.InvocationFactor;
 import com.haiyiyang.light.service.LightService;
-import com.haiyiyang.light.service.invocation.InvocationFactor;
 
 public class LightServiceFactory {
 

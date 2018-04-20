@@ -6,12 +6,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.haiyiyang.light.context.LightApplicationContext;
 import com.haiyiyang.light.meta.LightAppMeta;
-import com.haiyiyang.light.publish.LightPublisher;
-import com.haiyiyang.light.service.invocation.InvocationFactor;
-import com.haiyiyang.light.service.invocation.LightInvocationHandler;
-import com.haiyiyang.light.subscription.LightSubscriber;
+import com.haiyiyang.light.rpc.invocation.InvocationFactor;
+import com.haiyiyang.light.rpc.invocation.LightInvocationHandler;
+import com.haiyiyang.light.service.publish.LightPublisher;
+import com.haiyiyang.light.service.subscription.LightSubscriber;
 
 public class LightService implements LightPublisher, LightSubscriber {
 
@@ -23,7 +22,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 	private static LightAppMeta LIGHT_APP_META;
 
 	private LightService() {
-		LIGHT_APP_META = LightApplicationContext.getLightAppMeta();
+		LIGHT_APP_META = LightAppMeta.SINGLETON();
 	}
 
 	public static LightService SINGLETON() {

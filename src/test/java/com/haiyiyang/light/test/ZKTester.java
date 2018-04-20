@@ -2,7 +2,7 @@ package com.haiyiyang.light.test;
 
 import com.haiyiyang.light.meta.props.AppProps;
 import com.haiyiyang.light.meta.props.ResourceProps;
-import com.haiyiyang.light.subscription.LightSubscription;
+import com.haiyiyang.light.service.subscription.LightSubscription;
 
 public class ZKTester {
 

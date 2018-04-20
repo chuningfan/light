@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.meta.LightAppMeta;
-import com.haiyiyang.light.resource.LightResources;
-import com.haiyiyang.light.subscription.LightSubscriber;
-import com.haiyiyang.light.subscription.LightSubscription;
+import com.haiyiyang.light.meta.LightResourceType;
+import com.haiyiyang.light.service.subscription.LightSubscriber;
+import com.haiyiyang.light.service.subscription.LightSubscription;
 
 import jodd.props.Props;
 
@@ -30,8 +30,8 @@ public class ResourceProps implements LightSubscriber {
 
 	private static LightAppMeta LIGHT_APP_META;
 	private static ResourceProps RESOURCE_PROPS;
-	private static Map<String, LightResources> PATH_RESOURCES = new ConcurrentHashMap<>();
-	private static Map<LightResources, Props> RESOURCES_PROPS = new ConcurrentHashMap<>();
+	private static Map<String, LightResourceType> PATH_RESOURCES = new ConcurrentHashMap<>();
+	private static Map<LightResourceType, Props> RESOURCES_PROPS = new ConcurrentHashMap<>();
 
 	private ResourceProps(LightAppMeta lightAppMeta, Map<String, String> resourcesMap) {
 		ResourceProps.LIGHT_APP_META = lightAppMeta;
@@ -61,7 +61,7 @@ public class ResourceProps implements LightSubscriber {
 				File file = new File(filePath);
 				if (file.isFile()) {
 					try {
-						LightResources lightResource = LightResources.valueOf(entry.getKey());
+						LightResourceType lightResource = LightResourceType.valueOf(entry.getKey());
 						RESOURCES_PROPS.put(lightResource, new Props());
 						RESOURCES_PROPS.get(lightResource).load(file);
 					} catch (Exception ex) {
@@ -70,14 +70,14 @@ public class ResourceProps implements LightSubscriber {
 				}
 			} else {
 				String urlPath = RESOURCE_PROPS_PATH + entry.getValue();
-				LightResources lightResource = LightResources.valueOf(entry.getKey());
+				LightResourceType lightResource = LightResourceType.valueOf(entry.getKey());
 				PATH_RESOURCES.put(urlPath, lightResource);
 				updatePropsData(lightResource, LightSubscription.getSubscription(this).getData(urlPath));
 			}
 		}
 	}
 
-	private void updatePropsData(LightResources lightResource, byte[] data) {
+	private void updatePropsData(LightResourceType lightResource, byte[] data) {
 		synchronized (this) {
 			try {
 				RESOURCES_PROPS.put(lightResource, new Props());
@@ -88,14 +88,14 @@ public class ResourceProps implements LightSubscriber {
 		}
 	}
 
-	public String getPropsValue(LightResources resource, String key) {
+	public String getPropsValue(LightResourceType resource, String key) {
 		if (RESOURCES_PROPS.get(resource) != null) {
 			return RESOURCES_PROPS.get(resource).getValue(key);
 		}
 		return null;
 	}
 
-	public String getPropsValue(LightResources resource, String key, String profile) {
+	public String getPropsValue(LightResourceType resource, String key, String profile) {
 		if (RESOURCES_PROPS.get(resource) != null) {
 			return RESOURCES_PROPS.get(resource).getValue(key, profile);
 		}

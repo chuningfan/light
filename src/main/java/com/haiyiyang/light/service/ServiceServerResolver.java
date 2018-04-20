@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.haiyiyang.light.server.IpPortGroupWeight;
+import com.haiyiyang.light.rpc.server.IpPortGroupWeight;
 
 public class ServiceServerResolver {
 	private static Map<String, IpPortGroupWeight> LATEST_IPGW = new ConcurrentHashMap<>();
