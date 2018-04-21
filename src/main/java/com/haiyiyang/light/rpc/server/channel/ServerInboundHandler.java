@@ -1,9 +1,9 @@
-package com.haiyiyang.light.rpc.server;
+package com.haiyiyang.light.rpc.server.channel;
 
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 @Sharable
-public class LightServerChannelHandler extends ChannelInboundHandlerAdapter {
+public class ServerInboundHandler extends ChannelInboundHandlerAdapter {
 
 }

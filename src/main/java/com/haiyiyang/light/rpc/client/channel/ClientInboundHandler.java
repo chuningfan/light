@@ -7,11 +7,11 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
-public class InboundHandler extends ChannelInboundHandlerAdapter {
+public class ClientInboundHandler extends ChannelInboundHandlerAdapter {
 
 	private LightRpcClient lightRpcClient;
 
-	public InboundHandler(LightRpcClient lightRpcClient) {
+	public ClientInboundHandler(LightRpcClient lightRpcClient) {
 		this.lightRpcClient = lightRpcClient;
 	}
 

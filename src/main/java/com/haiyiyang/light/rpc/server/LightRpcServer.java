@@ -17,7 +17,7 @@ public class LightRpcServer {
 
 	private static LightRpcServer LIGHT_RPC_SERVER = new LightRpcServer();
 
-	private static Map<String, LightService.Service> map = new ConcurrentHashMap<>();
+	private static Map<String, LightService.ServiceInstance> map = new ConcurrentHashMap<>();
 
 	public static LightRpcServer SINGLETON() {
 		return LIGHT_RPC_SERVER;

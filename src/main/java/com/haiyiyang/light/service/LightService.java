@@ -9,13 +9,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.rpc.invocation.InvocationFactor;
 import com.haiyiyang.light.rpc.invocation.LightInvocationHandler;
+import com.haiyiyang.light.service.entry.ServiceEntry;
 import com.haiyiyang.light.service.publish.LightPublisher;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 
 public class LightService implements LightPublisher, LightSubscriber {
 
 	private static final Set<Object> LOCAL_SERVICE = new HashSet<>();
-	private static final Map<String, Service> PUBLISHED_SERVICES = new ConcurrentHashMap<>();
+	private static final Map<String, ServiceInstance> PUBLISHED_SERVICES = new ConcurrentHashMap<>();
 
 	private static LightService LIGHT_SERVICE;
 
@@ -39,9 +40,12 @@ public class LightService implements LightPublisher, LightSubscriber {
 
 	public Object getServiceProxy(InvocationFactor factor) {
 		String className = factor.getClazz().getName();
-		if (PUBLISHED_SERVICES.containsKey(className)) {
-			LOCAL_SERVICE.add(PUBLISHED_SERVICES.get(className).serviceImpl);
-			return PUBLISHED_SERVICES.get(className).serviceImpl;
+		ServiceInstance service = PUBLISHED_SERVICES.get(className);
+		if (service != null) {
+			if (!LOCAL_SERVICE.contains(service.serviceImpl)) {
+				LOCAL_SERVICE.add(service.serviceImpl);
+			}
+			return service.serviceImpl;
 		}
 		return LightInvocationHandler.getProxyService(factor);
 	}
@@ -53,40 +57,31 @@ public class LightService implements LightPublisher, LightSubscriber {
 		// }
 	}
 
-	public void subscribeService(Object object) {
+	public List<ServiceEntry> subscribeService(String serviceName) {
 		// if (service != SUBSCRIBED_SERVICES.putIfAbsent(service.serviceName, service))
 		// {
 		// // TODO publish service.
 		// }
+
+		return null;
 	}
 
 	public void addService(String beanName, Object object) {
-		Service service = new Service(beanName, object);
+		ServiceInstance service = new ServiceInstance(beanName, object);
 		PUBLISHED_SERVICES.put(service.serviceName, service);
 	}
 
 	@SuppressWarnings("unused")
-	public static class Service {
+	public static class ServiceInstance {
 		private String beanName;
 		private String serviceName;
 		private Object serviceImpl;
-		private int weight;
 
-		Service(String beanName, Object object) {
+		ServiceInstance(String beanName, Object object) {
 			this.beanName = beanName;
 			this.serviceImpl = object;
 			this.serviceName = getInterfaceName(this.serviceImpl);
-			this.weight = LIGHT_APP_META.getLightProps().getServerLoadWeight();
 		}
-	}
-
-	class ServiceEntry implements Cloneable {
-		private String ip;
-		private int port;
-		private String name;
-		private byte group;
-		private int weight;
-
 	}
 
 	private static String getInterfaceName(Object serviceImpl) {

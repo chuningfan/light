@@ -16,7 +16,7 @@ import jodd.props.Props;
 
 public class SettingsProps {
 
-	private static Logger logger = LoggerFactory.getLogger(SettingsProps.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(SettingsProps.class);
 
 	private static Props SETTINGS_PROPS = null;
 	private final static String FILE_SETTINGS_PROPS = "settings.props";
@@ -26,11 +26,12 @@ public class SettingsProps {
 	private final static String ANNOTATED_CLASSES = "annotatedClasses";
 
 	private static Props getSettingsProps() {
-		if (SETTINGS_PROPS == null) {
-			synchronized (SETTINGS_PROPS) {
-				if (SETTINGS_PROPS == null) {
-					initSettingsProps();
-				}
+		if (SETTINGS_PROPS != null) {
+			return SETTINGS_PROPS;
+		}
+		synchronized (SETTINGS_PROPS) {
+			if (SETTINGS_PROPS == null) {
+				initSettingsProps();
 			}
 		}
 		return SETTINGS_PROPS;
@@ -41,7 +42,7 @@ public class SettingsProps {
 		try {
 			ps = Thread.currentThread().getContextClassLoader().getResources(FILE_SETTINGS_PROPS);
 		} catch (IOException e) {
-			logger.error("The file [settings.props] was not found.");
+			LOGGER.error("The file [settings.props] was not found.");
 		}
 		SETTINGS_PROPS = new Props();
 		if (ps != null && ps.hasMoreElements()) {
@@ -50,13 +51,13 @@ public class SettingsProps {
 				in = ps.nextElement().openStream();
 				SETTINGS_PROPS.load(in);
 			} catch (IOException e) {
-				logger.error("Load file [settings.props] error.");
+				LOGGER.error("Load file [settings.props] error.");
 			} finally {
 				if (in != null) {
 					try {
 						in.close();
 					} catch (IOException e) {
-						logger.error("Close file [settings.props] input stream error.");
+						LOGGER.error("Close file [settings.props] input stream error.");
 					}
 				}
 			}
@@ -82,7 +83,7 @@ public class SettingsProps {
 			try {
 				classes[i] = Class.forName(classesNames[i]);
 			} catch (ClassNotFoundException e) {
-				logger.error("Class {} forName error.", classesNames[i]);
+				LOGGER.error("Class {} forName error.", classesNames[i]);
 				throw new LightException(LightException.Code.SETTINGS_ERROR);
 			}
 		}

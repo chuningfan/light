@@ -19,11 +19,10 @@ import com.haiyiyang.light.protocol.PacketIdGenerator;
 import com.haiyiyang.light.protocol.ProtocolPacket;
 import com.haiyiyang.light.rpc.client.LightRpcClient;
 import com.haiyiyang.light.rpc.request.RequestMeta;
-import com.haiyiyang.light.rpc.server.IpPortGroupWeight;
 import com.haiyiyang.light.serialization.SerializerFactory;
 import com.haiyiyang.light.serialization.SerializerMode;
-import com.haiyiyang.light.service.LightService;
-import com.haiyiyang.light.service.ServiceServerResolver;
+import com.haiyiyang.light.service.ServerResolver;
+import com.haiyiyang.light.service.entry.ServiceEntry;
 import com.haiyiyang.light.service.proxy.ProxyMode;
 import com.haiyiyang.light.utils.RequestUtil;
 
@@ -74,20 +73,22 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 	private Object doInvoke(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 		if (TO_STRING.equals(method.getName())) {
 			return proxy.getClass().getName();
-		} else if (LightService.isLocalService(proxy)) {
-			return method.invoke(proxy, args);
 		}
-
-		IpPortGroupWeight ipgw = ServiceServerResolver.getServer(invocationFactor.getClazz().getName());
-		Channel channel = client.getChannel(ipgw);
+		LightProps lightProps = LightAppMeta.SINGLETON().getLightProps();
+		Byte group = null;
+		if (lightProps.isOpenGroup()) {
+			group = LightAppMeta.SINGLETON().getZeroOneGrouping();
+		}
+		ServiceEntry se = ServerResolver.getServer(invocationFactor.getClazz().getName(), group);
+		Channel channel = client.getChannel(se.getIpPort());
 		while (channel == null) {
 			try {
-				channel = client.connect(ipgw);
+				channel = client.connect(se.getIpPort());
 			} catch (Exception e) {
 				// TODO
 			}
 		}
-		LightProps lightProps = LightAppMeta.SINGLETON().getLightProps();
+
 		SerializerMode serializerType = SerializerMode.valueOf(lightProps.getSerializer());
 
 		RequestMeta message = new RequestMeta();

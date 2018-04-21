@@ -12,7 +12,7 @@ import com.haiyiyang.light.protocol.ProtocolPacket;
 import com.haiyiyang.light.protocol.codec.ProtocolDecoder;
 import com.haiyiyang.light.protocol.codec.ProtocolEncoder;
 import com.haiyiyang.light.rpc.LightRpcContext;
-import com.haiyiyang.light.rpc.client.channel.InboundHandler;
+import com.haiyiyang.light.rpc.client.channel.ClientInboundHandler;
 import com.haiyiyang.light.rpc.response.ResponseFuture;
 import com.haiyiyang.light.rpc.server.IpPort;
 
@@ -28,7 +28,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 
 public class LightRpcClient {
-	private InboundHandler inboundHandler;
+	private ClientInboundHandler clentInboundHandler;
 	private static Map<IpPort, Channel> CHANNELS = new ConcurrentHashMap<>();
 	private static Map<IpPort, EventLoopGroup> EVENT_LOOP_GROUPS = new ConcurrentHashMap<>();
 
@@ -46,7 +46,7 @@ public class LightRpcClient {
 		try {
 			Bootstrap b = new Bootstrap();
 			EventLoopGroup group = new NioEventLoopGroup();
-			inboundHandler = new InboundHandler(this);
+			clentInboundHandler = new ClientInboundHandler(this);
 			b.group(group).channel(NioSocketChannel.class).option(ChannelOption.SO_KEEPALIVE, true)
 					.option(ChannelOption.TCP_NODELAY, true).handler(new ChannelInitializer<SocketChannel>() {
 						@Override
@@ -54,7 +54,7 @@ public class LightRpcClient {
 							ch.pipeline().addLast("decoder", new ProtocolDecoder());
 							ch.pipeline().addLast("encoder", new ProtocolEncoder());
 							ch.pipeline().addLast(new IdleStateHandler(0, 0, 10/** TODO */
-							), inboundHandler);
+							), clentInboundHandler);
 						}
 					});
 			ChannelFuture channelFuture = b.connect(ipPort.getIp(), ipPort.getPort());
