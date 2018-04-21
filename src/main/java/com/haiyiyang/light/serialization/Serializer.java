@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 
 public interface Serializer {
 
-	public ByteBuffer serialize(Object obj, SerializerContext context);
+	public ByteBuffer serialize(Object obj, Object type);
 
-	public Object deserialize(ByteBuffer buffer, SerializerContext context);
+	public Object deserialize(ByteBuffer buffer, Object type);
 
 }

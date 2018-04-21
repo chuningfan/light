@@ -15,7 +15,6 @@ import com.haiyiyang.light.rpc.LightRpcContext;
 import com.haiyiyang.light.rpc.client.channel.InboundHandler;
 import com.haiyiyang.light.rpc.response.ResponseFuture;
 import com.haiyiyang.light.rpc.server.IpPort;
-import com.haiyiyang.light.serialization.SerializerContext;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -72,11 +71,11 @@ public class LightRpcClient {
 		return CHANNELS.get(ipPort);
 	}
 
-	public Object sendMessage(ProtocolPacket packet, SerializerContext context, Channel channel) throws Exception {
+	public Object sendMessage(ProtocolPacket packet, Object classType, Channel channel) throws Exception {
 		LightProps lightProps = LightAppMeta.SINGLETON().getLightProps();
 		if (packet.getInvokeMode() != LightConstants.BYTE0) {
 			LightRpcContext.setResponseFuture(packet.getPacketId(),
-					new ResponseFuture<Object>(lightProps.getTimeout(), TimeUnit.MILLISECONDS));
+					new ResponseFuture<Object>(classType, lightProps.getTimeout(), TimeUnit.MILLISECONDS));
 		}
 		writeChannel(packet, channel);
 		if (packet.getInvokeMode() == LightConstants.BYTE1) {

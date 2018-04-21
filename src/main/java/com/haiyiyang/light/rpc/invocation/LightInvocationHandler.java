@@ -13,7 +13,6 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 
-import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.meta.props.LightProps;
 import com.haiyiyang.light.protocol.PacketIdGenerator;
@@ -21,12 +20,11 @@ import com.haiyiyang.light.protocol.ProtocolPacket;
 import com.haiyiyang.light.rpc.client.LightRpcClient;
 import com.haiyiyang.light.rpc.request.RequestMeta;
 import com.haiyiyang.light.rpc.server.IpPortGroupWeight;
-import com.haiyiyang.light.serialization.SerializerContext;
 import com.haiyiyang.light.serialization.SerializerFactory;
-import com.haiyiyang.light.serialization.SerializerType;
+import com.haiyiyang.light.serialization.SerializerMode;
 import com.haiyiyang.light.service.LightService;
 import com.haiyiyang.light.service.ServiceServerResolver;
-import com.haiyiyang.light.service.proxy.ProxyType;
+import com.haiyiyang.light.service.proxy.ProxyMode;
 import com.haiyiyang.light.utils.RequestUtil;
 
 import io.netty.channel.Channel;
@@ -39,13 +37,13 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 	private InvocationFactor invocationFactor;
 	private final static String TO_STRING = "toString";
 	private LightRpcClient client;
-	private ProxyType proxyType;
+	private ProxyMode proxyMode;
 
 	private LightInvocationHandler(InvocationFactor factor) {
 		this.invocationFactor = factor;
 		this.client = new LightRpcClient();
-		this.proxyType = ProxyType.valueOf(LightAppMeta.SINGLETON().getLightProps().getProxyType());
-		if (ProxyType.CGLIB == this.proxyType) {
+		this.proxyMode = ProxyMode.valueOf(LightAppMeta.SINGLETON().getLightProps().getProxyType());
+		if (ProxyMode.CGLIB == this.proxyMode) {
 			Enhancer en = new Enhancer();
 			en.setSuperclass(factor.getClazz());
 			en.setCallback(this);
@@ -90,7 +88,7 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 			}
 		}
 		LightProps lightProps = LightAppMeta.SINGLETON().getLightProps();
-		SerializerType serializerType = SerializerType.valueOf(lightProps.getSerializer());
+		SerializerMode serializerType = SerializerMode.valueOf(lightProps.getSerializer());
 
 		RequestMeta message = new RequestMeta();
 		String requestId = RequestUtil.getThreadLocalUUID();
@@ -113,15 +111,7 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 		}
 		ProtocolPacket protocolPacket = new ProtocolPacket(PacketIdGenerator.getPacketId(),
 				invocationFactor.getInvokeMode(), serializerType.getValue(), System.currentTimeMillis(), buffers);
-		SerializerContext context = null;
-		if (invocationFactor.getInvokeMode() == LightConstants.BYTE1) {
-			context = new SerializerContext(method.getReturnType());
-		} else if (invocationFactor.getInvokeMode() == LightConstants.BYTE2) {
-			context = new SerializerContext(method.getReturnType());
-		} else if (invocationFactor.getInvokeMode() == LightConstants.BYTE0) {
-			context = new SerializerContext();
-		}
-		return client.sendMessage(protocolPacket, context, channel);
+		return client.sendMessage(protocolPacket, method.getReturnType(), channel);
 	}
 
 }

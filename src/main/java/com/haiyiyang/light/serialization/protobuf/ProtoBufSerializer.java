@@ -3,7 +3,6 @@ package com.haiyiyang.light.serialization.protobuf;
 import java.nio.ByteBuffer;
 
 import com.haiyiyang.light.serialization.Serializer;
-import com.haiyiyang.light.serialization.SerializerContext;
 
 public class ProtoBufSerializer implements Serializer {
 
@@ -16,11 +15,11 @@ public class ProtoBufSerializer implements Serializer {
 		return PROTOBUF_SERIALIZER;
 	}
 
-	public ByteBuffer serialize(Object obj, SerializerContext context) {
+	public ByteBuffer serialize(Object obj, Object classType) {
 		return null; // TODO
 	}
 
-	public Object deserialize(ByteBuffer buffer, SerializerContext context) {
+	public Object deserialize(ByteBuffer buffer, Object classType) {
 		return null; // TODO
 	}
 }

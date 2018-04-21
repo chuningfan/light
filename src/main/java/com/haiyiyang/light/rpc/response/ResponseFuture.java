@@ -12,7 +12,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.protocol.ProtocolPacket;
-import com.haiyiyang.light.serialization.SerializerContext;
 import com.haiyiyang.light.serialization.SerializerFactory;
 
 public class ResponseFuture<V> implements Future<V> {
@@ -23,10 +22,11 @@ public class ResponseFuture<V> implements Future<V> {
 
 	private long timeout;
 	private TimeUnit timeUnit;
+	private Object classType = null;
 	private volatile ProtocolPacket packet;
-	private SerializerContext context = null;
 
-	public ResponseFuture(long timeout, TimeUnit timeUnit) {
+	public ResponseFuture(Object classType, long timeout, TimeUnit timeUnit) {
+		this.classType = classType;
 		this.timeout = timeout;
 		this.timeUnit = timeUnit;
 	}
@@ -98,8 +98,7 @@ public class ResponseFuture<V> implements Future<V> {
 			if (bf0.get() == LightConstants.BYTE0) {
 				// TODO
 			} else {
-				context.setRequest(false);
-				return SerializerFactory.getSerializer(packet.getSerializerType()).deserialize(result, context);
+				return SerializerFactory.getSerializer(packet.getSerializerType()).deserialize(result, classType);
 			}
 		}
 		return null;
