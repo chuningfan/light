@@ -18,6 +18,8 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.haiyiyang.light.constant.LightConstants;
+
 public abstract class RegistryConnection implements Watcher {
 
 	private static Logger logger = LoggerFactory.getLogger(RegistryConnection.class);
@@ -104,6 +106,19 @@ public abstract class RegistryConnection implements Watcher {
 		}
 	}
 
+	private void createLastPath(String path, byte[] data, List<ACL> acl, CreateMode createMode) {
+		if (existsPath(path, false) == null) {
+			try {
+				getRegistry().create(path, data, acl, createMode);
+				logger.info("ZookKeeper created the path {}.", path);
+			} catch (KeeperException ke) {
+				logger.error("Execute createPath {} caused KeeperException error : {}", path, ke.getMessage());
+			} catch (InterruptedException ie) {
+				logger.error("Execute createPath {} caused InterruptedException error : {}", path, ie.getMessage());
+			}
+		}
+	}
+
 	protected void createLightPath() {
 		createPath(PATH_LIGHT, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 	}
@@ -120,17 +135,15 @@ public abstract class RegistryConnection implements Watcher {
 		}
 	}
 
-	protected void createPath(String path, byte data[], List<ACL> acl, CreateMode createMode) {
+	protected void createPath(String fullPath, byte[] data, List<ACL> acl, CreateMode createMode) {
 		synchronized (this.registry) {
-			if (existsPath(path, false) == null) {
-				try {
-					getRegistry().create(path, null, acl, createMode);
-					logger.info("ZookKeeper created the path {}.", path);
-				} catch (KeeperException ke) {
-					logger.error("Execute createPath {} caused KeeperException error : {}", path, ke.getMessage());
-				} catch (InterruptedException ie) {
-					logger.error("Execute createPath {} caused InterruptedException error : {}", path, ie.getMessage());
-				}
+			String[] pathArray = fullPath.split("/");
+			StringBuilder pathStrb = new StringBuilder();
+			int i = 1;
+			while (i < pathArray.length) {
+				pathStrb.append(LightConstants.SLASH).append(pathArray[i]);
+				createLastPath(pathStrb.toString(), ++i == pathArray.length ? data : null, Ids.OPEN_ACL_UNSAFE,
+						CreateMode.PERSISTENT);
 			}
 		}
 	}

@@ -62,7 +62,7 @@ public class LightContext extends AnnotationConfigApplicationContext implements 
 			LightService lightService = LightService.SINGLETON();
 			for (Iterator<Entry<String, Object>> ite = objectMap.entrySet().iterator(); ite.hasNext();) {
 				Entry<String, Object> entry = ite.next();
-				lightService.addService(entry.getKey(), entry.getValue());
+				lightService.addService(entry.getValue());
 			}
 			lightService.publishService();
 		}

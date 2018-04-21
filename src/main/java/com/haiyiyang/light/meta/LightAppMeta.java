@@ -43,11 +43,11 @@ public class LightAppMeta {
 	}
 
 	private void initAppName() {
+		String rootPackage = SettingsProps.getRootPackage();
 		String domainPackage = SettingsProps.getDomainPackage();
-		if (domainPackage == null || domainPackage.isEmpty()) {
-			domainPackage = lightProps.getPropsValue(LightConstants.DOMAIN_PACKAGE);
+		if (rootPackage != null && domainPackage != null && rootPackage.length() > domainPackage.length()) {
+			this.appName = SettingsProps.getRootPackage().substring(domainPackage.length() + 1);
 		}
-		this.appName = SettingsProps.getRootPackage().substring(domainPackage.length() + 1);
 	}
 
 	private void initPublishRegistries() {
@@ -71,6 +71,22 @@ public class LightAppMeta {
 			}
 		}
 		ZERO_ONE_GROUPING = Byte.parseByte(MACHINE_IP.substring(MACHINE_IP.length() - 1, MACHINE_IP.length()));
+	}
+
+	public String resolveAppName(String serviceName) {
+		List<String> domainPackageList = lightProps.getDomainPackages();
+		if (!domainPackageList.isEmpty()) {
+			for (String domainPackage : domainPackageList) {
+				if (serviceName.indexOf(domainPackage) == 0) {
+					int index = serviceName.indexOf(LightConstants.DOT, domainPackage.length() + 1);
+					if (index == -1) {
+						index = serviceName.length();
+					}
+					return serviceName.substring(domainPackage.length() + 1, index);
+				}
+			}
+		}
+		return null;
 	}
 
 	public static LightAppMeta SINGLETON() {

@@ -6,15 +6,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.rpc.invocation.InvocationFactor;
 import com.haiyiyang.light.rpc.invocation.LightInvocationHandler;
 import com.haiyiyang.light.service.entry.ServiceEntry;
+import com.haiyiyang.light.service.publish.LightPublication;
 import com.haiyiyang.light.service.publish.LightPublisher;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
+import com.haiyiyang.light.service.subscription.LightSubscription;
 
 public class LightService implements LightPublisher, LightSubscriber {
 
+	private static final String SERVICE_URL = "/light/service/";
 	private static final Set<Object> LOCAL_SERVICE = new HashSet<>();
 	private static final Map<String, ServiceInstance> PUBLISHED_SERVICES = new ConcurrentHashMap<>();
 
@@ -51,34 +55,28 @@ public class LightService implements LightPublisher, LightSubscriber {
 	}
 
 	public void publishService() {
-		// if (service != PUBLISHED_SERVICES.putIfAbsent(service.serviceName, service))
-		// {
-		// // TODO publish service.
-		// }
+		LightPublication.getPublish(this);
 	}
 
 	public List<ServiceEntry> subscribeService(String serviceName) {
-		// if (service != SUBSCRIBED_SERVICES.putIfAbsent(service.serviceName, service))
-		// {
-		// // TODO publish service.
-		// }
-
+		StringBuilder strb = new StringBuilder(SERVICE_URL);
+		strb.append(LightConstants.SLASH);
+		strb.append(LightAppMeta.SINGLETON().resolveAppName(serviceName));
+		byte[] data = LightSubscription.getSubscription(this).getData(strb.toString());
+		// TODO
 		return null;
 	}
 
-	public void addService(String beanName, Object object) {
-		ServiceInstance service = new ServiceInstance(beanName, object);
+	public void addService(Object object) {
+		ServiceInstance service = new ServiceInstance(object);
 		PUBLISHED_SERVICES.put(service.serviceName, service);
 	}
 
-	@SuppressWarnings("unused")
 	public static class ServiceInstance {
-		private String beanName;
 		private String serviceName;
 		private Object serviceImpl;
 
-		ServiceInstance(String beanName, Object object) {
-			this.beanName = beanName;
+		ServiceInstance(Object object) {
 			this.serviceImpl = object;
 			this.serviceName = getInterfaceName(this.serviceImpl);
 		}

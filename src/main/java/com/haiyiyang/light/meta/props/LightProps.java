@@ -3,6 +3,7 @@ package com.haiyiyang.light.meta.props;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -50,7 +51,10 @@ public class LightProps implements LightSubscriber {
 	private static final String LIGHT_PROPS_LOCAL_URL = LightConstants.USER_HOME
 			+ LIGHT_PROPS_URL.replaceAll("/", LightConstants.FS);
 
+	public static final String DOMAIN_PACKAGES = "domainPackages";
+
 	private Props props;
+	private List<String> domainPackageList;
 	private static LightProps LIGHT_PROPS;
 	private static LightAppMeta LIGHT_APP_META;
 
@@ -95,6 +99,20 @@ public class LightProps implements LightSubscriber {
 				LOGGER.error(e.getMessage(), e);
 			}
 		}
+	}
+
+	public List<String> getDomainPackages() {
+		if (domainPackageList != null) {
+			return domainPackageList;
+		}
+		String domainPackages = props.getValue(DOMAIN_PACKAGES);
+		if (domainPackages == null) {
+			domainPackageList = Collections.emptyList();
+		} else {
+			domainPackageList = Lists.newArrayList(domainPackages.split(LightConstants.COMMA));
+			domainPackageList.sort((a, b) -> (a.length() > b.length()) ? -1 : 1);
+		}
+		return domainPackageList;
 	}
 
 	public int getMinThread() {
