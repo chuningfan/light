@@ -1,5 +1,7 @@
 package com.haiyiyang.light.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +26,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 
 	private static LightService LIGHT_SERVICE;
 
-	private static LightAppMeta LIGHT_APP_META;
-
 	private LightService() {
-		LIGHT_APP_META = LightAppMeta.SINGLETON();
 	}
 
 	public static LightService SINGLETON() {
@@ -62,9 +61,15 @@ public class LightService implements LightPublisher, LightSubscriber {
 		StringBuilder strb = new StringBuilder(SERVICE_URL);
 		strb.append(LightConstants.SLASH);
 		strb.append(LightAppMeta.SINGLETON().resolveAppName(serviceName));
-		byte[] data = LightSubscription.getSubscription(this).getData(strb.toString());
-		// TODO
-		return null;
+		List<byte[]> dataList = LightSubscription.getSubscription(this).getChildrenData(strb.toString());
+		if (dataList == null || dataList.isEmpty()) {
+			return Collections.emptyList();
+		}
+		List<ServiceEntry> serviceEntryList = new ArrayList<>(dataList.size());
+		for (byte[] data : dataList) {
+			serviceEntryList.add(ServiceEntry.decode(data));
+		}
+		return serviceEntryList;
 	}
 
 	public void addService(Object object) {

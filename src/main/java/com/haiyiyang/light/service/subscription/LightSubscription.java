@@ -1,5 +1,7 @@
 package com.haiyiyang.light.service.subscription;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +45,18 @@ public class LightSubscription extends RegistryConnection {
 
 	public List<String> getChildren(String path) {
 		return getChildren(path, this);
+	}
+
+	public List<byte[]> getChildrenData(String path) {
+		List<String> childrenPaths = getChildren(path, this);
+		if (childrenPaths != null && !childrenPaths.isEmpty()) {
+			List<byte[]> result = new ArrayList<>(childrenPaths.size());
+			for (String childrenPath : childrenPaths) {
+				result.add(getData(childrenPath));
+			}
+			return result;
+		}
+		return Collections.emptyList();
 	}
 
 	@Override
