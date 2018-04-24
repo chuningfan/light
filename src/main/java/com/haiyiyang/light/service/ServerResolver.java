@@ -13,15 +13,11 @@ public class ServerResolver {
 
 	public static ServiceEntry getServer(String serviceName, Byte group) {
 		List<ServiceEntry> list = LightService.SINGLETON().subscribeService(serviceName);
-		List<ServiceEntry> serviceEntryList = null;
-		if (group == null) {
-			serviceEntryList = list;
-		} else {
-			serviceEntryList = new ArrayList<>(list.size());
-			for (ServiceEntry serviceEntry : list) {
-				if (serviceEntry.getGroup() == group.byteValue()) {
-					serviceEntryList.add(serviceEntry);
-				}
+		List<ServiceEntry> serviceEntryList = new ArrayList<>(list.size());
+		for (ServiceEntry serviceEntry : list) {
+			if (serviceEntry.getServiceNames().contains(serviceName)
+					&& (group == null || serviceEntry.getGroup() == group.byteValue())) {
+				serviceEntryList.add(serviceEntry);
 			}
 		}
 		return getService(serviceName, serviceEntryList);

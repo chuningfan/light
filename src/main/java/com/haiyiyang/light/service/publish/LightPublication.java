@@ -1,9 +1,10 @@
 package com.haiyiyang.light.service.publish;
 
-import java.util.List;
 import java.util.Map;
 
+import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.ZooDefs.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +37,8 @@ public class LightPublication extends RegistryConnection {
 		}
 	}
 
-	public byte[] getData(String path) {
-		return getData(path, this);
-	}
-
-	public List<String> getChildren(String path) {
-		return getChildren(path, this);
+	public void publishService(String path, byte[] data) {
+		createPath(path, data, Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 	}
 
 	protected LightPublication(String registry) {

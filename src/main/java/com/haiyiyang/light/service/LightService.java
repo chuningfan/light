@@ -58,9 +58,12 @@ public class LightService implements LightPublisher, LightSubscriber {
 	}
 
 	public List<ServiceEntry> subscribeService(String serviceName) {
-		StringBuilder strb = new StringBuilder(SERVICE_URL);
-		strb.append(LightConstants.SLASH);
-		strb.append(LightAppMeta.SINGLETON().resolveAppName(serviceName));
+		//TODO add cache.
+		String appName = LightAppMeta.SINGLETON().resolveAppName(serviceName);
+		if (appName == null || appName.isEmpty()) {
+			appName = serviceName;
+		}
+		StringBuilder strb = new StringBuilder(SERVICE_URL).append(LightConstants.SLASH).append(appName);
 		List<byte[]> dataList = LightSubscription.getSubscription(this).getChildrenData(strb.toString());
 		if (dataList == null || dataList.isEmpty()) {
 			return Collections.emptyList();

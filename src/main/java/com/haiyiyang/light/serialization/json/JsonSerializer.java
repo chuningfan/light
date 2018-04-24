@@ -34,4 +34,9 @@ public class JsonSerializer implements Serializer {
 			}
 		}
 	}
+	
+	public static void main (String[] args) {
+		Object classArray = new Object[2];
+		System.out.println((classArray instanceof Class));
+	}
 }

@@ -1,7 +1,5 @@
 package com.haiyiyang.light.protocol.codec;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.haiyiyang.light.constant.LightConstants;
@@ -28,23 +26,8 @@ public class ProtocolDecoder extends ByteToMessageDecoder {
 			in.resetReaderIndex();
 			return;
 		}
-		byte[] decoded = new byte[dataLength];
-		in.readBytes(decoded);
-		ByteBuffer buffer = ByteBuffer.wrap(decoded);
-		int packetId = buffer.getInt();
-		byte invokeMode = buffer.get();
-		byte serializerType = buffer.get();
-		long startTime = buffer.getLong();
-		int argumentsSize = buffer.getInt();
-		List<ByteBuffer> datas = new ArrayList<ByteBuffer>();
-		for (int i = 0; i < argumentsSize; i++) {
-			int length = buffer.getInt();
-			ByteBuffer buf = ByteBuffer.allocate(length);
-			System.arraycopy(buffer.array(), buffer.position(), buf.array(), 0, length);
-			buffer.position(buffer.position() + length);
-			datas.add(buf);
-		}
-		out.add(new ProtocolPacket(packetId, invokeMode, serializerType, startTime, datas));
+		byte[] data = new byte[dataLength];
+		in.readBytes(data);
+		out.add(ProtocolPacket.decode(data));
 	}
-
 }

@@ -23,6 +23,10 @@ public class SerializerFactory {
 		return SERIALIZER.get(type);
 	}
 
+	public static Serializer getSerializer(SerializerMode serializerMode) {
+		return SERIALIZER.get(serializerMode.getValue());
+	}
+
 	public static byte[] getBytes(String data) {
 		return data.getBytes(LightConstants.CHARSET_UTF8);
 	}

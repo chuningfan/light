@@ -43,10 +43,6 @@ public class LightSubscription extends RegistryConnection {
 		return getData(path, this);
 	}
 
-	public List<String> getChildren(String path) {
-		return getChildren(path, this);
-	}
-
 	public List<byte[]> getChildrenData(String path) {
 		List<String> childrenPaths = getChildren(path, this);
 		if (childrenPaths != null && !childrenPaths.isEmpty()) {

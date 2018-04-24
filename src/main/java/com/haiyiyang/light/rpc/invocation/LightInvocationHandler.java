@@ -79,11 +79,11 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 		if (lightProps.isOpenGroup()) {
 			group = LightAppMeta.SINGLETON().getZeroOneGrouping();
 		}
-		ServiceEntry se = ServerResolver.getServer(invocationFactor.getClazz().getName(), group);
-		Channel channel = client.getChannel(se.getIpPort());
+		ServiceEntry serviceEntry = ServerResolver.getServer(invocationFactor.getClazz().getName(), group);
+		Channel channel = client.getChannel(serviceEntry.getIpPort());
 		while (channel == null) {
 			try {
-				channel = client.connect(se.getIpPort());
+				channel = client.connect(serviceEntry.getIpPort());
 			} catch (Exception e) {
 				// TODO
 			}
@@ -108,7 +108,7 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 		List<ByteBuffer> buffers = new ArrayList<ByteBuffer>();
 		buffers.add(message.serialize());
 		if (args != null && args.length > 0) {
-			buffers.add(SerializerFactory.getSerializer(serializerType.getValue()).serialize(args, null));
+			buffers.add(SerializerFactory.getSerializer(serializerType).serialize(args, args.getClass()));
 		}
 		ProtocolPacket protocolPacket = new ProtocolPacket(PacketIdGenerator.getPacketId(),
 				invocationFactor.getInvokeMode(), serializerType.getValue(), System.currentTimeMillis(), buffers);

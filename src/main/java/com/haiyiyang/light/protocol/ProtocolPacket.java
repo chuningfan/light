@@ -1,6 +1,7 @@
 package com.haiyiyang.light.protocol;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProtocolPacket {
@@ -21,16 +22,17 @@ public class ProtocolPacket {
 		this.requestMeta = requestMeta;
 	}
 
-	public ByteBuffer encode() {
+	public static ByteBuffer encode(ProtocolPacket packet) {
 		int totalLenght = headerLength;
-		int datasize = requestMeta.size();
+		int datasize = packet.getRequestMeta().size();
 		for (int i = 0; i < datasize; i++) {
-			totalLenght += (4 + requestMeta.get(i).limit());
+			totalLenght += (4 + packet.getRequestMeta().get(i).limit());
 		}
 		ByteBuffer byteBuffer = ByteBuffer.allocate(totalLenght);
-		byteBuffer.putInt(packetId).put(invokeMode).put(serializerType).putLong(startTime).putInt(datasize);
+		byteBuffer.putInt(packet.getPacketId()).put(packet.getInvokeMode()).put(packet.getSerializerType())
+				.putLong(packet.getStartTime()).putInt(datasize);
 		for (int i = 0; i < datasize; i++) {
-			ByteBuffer data = requestMeta.get(i);
+			ByteBuffer data = packet.getRequestMeta().get(i);
 			int lenli = data.limit();
 			byteBuffer.putInt(lenli);
 			System.arraycopy(data.array(), 0, byteBuffer.array(), byteBuffer.position(), lenli);
@@ -38,6 +40,24 @@ public class ProtocolPacket {
 		}
 		byteBuffer.flip();
 		return byteBuffer;
+	}
+
+	public static ProtocolPacket decode(byte[] data) {
+		ByteBuffer buffer = ByteBuffer.wrap(data);
+		int packetId = buffer.getInt();
+		byte invokeMode = buffer.get();
+		byte serializerType = buffer.get();
+		long startTime = buffer.getLong();
+		int argumentsSize = buffer.getInt();
+		List<ByteBuffer> datas = new ArrayList<ByteBuffer>();
+		for (int i = 0; i < argumentsSize; i++) {
+			int length = buffer.getInt();
+			ByteBuffer buf = ByteBuffer.allocate(length);
+			System.arraycopy(buffer.array(), buffer.position(), buf.array(), 0, length);
+			buffer.position(buffer.position() + length);
+			datas.add(buf);
+		}
+		return new ProtocolPacket(packetId, invokeMode, serializerType, startTime, datas);
 	}
 
 	public int getPacketId() {

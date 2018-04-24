@@ -11,7 +11,7 @@ public class ProtocolEncoder extends MessageToByteEncoder<ProtocolPacket> {
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, ProtocolPacket msg, ByteBuf out) throws Exception {
-		byte[] data = msg.encode().array();
+		byte[] data = ProtocolPacket.encode(msg).array();
 		out.writeByte(LightConstants.PROTOCOL_MAGIC_NUMBER).writeInt(data.length).writeBytes(data);
 	}
 }

@@ -143,7 +143,7 @@ public abstract class RegistryConnection implements Watcher {
 			while (i < pathArray.length) {
 				pathStrb.append(LightConstants.SLASH).append(pathArray[i]);
 				createLastPath(pathStrb.toString(), ++i == pathArray.length ? data : null, Ids.OPEN_ACL_UNSAFE,
-						CreateMode.PERSISTENT);
+						createMode);
 			}
 		}
 	}
