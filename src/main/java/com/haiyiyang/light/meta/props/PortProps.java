@@ -72,8 +72,8 @@ public class PortProps implements LightSubscriber {
 		}
 	}
 
-	public int getAppPort(String appName) {
-		Integer appPort = props.getIntegerValue(appName);
+	public int getAppPort() {
+		Integer appPort = props.getIntegerValue(LIGHT_APP_META.getAppName());
 		if (appPort != null) {
 			return appPort.intValue();
 		}

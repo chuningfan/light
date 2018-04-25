@@ -28,6 +28,8 @@ public class LightAppMeta {
 	private static byte ZERO_ONE_GROUPING;
 	private static List<String> PUBLISH_REGISTRIES = new ArrayList<>(3);
 	private static String MACHINE_IP = LightConstants.IP_127_0_0_1;
+	private final static String LIGHT_SLASH_PATH = "/light/";
+	private static String APP_SERVICE_PATH;
 
 	private static volatile LightAppMeta LIGHT_APP_META;
 
@@ -47,6 +49,7 @@ public class LightAppMeta {
 		String domainPackage = SettingsProps.getDomainPackage();
 		if (rootPackage != null && domainPackage != null && rootPackage.length() > domainPackage.length()) {
 			this.appName = SettingsProps.getRootPackage().substring(domainPackage.length() + 1);
+			APP_SERVICE_PATH = new StringBuilder(LIGHT_SLASH_PATH).append(this.appName).toString();
 		}
 	}
 
@@ -73,20 +76,29 @@ public class LightAppMeta {
 		ZERO_ONE_GROUPING = Byte.parseByte(MACHINE_IP.substring(MACHINE_IP.length() - 1, MACHINE_IP.length()));
 	}
 
-	public String resolveAppName(String serviceName) {
+	public String resolveServicePath(String serviceName) {
 		List<String> domainPackageList = lightProps.getDomainPackages();
 		if (!domainPackageList.isEmpty()) {
 			for (String domainPackage : domainPackageList) {
 				if (serviceName.indexOf(domainPackage) == 0) {
 					int index = serviceName.indexOf(LightConstants.DOT, domainPackage.length() + 1);
-					if (index == -1) {
-						index = serviceName.length();
-					}
-					return serviceName.substring(domainPackage.length() + 1, index);
+					return serviceName.substring(domainPackage.length() + 1,
+							index == -1 ? serviceName.length() : index);
 				}
 			}
 		}
 		return null;
+	}
+
+	public int getAppPort() {
+		return portProps.getAppPort();
+	}
+
+	public String getAppServicePath() {
+		if (APP_SERVICE_PATH == null) {
+			APP_SERVICE_PATH = new StringBuilder(LIGHT_SLASH_PATH).append(this.appName).toString();
+		}
+		return APP_SERVICE_PATH;
 	}
 
 	public static LightAppMeta SINGLETON() {

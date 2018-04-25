@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.rpc.invocation.InvocationFactor;
 import com.haiyiyang.light.rpc.invocation.LightInvocationHandler;
+import com.haiyiyang.light.rpc.server.IpPort;
 import com.haiyiyang.light.service.entry.ServiceEntry;
 import com.haiyiyang.light.service.publish.LightPublication;
 import com.haiyiyang.light.service.publish.LightPublisher;
@@ -20,7 +20,7 @@ import com.haiyiyang.light.service.subscription.LightSubscription;
 
 public class LightService implements LightPublisher, LightSubscriber {
 
-	private static final String SERVICE_URL = "/light/service/";
+	private static final String LIGHT_SERVICE_SLASH_URL = "/light/service/";
 	private static final Set<Object> LOCAL_SERVICE = new HashSet<>();
 	private static final Map<String, ServiceInstance> PUBLISHED_SERVICES = new ConcurrentHashMap<>();
 
@@ -54,16 +54,24 @@ public class LightService implements LightPublisher, LightSubscriber {
 	}
 
 	public void publishService() {
-		LightPublication.getPublish(this);
+		if (!PUBLISHED_SERVICES.isEmpty()) {
+			LightAppMeta lightAppMeta = LightAppMeta.SINGLETON();
+			ServiceEntry serviceEntry = new ServiceEntry(
+					new IpPort(lightAppMeta.getMachineIp(), lightAppMeta.getAppPort()),
+					lightAppMeta.getLightProps().getServerLoadWeight(), lightAppMeta.getZeroOneGrouping());
+			serviceEntry.setServiceNames(PUBLISHED_SERVICES.keySet());
+			LightPublication.getPublish(this).publishService(lightAppMeta.getAppServicePath(),
+					ServiceEntry.encode(serviceEntry));
+		}
 	}
 
 	public List<ServiceEntry> subscribeService(String serviceName) {
-		//TODO add cache.
-		String appName = LightAppMeta.SINGLETON().resolveAppName(serviceName);
+		// TODO add cache.
+		String appName = LightAppMeta.SINGLETON().resolveServicePath(serviceName);
 		if (appName == null || appName.isEmpty()) {
 			appName = serviceName;
 		}
-		StringBuilder strb = new StringBuilder(SERVICE_URL).append(LightConstants.SLASH).append(appName);
+		StringBuilder strb = new StringBuilder(LIGHT_SERVICE_SLASH_URL).append(appName);
 		List<byte[]> dataList = LightSubscription.getSubscription(this).getChildrenData(strb.toString());
 		if (dataList == null || dataList.isEmpty()) {
 			return Collections.emptyList();

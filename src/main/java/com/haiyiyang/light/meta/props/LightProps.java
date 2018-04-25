@@ -44,7 +44,7 @@ public class LightProps implements LightSubscriber {
 	private static final String OPEN_GROUP = "openGroup";
 	private static final String NEED_SIGNATURE = "needSignature";
 
-	private static final int DEFAULT_SERVER_LOAD_WEIGHT = 3;
+	private static final byte DEFAULT_SERVER_LOAD_WEIGHT = 3;
 	private static final String SERVER_LOAD_WEIGHT = "serverLoadWeight";
 
 	private static final String LIGHT_PROPS_URL = "/light/light.props";
@@ -155,10 +155,10 @@ public class LightProps implements LightSubscriber {
 		return DEFAULT_REGISTRY;
 	}
 
-	public int getServerLoadWeight() {
+	public byte getServerLoadWeight() {
 		Integer weight = props.getIntegerValue(SERVER_LOAD_WEIGHT, LIGHT_APP_META.getMachineIp());
 		if (weight != null) {
-			return weight.intValue();
+			return weight.byteValue();
 		}
 		return DEFAULT_SERVER_LOAD_WEIGHT;
 	}
