@@ -4,7 +4,7 @@ import com.haiyiyang.light.context.LightContext;
 
 public class LightApp {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		LightContext.getContext().start();
 	}
 

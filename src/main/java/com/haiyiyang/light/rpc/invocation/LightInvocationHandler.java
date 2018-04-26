@@ -13,7 +13,7 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 
-import com.haiyiyang.light.meta.LightAppMeta;
+import com.haiyiyang.light.context.LightContext;
 import com.haiyiyang.light.meta.props.LightProps;
 import com.haiyiyang.light.protocol.PacketIdGenerator;
 import com.haiyiyang.light.protocol.ProtocolPacket;
@@ -41,7 +41,7 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 	private LightInvocationHandler(InvocationFactor factor) {
 		this.invocationFactor = factor;
 		this.client = new LightRpcClient();
-		this.proxyMode = ProxyMode.valueOf(LightAppMeta.SINGLETON().getLightProps().getProxyType());
+		this.proxyMode = ProxyMode.valueOf(getLightProps().getProxyType());
 		if (ProxyMode.CGLIB == this.proxyMode) {
 			Enhancer en = new Enhancer();
 			en.setSuperclass(factor.getClazz());
@@ -51,6 +51,10 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 			this.objectProxy = Proxy.newProxyInstance(LightInvocationHandler.class.getClassLoader(),
 					new Class[] { factor.getClazz() }, this);
 		}
+	}
+
+	private static LightProps getLightProps() {
+		return LightContext.getContext().getLightAppMeta().getLightProps();
 	}
 
 	public static Object getProxyService(InvocationFactor factor) {
@@ -74,10 +78,9 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 		if (TO_STRING.equals(method.getName())) {
 			return proxy.getClass().getName();
 		}
-		LightProps lightProps = LightAppMeta.SINGLETON().getLightProps();
 		Byte group = null;
-		if (lightProps.isOpenGroup()) {
-			group = LightAppMeta.SINGLETON().getZeroOneGrouping();
+		if (getLightProps().isOpenGroup()) {
+			group = LightContext.getContext().getLightAppMeta().getZeroOneGrouping();
 		}
 		ServiceEntry serviceEntry = ServerResolver.getServer(invocationFactor.getClazz().getName(), group);
 		Channel channel = client.getChannel(serviceEntry.getIpPort());
@@ -89,7 +92,7 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 			}
 		}
 
-		SerializerMode serializerType = SerializerMode.valueOf(lightProps.getSerializer());
+		SerializerMode serializerType = SerializerMode.valueOf(getLightProps().getSerializer());
 
 		RequestMeta message = new RequestMeta();
 		String requestId = RequestUtil.getThreadLocalUUID();
@@ -101,8 +104,8 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 		message.setServiceName(invocationFactor.getClazz().getName());
 		message.setMethod(method.getName());
 		message.setParamsTypes(method.getParameterTypes());
-		message.setClientAppName(LightAppMeta.SINGLETON().getAppName());
-		message.setClientIP(LightAppMeta.SINGLETON().getMachineIp());
+		message.setClientAppName(LightContext.getContext().getLightAppMeta().getAppName());
+		message.setClientIP(LightContext.getContext().getLightAppMeta().getMachineIp());
 		message.setDatetime(String.valueOf(System.currentTimeMillis()));
 
 		List<ByteBuffer> buffers = new ArrayList<ByteBuffer>();

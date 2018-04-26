@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.haiyiyang.light.context.LightContext;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.rpc.invocation.InvocationFactor;
 import com.haiyiyang.light.rpc.invocation.LightInvocationHandler;
@@ -24,9 +25,11 @@ public class LightService implements LightPublisher, LightSubscriber {
 	private static final Set<Object> LOCAL_SERVICE = new HashSet<>();
 	private static final Map<String, ServiceInstance> PUBLISHED_SERVICES = new ConcurrentHashMap<>();
 
+	private LightAppMeta lightAppMeta;
 	private static LightService LIGHT_SERVICE;
 
 	private LightService() {
+		this.lightAppMeta = LightContext.getContext().getLightAppMeta();
 	}
 
 	public static LightService SINGLETON() {
@@ -55,7 +58,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 
 	public void publishService() {
 		if (!PUBLISHED_SERVICES.isEmpty()) {
-			LightAppMeta lightAppMeta = LightAppMeta.SINGLETON();
+			LightAppMeta lightAppMeta = LightContext.getContext().getLightAppMeta();
 			ServiceEntry serviceEntry = new ServiceEntry(
 					new IpPort(lightAppMeta.getMachineIp(), lightAppMeta.getAppPort()),
 					lightAppMeta.getLightProps().getServerLoadWeight(), lightAppMeta.getZeroOneGrouping());
@@ -67,7 +70,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 
 	public List<ServiceEntry> subscribeService(String serviceName) {
 		// TODO add cache.
-		String appName = LightAppMeta.SINGLETON().resolveServicePath(serviceName);
+		String appName = lightAppMeta.resolveServicePath(serviceName);
 		if (appName == null || appName.isEmpty()) {
 			appName = serviceName;
 		}

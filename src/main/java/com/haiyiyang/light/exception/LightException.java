@@ -2,12 +2,12 @@ package com.haiyiyang.light.exception;
 
 public class LightException extends RuntimeException {
 
-	private static final long serialVersionUID = 2356666188593679816L;
+	private static final long serialVersionUID = -1L;
 
 	private final String code;
 	private final String message;
-	private static final String codePrefix = "LightException > code: ";
-	private static final String messagePrefix = " | message: ";
+	private static final String CODE_PREFIX = "LightException > code: ";
+	private static final String MESSAGE_PREFIX = " | message: ";
 
 	public String getCode() {
 		return code;
@@ -32,7 +32,7 @@ public class LightException extends RuntimeException {
 	}
 
 	private static String getCauseMessage(String code, String message) {
-		return new StringBuilder(codePrefix).append(code).append(messagePrefix).append(message).toString();
+		return new StringBuilder(CODE_PREFIX).append(code).append(MESSAGE_PREFIX).append(message).toString();
 	}
 
 	public static enum Code {

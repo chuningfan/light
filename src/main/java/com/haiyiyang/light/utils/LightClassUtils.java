@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ClassUtils;
 
-import com.haiyiyang.light.app.props.SettingsProps;
-
 public class LightClassUtils {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(LightClassUtils.class);
@@ -21,12 +19,8 @@ public class LightClassUtils {
 			return userServiceClassMap.get(name);
 		}
 		try {
-			if (!name.startsWith(SettingsProps.getRootPackage())) {
-				return ClassUtils.forName(name, null);
-			} else {
-				userServiceClassMap.put(name, ClassUtils.forName(name, null));
-				return userServiceClassMap.get(name);
-			}
+			userServiceClassMap.put(name, ClassUtils.forName(name, null));
+			return userServiceClassMap.get(name);
 		} catch (ClassNotFoundException | LinkageError e) {
 			LOGGER.error(e.getMessage());
 			return null;

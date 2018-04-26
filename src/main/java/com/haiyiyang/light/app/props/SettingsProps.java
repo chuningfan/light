@@ -7,84 +7,98 @@ import java.util.Enumeration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import com.haiyiyang.light.constant.LightConstants;
-import com.haiyiyang.light.exception.LightException;
 
 import jodd.props.Props;
 
 public class SettingsProps {
-
 	private static Logger LOGGER = LoggerFactory.getLogger(SettingsProps.class);
 
-	private static Props SETTINGS_PROPS = null;
 	private final static String FILE_SETTINGS_PROPS = "settings.props";
-
-	private final static String ROOT_PACKAGE = "rootPackage";
-	private final static String DOMAIN_PACKAGE = "domainPackage";
+	private final static String APP_NAME = "appName";
+	private final static String SCAN_PACKAGES = "scanPackages";
 	private final static String ANNOTATED_CLASSES = "annotatedClasses";
 
-	private static Props getSettingsProps() {
+	private Props props;
+	private static SettingsProps SETTINGS_PROPS;
+
+	private SettingsProps() throws IOException {
+		this.props = new Props();
+		initSettingsProps();
+	}
+
+	public static SettingsProps SINGLETON() throws IOException {
 		if (SETTINGS_PROPS != null) {
 			return SETTINGS_PROPS;
 		}
 		synchronized (SETTINGS_PROPS) {
 			if (SETTINGS_PROPS == null) {
-				initSettingsProps();
+				SETTINGS_PROPS = new SettingsProps();
 			}
 		}
 		return SETTINGS_PROPS;
 	}
 
-	private static void initSettingsProps() {
+	private void initSettingsProps() throws IOException {
 		Enumeration<URL> ps = null;
 		try {
 			ps = Thread.currentThread().getContextClassLoader().getResources(FILE_SETTINGS_PROPS);
 		} catch (IOException e) {
 			LOGGER.error("The file [settings.props] was not found.");
+			throw e;
 		}
-		SETTINGS_PROPS = new Props();
 		if (ps != null && ps.hasMoreElements()) {
 			InputStream in = null;
 			try {
 				in = ps.nextElement().openStream();
-				SETTINGS_PROPS.load(in);
+				props.load(in);
+				LOGGER.debug("Loaded file [settings.props] successful.");
 			} catch (IOException e) {
-				LOGGER.error("Load file [settings.props] error.");
+				LOGGER.error("Loaded file [settings.props] error.");
+				throw e;
 			} finally {
 				if (in != null) {
 					try {
 						in.close();
 					} catch (IOException e) {
 						LOGGER.error("Close file [settings.props] input stream error.");
+						throw e;
 					}
 				}
 			}
 		}
 	}
 
-	public static String getRootPackage() {
-		return getSettingsProps().getValue(ROOT_PACKAGE);
+	public String getAppName() {
+		String appName = props.getValue(APP_NAME);
+		if (appName == null || appName.isEmpty()) {
+			return null;
+		}
+		return appName;
 	}
 
-	public static String getDomainPackage() {
-		return getSettingsProps().getValue(DOMAIN_PACKAGE);
+	public String getScanPackages() {
+		return props.getValue(SCAN_PACKAGES);
 	}
 
-	private static String getAnnotatedClasses() {
-		return getSettingsProps().getValue(ANNOTATED_CLASSES);
+	public String getAnnotatedClasses() {
+		return props.getValue(ANNOTATED_CLASSES);
 	}
 
-	public static Class<?>[] getConfigurableClasses() throws LightException {
-		String[] classesNames = StringUtils.tokenizeToStringArray(getAnnotatedClasses(), LightConstants.COMMA);
+	public Class<?>[] getConfigurableClasses() throws ClassNotFoundException {
+		String annotatedClasses = getAnnotatedClasses();
+		if (annotatedClasses == null || annotatedClasses.isEmpty()) {
+			return null;
+		}
+		String[] classesNames = annotatedClasses.split(LightConstants.COMMA);
 		Class<?>[] classes = new Class<?>[classesNames.length];
 		for (int i = 0; i < classesNames.length; i++) {
 			try {
 				classes[i] = Class.forName(classesNames[i]);
 			} catch (ClassNotFoundException e) {
 				LOGGER.error("Class {} forName error.", classesNames[i]);
-				throw new LightException(LightException.Code.SETTINGS_ERROR);
+				throw e;
 			}
 		}
 		return classes;

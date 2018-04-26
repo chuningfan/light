@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.haiyiyang.light.constant.LightConstants;
-import com.haiyiyang.light.meta.LightAppMeta;
+import com.haiyiyang.light.context.LightContext;
 import com.haiyiyang.light.meta.props.LightProps;
 import com.haiyiyang.light.protocol.ProtocolPacket;
 import com.haiyiyang.light.protocol.codec.ProtocolDecoder;
@@ -72,7 +72,7 @@ public class LightRpcClient {
 	}
 
 	public Object sendMessage(ProtocolPacket packet, Object classType, Channel channel) throws Exception {
-		LightProps lightProps = LightAppMeta.SINGLETON().getLightProps();
+		LightProps lightProps = LightContext.getContext().getLightAppMeta().getLightProps();
 		if (packet.getInvokeMode() != LightConstants.BYTE0) {
 			LightRpcContext.setResponseFuture(packet.getPacketId(),
 					new ResponseFuture<Object>(classType, lightProps.getTimeout(), TimeUnit.MILLISECONDS));

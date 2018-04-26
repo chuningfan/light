@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.haiyiyang.light.app.props.SettingsProps;
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.props.AppProps;
@@ -28,29 +28,20 @@ public class LightAppMeta {
 	private static byte ZERO_ONE_GROUPING;
 	private static List<String> PUBLISH_REGISTRIES = new ArrayList<>(3);
 	private static String MACHINE_IP = LightConstants.IP_127_0_0_1;
-	private final static String LIGHT_SLASH_PATH = "/light/";
+	private final static String LIGHT_SLASH_PATH = "/light/"; // TODO
 	private static String APP_SERVICE_PATH;
 
 	private static volatile LightAppMeta LIGHT_APP_META;
 
-	private LightAppMeta() throws LightException {
+	private LightAppMeta(String appName) throws LightException {
+		this.appName = appName;
 		this.configRegistry = LightConfig.getConfigServer();
 		this.lightProps = LightProps.SINGLETON(this);
-		this.initAppName();
 		this.initPublishRegistries();
 		this.portProps = PortProps.SINGLETON(this);
 		this.appProps = AppProps.SINGLETON(this);
 		this.resourceProps = ResourceProps.SINGLETON(this, this.appProps.getResources());
 		this.setMachineIPAndZeroOneGrouping();
-	}
-
-	private void initAppName() {
-		String rootPackage = SettingsProps.getRootPackage();
-		String domainPackage = SettingsProps.getDomainPackage();
-		if (rootPackage != null && domainPackage != null && rootPackage.length() > domainPackage.length()) {
-			this.appName = SettingsProps.getRootPackage().substring(domainPackage.length() + 1);
-			APP_SERVICE_PATH = new StringBuilder(LIGHT_SLASH_PATH).append(this.appName).toString();
-		}
 	}
 
 	private void initPublishRegistries() {
@@ -101,11 +92,12 @@ public class LightAppMeta {
 		return APP_SERVICE_PATH;
 	}
 
-	public static LightAppMeta SINGLETON() {
+	public static LightAppMeta SINGLETON(String appName) {
+		Assert.notNull(appName, "[appName] cannot be empty.");
 		if (LIGHT_APP_META == null) {
 			synchronized (LIGHT_APP_META) {
 				if (LIGHT_APP_META == null) {
-					LIGHT_APP_META = new LightAppMeta();
+					LIGHT_APP_META = new LightAppMeta(appName);
 				}
 			}
 		}
