@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.haiyiyang.light.constant.LightConstants;
+import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
@@ -32,7 +33,7 @@ public class PortProps implements LightSubscriber {
 	private PortProps(LightAppMeta lightAppMeta) {
 		props = new Props();
 		PortProps.LIGHT_APP_META = lightAppMeta;
-		initPortProps();
+		initializePortProps();
 	}
 
 	public static PortProps SINGLETON(LightAppMeta lightAppMeta) {
@@ -47,18 +48,26 @@ public class PortProps implements LightSubscriber {
 		return PORT_PROPS;
 	}
 
-	private void initPortProps() {
+	private void initializePortProps() {
 		if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
 			File file = new File(APP_PORT_PROPS_LOCAL_URL);
-			if (file.isFile()) {
-				try {
-					props.load(file);
-				} catch (Exception ex) {
-					LOGGER.error(ex.getMessage(), ex);
-				}
+			if (!file.isFile()) {
+				LOGGER.error("The file[{}] does not exists.", APP_PORT_PROPS_LOCAL_URL);
+				throw new RuntimeException(LightException.FILE_NOT_FOUND);
+			}
+			try {
+				props.load(file);
+			} catch (Exception ex) {
+				LOGGER.error("Loading file[{}] failed.", APP_PORT_PROPS_LOCAL_URL);
+				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		} else {
-			updatePropsData(LightSubscription.getSubscription(this).getData(APP_PORT_PROPS_URL));
+			byte[] data = LightSubscription.getSubscription(this).getData(APP_PORT_PROPS_URL);
+			if (data == null || data.length == 0) {
+				LOGGER.error("The file[{}] does not exists, or is empty.", APP_PORT_PROPS_URL);
+				throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
+			}
+			updatePropsData(data);
 		}
 	}
 
@@ -67,7 +76,8 @@ public class PortProps implements LightSubscriber {
 			try {
 				props.load(new ByteArrayInputStream(data));
 			} catch (IOException e) {
-				LOGGER.error(e.getMessage(), e);
+				LOGGER.error("Loading file[{}] failed.", APP_PORT_PROPS_URL);
+				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		}
 	}
@@ -92,7 +102,8 @@ public class PortProps implements LightSubscriber {
 
 	@Override
 	public void processData(String path, byte[] data) {
-		LOGGER.info("PortProps>>>> PATH: {}, data", path, data);
+		updatePropsData(data);
+		LOGGER.info("Reloading file[{}].", path);
 	}
 
 }

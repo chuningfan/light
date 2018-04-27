@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -17,6 +19,8 @@ import com.haiyiyang.light.rpc.server.LightConfig;
 import com.haiyiyang.light.utils.NetworkUtils;
 
 public class LightAppMeta {
+
+	private static Logger LOGGER = LoggerFactory.getLogger(LightAppMeta.class);
 
 	private String appName;
 	private String configRegistry;
@@ -37,16 +41,17 @@ public class LightAppMeta {
 		this.appName = appName;
 		this.configRegistry = LightConfig.getConfigServer();
 		this.lightProps = LightProps.SINGLETON(this);
-		this.initPublishRegistries();
 		this.portProps = PortProps.SINGLETON(this);
 		this.appProps = AppProps.SINGLETON(this);
-		this.resourceProps = ResourceProps.SINGLETON(this, this.appProps.getResources());
+		this.resourceProps = ResourceProps.SINGLETON(this, appProps.getResources());
+		this.initPublishRegistries();
 		this.setMachineIPAndZeroOneGrouping();
+		LOGGER.info("Initialized LightAppMeta.");
 	}
 
 	private void initPublishRegistries() {
 		String publishRegistry = lightProps.getPublishRegistry();
-		String[] registrys = StringUtils.tokenizeToStringArray(publishRegistry, LightConstants.SEMICOLON);
+		String[] registrys = publishRegistry.split(LightConstants.SEMICOLON);
 		for (String registry : registrys) {
 			PUBLISH_REGISTRIES.add(registry);
 		}
@@ -75,6 +80,18 @@ public class LightAppMeta {
 					int index = serviceName.indexOf(LightConstants.DOT, domainPackage.length() + 1);
 					return serviceName.substring(domainPackage.length() + 1,
 							index == -1 ? serviceName.length() : index);
+				}
+			}
+		}
+		return serviceName;
+	}
+
+	public String getMatchedDomainPackage(String serviceName) {
+		List<String> domainPackageList = lightProps.getDomainPackages();
+		if (!domainPackageList.isEmpty()) {
+			for (String domainPackage : domainPackageList) {
+				if (serviceName.indexOf(domainPackage) == 0) {
+					return domainPackage;
 				}
 			}
 		}

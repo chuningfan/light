@@ -9,6 +9,10 @@ public class LightException extends RuntimeException {
 	private static final String CODE_PREFIX = "LightException > code: ";
 	private static final String MESSAGE_PREFIX = " | message: ";
 
+	public static final String FILE_NOT_FOUND = "File does not exist.";
+	public static final String LOADING_FILE_FAILED = "Loading file failed.";
+	public static final String FILE_NOT_FOUND_OR_EMPTY = "File does not exist, or is empty.";
+
 	public String getCode() {
 		return code;
 	}

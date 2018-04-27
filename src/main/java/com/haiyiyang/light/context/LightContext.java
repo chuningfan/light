@@ -48,27 +48,27 @@ public class LightContext extends AnnotationConfigApplicationContext implements 
 	private LightContext() {
 		try {
 			SettingsProps settingsProps = SettingsProps.SINGLETON();
-			LOGGER.debug("Initialized configuration[SettingsProps].");
+			LOGGER.info("System Property [useLocalProps] is {}", LightConstants.USE_LOCAL_PROPS);
 			lightAppMeta = LightAppMeta.SINGLETON(settingsProps.getAppName());
 			String scanPackages = settingsProps.getScanPackages();
 			if (scanPackages != null && !scanPackages.isEmpty()) {
 				this.scan(scanPackages.split(LightConstants.COMMA));
-				LOGGER.debug("Scanned packages: {}.", scanPackages);
+				LOGGER.info("Scanned packages: {}.", scanPackages);
 			}
 			Class<?>[] classes;
 			classes = settingsProps.getConfigurableClasses();
 			if (classes != null && classes.length > 0) {
 				this.register(classes);
-				LOGGER.debug("Registered packages: {}.", settingsProps.getAnnotatedClasses());
+				LOGGER.info("Registered packages: {}.", settingsProps.getAnnotatedClasses());
 			}
 			this.refresh();
-			LOGGER.debug("Refreshed the light context.");
+			LOGGER.info("Refreshed the light context.");
 		} catch (IOException e) {
-			LOGGER.debug("Initialization configuration[SettingsProps] failed.");
-			System.exit(0);
+			LOGGER.info("Initialization configuration[SettingsProps] failed.");
+			throw new RuntimeException(e);
 		} catch (ClassNotFoundException e) {
-			LOGGER.debug("Registered annotatedClasses in configuration[SettingsProps] failed.");
-			System.exit(0);
+			LOGGER.info("Registered annotatedClasses in configuration[SettingsProps] failed.");
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -86,8 +86,9 @@ public class LightContext extends AnnotationConfigApplicationContext implements 
 		Map<String, Object> objectMap = CONTEXT.getBeansWithAnnotation(IAmALightService.class);
 		if (objectMap != null && !objectMap.isEmpty()) {
 			LightService lightService = LightService.SINGLETON();
+			Entry<String, Object> entry;
 			for (Iterator<Entry<String, Object>> ite = objectMap.entrySet().iterator(); ite.hasNext();) {
-				Entry<String, Object> entry = ite.next();
+				entry = ite.next();
 				lightService.addService(entry.getValue());
 			}
 			lightService.publishService();

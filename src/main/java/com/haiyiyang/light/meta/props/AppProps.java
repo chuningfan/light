@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.haiyiyang.light.constant.LightConstants;
+import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
@@ -42,7 +43,7 @@ public class AppProps implements LightSubscriber {
 				.append(LightConstants.DOT_PROPS).toString();
 		this.appPropsLocalPath = new StringBuilder(APP_PROPS_LOCAL_PATH).append(lightAppMeta.getAppName())
 				.append(LightConstants.DOT_PROPS).toString();
-		initAppProps();
+		initializeAppProps();
 	}
 
 	public static AppProps SINGLETON(LightAppMeta lightAppMeta) {
@@ -57,18 +58,26 @@ public class AppProps implements LightSubscriber {
 		return APP_PROPS;
 	}
 
-	private void initAppProps() {
+	private void initializeAppProps() {
 		if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
 			File file = new File(appPropsLocalPath);
-			if (file.isFile()) {
-				try {
-					props.load(file);
-				} catch (Exception ex) {
-					LOGGER.error(ex.getMessage(), ex);
-				}
+			if (!file.isFile()) {
+				LOGGER.error("The file[{}] does not exists.", appPropsLocalPath);
+				throw new RuntimeException(LightException.FILE_NOT_FOUND);
+			}
+			try {
+				props.load(file);
+			} catch (Exception ex) {
+				LOGGER.error("Loading file[{}] failed.", appPropsLocalPath);
+				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		} else {
-			updatePropsData(LightSubscription.getSubscription(this).getData(this.appPropsPath));
+			byte[] data = LightSubscription.getSubscription(this).getData(appPropsPath);
+			if (data == null || data.length == 0) {
+				LOGGER.error("The file[{}] does not exists, or is empty.", appPropsPath);
+				throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
+			}
+			updatePropsData(data);
 		}
 	}
 
@@ -77,7 +86,8 @@ public class AppProps implements LightSubscriber {
 			try {
 				props.load(new ByteArrayInputStream(data));
 			} catch (IOException e) {
-				LOGGER.error(e.getMessage(), e);
+				LOGGER.error("Loading file[{}] failed.", appPropsPath);
+				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		}
 	}
@@ -113,7 +123,8 @@ public class AppProps implements LightSubscriber {
 
 	@Override
 	public void processData(String path, byte[] data) {
-		LOGGER.info("AppProps>>>> PATH: {}, data", path, data);
+		updatePropsData(data);
+		LOGGER.info("Reloading file[{}].", path);
 	}
 
 }

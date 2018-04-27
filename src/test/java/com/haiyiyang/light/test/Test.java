@@ -15,6 +15,7 @@ public class Test {
 			String result = serviceName.substring(domainPackage.length() + 1, index);
 			System.out.println(result);
 		}
+		
 	}
 
 }

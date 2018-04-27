@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.haiyiyang.light.constant.LightConstants;
+import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
@@ -53,15 +54,15 @@ public class LightProps implements LightSubscriber {
 
 	public static final String DOMAIN_PACKAGES = "domainPackages";
 
-	private Props props;
-	private List<String> domainPackageList;
+	private Props props = new Props();;
 	private static LightProps LIGHT_PROPS;
-	private static LightAppMeta LIGHT_APP_META;
+
+	private LightAppMeta lightAppMeta;
+	private List<String> domainPackageList;
 
 	private LightProps(LightAppMeta lightAppMeta) {
-		this.props = new Props();
-		LightProps.LIGHT_APP_META = lightAppMeta;
-		initLightProps();
+		this.lightAppMeta = lightAppMeta;
+		initializeLightProps();
 	}
 
 	public static LightProps SINGLETON(LightAppMeta lightAppMeta) {
@@ -76,18 +77,26 @@ public class LightProps implements LightSubscriber {
 		return LIGHT_PROPS;
 	}
 
-	private void initLightProps() {
+	private void initializeLightProps() {
 		if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
 			File file = new File(LIGHT_PROPS_LOCAL_URL);
-			if (file.isFile()) {
-				try {
-					props.load(file);
-				} catch (Exception ex) {
-					LOGGER.error(ex.getMessage(), ex);
-				}
+			if (!file.isFile()) {
+				LOGGER.error("The file[{}] does not exists.", LIGHT_PROPS_LOCAL_URL);
+				throw new RuntimeException(LightException.FILE_NOT_FOUND);
+			}
+			try {
+				props.load(file);
+			} catch (Exception ex) {
+				LOGGER.error("Loading file[{}] failed.", LIGHT_PROPS_LOCAL_URL);
+				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		} else {
-			updatePropsData(LightSubscription.getSubscription(this).getData(LIGHT_PROPS_URL));
+			byte[] data = LightSubscription.getSubscription(this).getData(LIGHT_PROPS_URL);
+			if (data == null || data.length == 0) {
+				LOGGER.error("The file[{}] does not exists, or is empty.", LIGHT_PROPS_URL);
+				throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
+			}
+			updatePropsData(data);
 		}
 	}
 
@@ -96,7 +105,8 @@ public class LightProps implements LightSubscriber {
 			try {
 				props.load(new ByteArrayInputStream(data));
 			} catch (IOException e) {
-				LOGGER.error(e.getMessage(), e);
+				LOGGER.error("Loading file[{}] failed.", LIGHT_PROPS_URL);
+				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		}
 	}
@@ -116,7 +126,7 @@ public class LightProps implements LightSubscriber {
 	}
 
 	public int getMinThread() {
-		Integer minThread = props.getIntegerValue(MIN_THREAD, LIGHT_APP_META.getAppName());
+		Integer minThread = props.getIntegerValue(MIN_THREAD, lightAppMeta.getAppName());
 		if (minThread != null) {
 			return minThread.intValue();
 		}
@@ -124,7 +134,7 @@ public class LightProps implements LightSubscriber {
 	}
 
 	public int getMaxThread() {
-		Integer maxThread = props.getIntegerValue(MAX_THREAD, LIGHT_APP_META.getAppName());
+		Integer maxThread = props.getIntegerValue(MAX_THREAD, lightAppMeta.getAppName());
 		if (maxThread != null) {
 			return maxThread.intValue();
 		}
@@ -132,7 +142,7 @@ public class LightProps implements LightSubscriber {
 	}
 
 	public long getTimeout() {
-		Long timeout = props.getLongValue(TIMEOUT, LIGHT_APP_META.getAppName());
+		Long timeout = props.getLongValue(TIMEOUT, lightAppMeta.getAppName());
 		if (timeout != null) {
 			return timeout.longValue();
 		}
@@ -140,7 +150,7 @@ public class LightProps implements LightSubscriber {
 	}
 
 	public String getPublishRegistry() {
-		String publishRegistry = props.getValue(PUBLISH_REGISTRY, LIGHT_APP_META.getAppName());
+		String publishRegistry = props.getValue(PUBLISH_REGISTRY, lightAppMeta.getAppName());
 		if (publishRegistry != null) {
 			return publishRegistry;
 		}
@@ -156,7 +166,7 @@ public class LightProps implements LightSubscriber {
 	}
 
 	public byte getServerLoadWeight() {
-		Integer weight = props.getIntegerValue(SERVER_LOAD_WEIGHT, LIGHT_APP_META.getMachineIp());
+		Integer weight = props.getIntegerValue(SERVER_LOAD_WEIGHT, lightAppMeta.getMachineIp());
 		if (weight != null) {
 			return weight.byteValue();
 		}
@@ -164,7 +174,7 @@ public class LightProps implements LightSubscriber {
 	}
 
 	public String getProxyType() {
-		String proxyType = props.getValue(PROXY_TYPE, LIGHT_APP_META.getAppName());
+		String proxyType = props.getValue(PROXY_TYPE, lightAppMeta.getAppName());
 		if (proxyType != null) {
 			return proxyType;
 		}
@@ -172,7 +182,7 @@ public class LightProps implements LightSubscriber {
 	}
 
 	public String getSerializer() {
-		String serializer = props.getValue(SERIALIZER, LIGHT_APP_META.getAppName());
+		String serializer = props.getValue(SERIALIZER, lightAppMeta.getAppName());
 		if (serializer != null) {
 			return serializer;
 		}
@@ -184,7 +194,7 @@ public class LightProps implements LightSubscriber {
 	}
 
 	public boolean needSignature() {
-		return LightConstants.STR1.equals(props.getValue(NEED_SIGNATURE, LIGHT_APP_META.getAppName()));
+		return LightConstants.STR1.equals(props.getValue(NEED_SIGNATURE, lightAppMeta.getAppName()));
 	}
 
 	public String getIpSegmentPrefix() {
@@ -201,7 +211,7 @@ public class LightProps implements LightSubscriber {
 
 	@Override
 	public String getRegistry() {
-		return LIGHT_APP_META.getConfigRegistry();
+		return lightAppMeta.getConfigRegistry();
 	}
 
 	@Override
@@ -211,7 +221,8 @@ public class LightProps implements LightSubscriber {
 
 	@Override
 	public void processData(String path, byte[] data) {
-		LOGGER.info("LightProps>>>> PATH: {}, data", path, data);
+		updatePropsData(data);
+		LOGGER.info("Reloading file[{}].", path);
 	}
 
 }

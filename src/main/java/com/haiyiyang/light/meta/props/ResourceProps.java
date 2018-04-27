@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.haiyiyang.light.constant.LightConstants;
+import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.meta.LightResourceType;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
@@ -24,10 +24,6 @@ import jodd.props.Props;
 public class ResourceProps implements LightSubscriber {
 	protected static Logger LOGGER = LoggerFactory.getLogger(ResourceProps.class);
 
-	public static final String RESOURCE_PROPS_PATH = "/light/resource/";
-	public static final String RESOURCE_PROPS_LOCAL_PATH = LightConstants.USER_HOME
-			+ RESOURCE_PROPS_PATH.replaceAll("/", LightConstants.FS);
-
 	private static LightAppMeta LIGHT_APP_META;
 	private static ResourceProps RESOURCE_PROPS;
 	private static Map<String, LightResourceType> PATH_RESOURCES = new ConcurrentHashMap<>();
@@ -35,7 +31,9 @@ public class ResourceProps implements LightSubscriber {
 
 	private ResourceProps(LightAppMeta lightAppMeta, Map<String, String> resourcesMap) {
 		ResourceProps.LIGHT_APP_META = lightAppMeta;
-		initResourceProps(resourcesMap);
+		if (resourcesMap != null && !resourcesMap.isEmpty()) {
+			initializeResourceProps(resourcesMap);
+		}
 	}
 
 	public static ResourceProps SINGLETON(LightAppMeta lightAppMeta, Map<String, String> resourcesMap) {
@@ -50,29 +48,36 @@ public class ResourceProps implements LightSubscriber {
 		return RESOURCE_PROPS;
 	}
 
-	private void initResourceProps(Map<String, String> resourcesMap) {
-		Set<Map.Entry<String, String>> entrySet = resourcesMap.entrySet();
-		Iterator<Map.Entry<String, String>> iter = entrySet.iterator();
+	private void initializeResourceProps(Map<String, String> resourcesMap) {
+		Iterator<Map.Entry<String, String>> iter = resourcesMap.entrySet().iterator();
 		Map.Entry<String, String> entry;
 		while (iter.hasNext()) {
 			entry = iter.next();
 			if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
-				String filePath = RESOURCE_PROPS_LOCAL_PATH + entry.getValue();
+				LightResourceType lightResourceType = LightResourceType.valueOf(entry.getValue());
+				String filePath = lightResourceType.getLocalPath();
 				File file = new File(filePath);
-				if (file.isFile()) {
-					try {
-						LightResourceType lightResource = LightResourceType.valueOf(entry.getKey());
-						RESOURCES_PROPS.put(lightResource, new Props());
-						RESOURCES_PROPS.get(lightResource).load(file);
-					} catch (Exception ex) {
-						LOGGER.error(ex.getMessage(), ex);
-					}
+				if (!file.isFile()) {
+					LOGGER.error("The file[{}] does not exists.", filePath);
+					throw new RuntimeException(LightException.FILE_NOT_FOUND);
+				}
+				try {
+					RESOURCES_PROPS.put(lightResourceType, new Props());
+					RESOURCES_PROPS.get(lightResourceType).load(file);
+				} catch (Exception ex) {
+					LOGGER.error("Loading file[{}] failed.", filePath);
+					throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 				}
 			} else {
-				String urlPath = RESOURCE_PROPS_PATH + entry.getValue();
-				LightResourceType lightResource = LightResourceType.valueOf(entry.getKey());
-				PATH_RESOURCES.put(urlPath, lightResource);
-				updatePropsData(lightResource, LightSubscription.getSubscription(this).getData(urlPath));
+				LightResourceType lightResourceType = LightResourceType.valueOf(entry.getValue());
+				String urlPath = lightResourceType.getPath();
+				PATH_RESOURCES.put(urlPath, lightResourceType);
+				byte[] data = LightSubscription.getSubscription(this).getData(urlPath);
+				if (data == null || data.length == 0) {
+					LOGGER.error("The file[{}] does not exists, or is empty.", urlPath);
+					throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
+				}
+				updatePropsData(lightResourceType, data);
 			}
 		}
 	}
@@ -83,7 +88,8 @@ public class ResourceProps implements LightSubscriber {
 				RESOURCES_PROPS.put(lightResource, new Props());
 				RESOURCES_PROPS.get(lightResource).load(new ByteArrayInputStream(data));
 			} catch (IOException e) {
-				LOGGER.error(e.getMessage(), e);
+				LOGGER.error("Loading file[{}] failed.", lightResource.getPath());
+				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		}
 	}

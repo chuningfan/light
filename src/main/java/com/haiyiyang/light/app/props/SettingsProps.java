@@ -68,6 +68,7 @@ public class SettingsProps {
 				}
 			}
 		}
+		LOGGER.info("Initialized configuration[SettingsProps].");
 	}
 
 	public String getAppName() {

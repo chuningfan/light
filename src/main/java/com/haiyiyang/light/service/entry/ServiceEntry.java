@@ -11,7 +11,7 @@ public class ServiceEntry {
 	private IpPort ipPort;
 	private byte group;
 	private byte weight;
-	private Set<String> serviceNames;
+	private Set<String> serviceNames = new HashSet<>(8);
 
 	public ServiceEntry(IpPort ipPort) {
 		this.ipPort = ipPort;
@@ -57,13 +57,11 @@ public class ServiceEntry {
 		bb.get(byteArray);
 		IpPort ipPort = new IpPort(new String(byteArray, LightConstants.CHARSET_UTF8), bb.getInt());
 		ServiceEntry serviceEntry = new ServiceEntry(ipPort, bb.get(), bb.get());
-		Set<String> serviceNameSet = new HashSet<>();
 		while (bb.hasRemaining()) {
 			byteArray = new byte[bb.getInt()];
 			bb.get(byteArray);
-			serviceNameSet.add(new String(byteArray, LightConstants.CHARSET_UTF8));
+			serviceEntry.getServiceNames().add(new String(byteArray, LightConstants.CHARSET_UTF8));
 		}
-		serviceEntry.setServiceNames(serviceNameSet);
 		return serviceEntry;
 	}
 
@@ -126,17 +124,11 @@ public class ServiceEntry {
 		return serviceNames;
 	}
 
-	public void setServiceNames(Set<String> serviceNames) {
-		this.serviceNames = serviceNames;
-	}
-
 	public static void main(String[] args) {
 		ServiceEntry se = new ServiceEntry(new IpPort("192.168.1.1", 8080), (byte) 1, (byte) 1);
-		Set<String> serviceNames = new HashSet<>();
-		serviceNames.add("123");
-		serviceNames.add("com.demo.a.b");
-		serviceNames.add("com.demo.a.b.c");
-		se.setServiceNames(serviceNames);
+		se.getServiceNames().add("123");
+		se.getServiceNames().add("com.demo.a.b");
+		se.getServiceNames().add("com.demo.a.b.c");
 		byte[] code = ServiceEntry.encode(se);
 		ServiceEntry newSe = ServiceEntry.decode(code);
 		System.out.println(newSe);

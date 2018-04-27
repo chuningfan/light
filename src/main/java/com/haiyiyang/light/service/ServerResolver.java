@@ -20,7 +20,7 @@ public class ServerResolver {
 				serviceEntryList.add(serviceEntry);
 			}
 		}
-		return getService(serviceName, serviceEntryList);
+		return getNextServiceEntry(serviceName, serviceEntryList);
 	}
 
 	private static int GCD(int m, int n) {
@@ -56,7 +56,7 @@ public class ServerResolver {
 		return maxWeight;
 	}
 
-	public static ServiceEntry getService(String serviceName, List<ServiceEntry> entrieList) {
+	public static ServiceEntry getNextServiceEntry(String serviceName, List<ServiceEntry> entrieList) {
 		ServiceEntry latestServiceEntry = LATEST_SERVICE_ENTRY.get(serviceName);
 		int index = -1;
 		byte currentWeight = 0;
@@ -77,10 +77,10 @@ public class ServerResolver {
 						return null;
 				}
 			}
-			ServiceEntry ipgw = entrieList.get(index);
-			if (ipgw.getWeight() >= currentWeight) {
-				LATEST_SERVICE_ENTRY.put(serviceName, new ServiceEntry(ipgw.getIpPort(), currentWeight));
-				return ipgw;
+			ServiceEntry serviceEntry = entrieList.get(index);
+			if (serviceEntry.getWeight() >= currentWeight) {
+				LATEST_SERVICE_ENTRY.put(serviceName, new ServiceEntry(serviceEntry.getIpPort(), currentWeight));
+				return serviceEntry;
 			}
 		}
 	}
