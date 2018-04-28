@@ -11,7 +11,7 @@ import io.netty.channel.EventLoopGroup;
 
 public class LightRpcServer {
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(LightRpcServer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightRpcServer.class);
 
 	private static LightRpcServer LIGHT_RPC_SERVER = new LightRpcServer();
 

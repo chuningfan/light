@@ -1,9 +1,7 @@
 package com.haiyiyang.light.context;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +19,7 @@ import com.haiyiyang.light.service.annotation.IAmALightService;
 
 public class LightContext extends AnnotationConfigApplicationContext implements ApplicationListener<ApplicationEvent> {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(LightContext.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightContext.class);
 
 	private LightAppMeta lightAppMeta;
 
@@ -85,13 +83,7 @@ public class LightContext extends AnnotationConfigApplicationContext implements 
 	private void publishLightService() {
 		Map<String, Object> objectMap = CONTEXT.getBeansWithAnnotation(IAmALightService.class);
 		if (objectMap != null && !objectMap.isEmpty()) {
-			LightService lightService = LightService.SINGLETON();
-			Entry<String, Object> entry;
-			for (Iterator<Entry<String, Object>> ite = objectMap.entrySet().iterator(); ite.hasNext();) {
-				entry = ite.next();
-				lightService.addService(entry.getValue());
-			}
-			lightService.publishService();
+			LightService.publishServices(lightAppMeta.getLightProps().getRegistry(), objectMap.values());
 		}
 	}
 

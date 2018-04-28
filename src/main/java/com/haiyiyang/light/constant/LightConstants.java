@@ -17,9 +17,9 @@ public class LightConstants {
 	public static final String STR0 = "0", STR1 = "1", STR2 = "2", STR3 = "3";
 
 	public static final String UTF8 = "UTF-8";
-	public static final String FS = File.separator;
 	public static final String DOT_PROPS = ".props";
 	public static final String IP_127_0_0_1 = "127.0.0.1";
+	public static final char FS_CHAR = File.separatorChar;
 	public static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 	public static final String USER_HOME = System.getProperty("user.home");
 	public static final String USE_LOCAL_PROPS = System.getProperty("useLocalProps");

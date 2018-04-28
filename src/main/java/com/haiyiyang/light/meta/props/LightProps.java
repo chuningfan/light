@@ -15,12 +15,13 @@ import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
+import com.haiyiyang.light.utils.LightUtils;
 
 import jodd.props.Props;
 
 public class LightProps implements LightSubscriber {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(LightProps.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightProps.class);
 
 	private static final String TIMEOUT = "timeout";
 	private static final long DEFAULT_TIMEOUT = 10000;
@@ -49,8 +50,7 @@ public class LightProps implements LightSubscriber {
 	private static final String SERVER_LOAD_WEIGHT = "serverLoadWeight";
 
 	private static final String LIGHT_PROPS_URL = "/light/light.props";
-	private static final String LIGHT_PROPS_LOCAL_URL = LightConstants.USER_HOME
-			+ LIGHT_PROPS_URL.replaceAll("/", LightConstants.FS);
+	private static final String LIGHT_PROPS_LOCAL_URL = LightUtils.getLocalPath(LIGHT_PROPS_URL);
 
 	public static final String DOMAIN_PACKAGES = "domainPackages";
 
@@ -69,7 +69,7 @@ public class LightProps implements LightSubscriber {
 		if (LIGHT_PROPS != null) {
 			return LIGHT_PROPS;
 		}
-		synchronized (LIGHT_PROPS) {
+		synchronized (LightProps.class) {
 			if (LIGHT_PROPS == null) {
 				LIGHT_PROPS = new LightProps(lightAppMeta);
 			}
@@ -81,19 +81,19 @@ public class LightProps implements LightSubscriber {
 		if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
 			File file = new File(LIGHT_PROPS_LOCAL_URL);
 			if (!file.isFile()) {
-				LOGGER.error("The file[{}] does not exists.", LIGHT_PROPS_LOCAL_URL);
+				LOGGER.error("The file [{}] does not exists.", LIGHT_PROPS_LOCAL_URL);
 				throw new RuntimeException(LightException.FILE_NOT_FOUND);
 			}
 			try {
 				props.load(file);
 			} catch (Exception ex) {
-				LOGGER.error("Loading file[{}] failed.", LIGHT_PROPS_LOCAL_URL);
+				LOGGER.error("Loading file [{}] failed.", LIGHT_PROPS_LOCAL_URL);
 				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		} else {
 			byte[] data = LightSubscription.getSubscription(this).getData(LIGHT_PROPS_URL);
 			if (data == null || data.length == 0) {
-				LOGGER.error("The file[{}] does not exists, or is empty.", LIGHT_PROPS_URL);
+				LOGGER.error("The file [{}] does not exists, or is empty.", LIGHT_PROPS_URL);
 				throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
 			}
 			updatePropsData(data);
@@ -105,7 +105,7 @@ public class LightProps implements LightSubscriber {
 			try {
 				props.load(new ByteArrayInputStream(data));
 			} catch (IOException e) {
-				LOGGER.error("Loading file[{}] failed.", LIGHT_PROPS_URL);
+				LOGGER.error("Loading file [{}] failed.", LIGHT_PROPS_URL);
 				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		}
@@ -151,7 +151,7 @@ public class LightProps implements LightSubscriber {
 
 	public String getPublishRegistry() {
 		String publishRegistry = props.getValue(PUBLISH_REGISTRY, lightAppMeta.getAppName());
-		if (publishRegistry != null) {
+		if (publishRegistry != null && !publishRegistry.isEmpty()) {
 			return publishRegistry;
 		}
 		return DEFAULT_REGISTRY;
@@ -222,7 +222,7 @@ public class LightProps implements LightSubscriber {
 	@Override
 	public void processData(String path, byte[] data) {
 		updatePropsData(data);
-		LOGGER.info("Reloading file[{}].", path);
+		LOGGER.info("Reloaded file [{}].", path);
 	}
 
 }

@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class RequestUtil {
 
-	private final static ThreadLocal<String> THREAD_LOCAL = new ThreadLocal<String>();
+	private static final ThreadLocal<String> THREAD_LOCAL = new ThreadLocal<String>();
 	private static volatile AtomicLong REQUEST_COUNT = new AtomicLong();
 
 	public static String getRequestUUID() {

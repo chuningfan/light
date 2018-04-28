@@ -12,7 +12,7 @@ public class ServerResolver {
 	private static Map<String, ServiceEntry> LATEST_SERVICE_ENTRY = new ConcurrentHashMap<>();
 
 	public static ServiceEntry getServer(String serviceName, Byte group) {
-		List<ServiceEntry> list = LightService.SINGLETON().subscribeService(serviceName);
+		List<ServiceEntry> list = LightService.subscribeService(serviceName);
 		List<ServiceEntry> serviceEntryList = new ArrayList<>(list.size());
 		for (ServiceEntry serviceEntry : list) {
 			if (serviceEntry.getServiceNames().contains(serviceName)

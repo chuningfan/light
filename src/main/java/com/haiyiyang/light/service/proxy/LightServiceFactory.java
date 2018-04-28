@@ -28,7 +28,7 @@ public class LightServiceFactory {
 	private static <T> T getServiceProxy(Class<T> clazz, byte invokeMode) throws LightException {
 		InvocationFactor factor = new InvocationFactor(clazz, invokeMode);
 		if (!CACHED_SERVICES.containsKey(factor)) {
-			CACHED_SERVICES.put(factor, LightService.SINGLETON().getServiceProxy(factor));
+			CACHED_SERVICES.put(factor, LightService.getServiceProxy(factor));
 		}
 		return (T) CACHED_SERVICES.get(factor);
 	}

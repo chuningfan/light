@@ -8,4 +8,6 @@ public interface LightPublisher {
 
 	public List<String> getPaths();
 
+	public byte[] getData(String path);
+
 }

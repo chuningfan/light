@@ -15,19 +15,19 @@ import org.slf4j.LoggerFactory;
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
-import com.haiyiyang.light.meta.LightResourceType;
+import com.haiyiyang.light.meta.ResourceEnum;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
 
 import jodd.props.Props;
 
 public class ResourceProps implements LightSubscriber {
-	protected static Logger LOGGER = LoggerFactory.getLogger(ResourceProps.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(ResourceProps.class);
 
 	private static LightAppMeta LIGHT_APP_META;
 	private static ResourceProps RESOURCE_PROPS;
-	private static Map<String, LightResourceType> PATH_RESOURCES = new ConcurrentHashMap<>();
-	private static Map<LightResourceType, Props> RESOURCES_PROPS = new ConcurrentHashMap<>();
+	private static Map<String, ResourceEnum> PATH_RESOURCES = new ConcurrentHashMap<>();
+	private static Map<ResourceEnum, Props> RESOURCES_PROPS = new ConcurrentHashMap<>();
 
 	private ResourceProps(LightAppMeta lightAppMeta, Map<String, String> resourcesMap) {
 		ResourceProps.LIGHT_APP_META = lightAppMeta;
@@ -40,7 +40,7 @@ public class ResourceProps implements LightSubscriber {
 		if (RESOURCE_PROPS != null) {
 			return RESOURCE_PROPS;
 		}
-		synchronized (RESOURCE_PROPS) {
+		synchronized (ResourceProps.class) {
 			if (RESOURCE_PROPS == null) {
 				RESOURCE_PROPS = new ResourceProps(lightAppMeta, resourcesMap);
 			}
@@ -54,54 +54,55 @@ public class ResourceProps implements LightSubscriber {
 		while (iter.hasNext()) {
 			entry = iter.next();
 			if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
-				LightResourceType lightResourceType = LightResourceType.valueOf(entry.getValue());
-				String filePath = lightResourceType.getLocalPath();
+				ResourceEnum resourceEnum = ResourceEnum.valueOf(entry.getValue());
+				String filePath = resourceEnum.getLocalPath();
 				File file = new File(filePath);
 				if (!file.isFile()) {
-					LOGGER.error("The file[{}] does not exists.", filePath);
+					LOGGER.error("The file [{}] does not exists.", filePath);
 					throw new RuntimeException(LightException.FILE_NOT_FOUND);
 				}
 				try {
-					RESOURCES_PROPS.put(lightResourceType, new Props());
-					RESOURCES_PROPS.get(lightResourceType).load(file);
+					RESOURCES_PROPS.put(resourceEnum, new Props());
+					RESOURCES_PROPS.get(resourceEnum).load(file);
 				} catch (Exception ex) {
-					LOGGER.error("Loading file[{}] failed.", filePath);
+					LOGGER.error("Loading file [{}] failed.", filePath);
 					throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 				}
 			} else {
-				LightResourceType lightResourceType = LightResourceType.valueOf(entry.getValue());
-				String urlPath = lightResourceType.getPath();
-				PATH_RESOURCES.put(urlPath, lightResourceType);
+				ResourceEnum resourceEnum = ResourceEnum.valueOf(entry.getValue());
+				String urlPath = resourceEnum.getPath();
+				PATH_RESOURCES.put(urlPath, resourceEnum);
 				byte[] data = LightSubscription.getSubscription(this).getData(urlPath);
 				if (data == null || data.length == 0) {
-					LOGGER.error("The file[{}] does not exists, or is empty.", urlPath);
+					LOGGER.error("The file [{}] does not exists, or is empty.", urlPath);
 					throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
 				}
-				updatePropsData(lightResourceType, data);
+				updatePropsData(resourceEnum, data);
 			}
 		}
 	}
 
-	private void updatePropsData(LightResourceType lightResource, byte[] data) {
+	private void updatePropsData(ResourceEnum lightResource, byte[] data) {
 		synchronized (this) {
 			try {
-				RESOURCES_PROPS.put(lightResource, new Props());
-				RESOURCES_PROPS.get(lightResource).load(new ByteArrayInputStream(data));
+				Props props = new Props();
+				props.load(new ByteArrayInputStream(data));
+				RESOURCES_PROPS.put(lightResource, props);
 			} catch (IOException e) {
-				LOGGER.error("Loading file[{}] failed.", lightResource.getPath());
+				LOGGER.error("Loading file [{}] failed.", lightResource.getPath());
 				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		}
 	}
 
-	public String getPropsValue(LightResourceType resource, String key) {
+	public String getPropsValue(ResourceEnum resource, String key) {
 		if (RESOURCES_PROPS.get(resource) != null) {
 			return RESOURCES_PROPS.get(resource).getValue(key);
 		}
 		return null;
 	}
 
-	public String getPropsValue(LightResourceType resource, String key, String profile) {
+	public String getPropsValue(ResourceEnum resource, String key, String profile) {
 		if (RESOURCES_PROPS.get(resource) != null) {
 			return RESOURCES_PROPS.get(resource).getValue(key, profile);
 		}
@@ -120,7 +121,8 @@ public class ResourceProps implements LightSubscriber {
 
 	@Override
 	public void processData(String path, byte[] data) {
-		LOGGER.info("ResourceProps>>>> PATH: {}, data", path, data);
+		updatePropsData(ResourceEnum.pathVauleOf(path), data);
+		LOGGER.info("Reloaded file [{}].", path);
 	}
 
 }

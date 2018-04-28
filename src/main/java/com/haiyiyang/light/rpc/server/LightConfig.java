@@ -13,18 +13,26 @@ import org.slf4j.LoggerFactory;
 
 import com.haiyiyang.light.exception.LightException;
 
+import jodd.http.HttpRequest;
+import jodd.http.HttpResponse;
+
 public class LightConfig {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(LightConfig.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightConfig.class);
 	private static final String CONFIG_SERVER_URL = "http://config.haiyiyang.com";
 
-	public static String getConfigServer() throws LightException {
+	/** CharSet ISO 8859-1 */
+	public static String getRegistry() {
+		return HttpRequest.get(CONFIG_SERVER_URL).send().toString();
+	}
+
+	public static String getConfigRegistry() throws LightException {
 		String result = null;
 		CloseableHttpResponse response = null;
 		try {
 			response = HttpClients.createDefault().execute(new HttpGet(CONFIG_SERVER_URL));
 		} catch (IOException e) {
-			LOGGER.info("Light config server is not available: {}", CONFIG_SERVER_URL);
+			LOGGER.error("Light config server is not available: {}", CONFIG_SERVER_URL);
 		}
 		if (response != null) {
 			try {
@@ -43,12 +51,12 @@ public class LightConfig {
 					}
 				}
 			} catch (UnsupportedOperationException | IOException e) {
-				LOGGER.info("Parse Light config server URL error.");
+				LOGGER.error("Parse Light config server URL error.");
 			} finally {
 				try {
 					response.close();
 				} catch (IOException e) {
-					LOGGER.info("Close Http Response error.");
+					LOGGER.error("Close Http Response error.");
 				}
 			}
 		}
@@ -60,8 +68,13 @@ public class LightConfig {
 	}
 
 	public static void main(String[] args) throws ClientProtocolException, IOException {
-		String config = getConfigServer();
+		String config = getConfigRegistry();
 		System.out.println(config);
+
+		HttpRequest httpRequest = HttpRequest.get("http://www.baidu.com");
+		HttpResponse response = httpRequest.send();
+		System.out.println(response);
+		System.out.println(response.body());
 	}
 
 }

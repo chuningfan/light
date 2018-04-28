@@ -34,7 +34,7 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 
 	private Object objectProxy;
 	private InvocationFactor invocationFactor;
-	private final static String TO_STRING = "toString";
+	private static final String TO_STRING = "toString";
 	private LightRpcClient client;
 	private ProxyMode proxyMode;
 

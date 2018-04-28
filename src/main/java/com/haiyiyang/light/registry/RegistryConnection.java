@@ -22,9 +22,9 @@ import com.haiyiyang.light.constant.LightConstants;
 
 public abstract class RegistryConnection implements Watcher {
 
-	private static Logger logger = LoggerFactory.getLogger(RegistryConnection.class);
+	private static final Logger logger = LoggerFactory.getLogger(RegistryConnection.class);
 
-	protected final static String PATH_LIGHT = "/light";
+	protected static final String PATH_LIGHT = "/light";
 
 	protected String registry = null;
 	protected ZooKeeper zooKeeper = null;

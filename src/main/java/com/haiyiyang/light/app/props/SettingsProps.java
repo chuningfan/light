@@ -13,26 +13,25 @@ import com.haiyiyang.light.constant.LightConstants;
 import jodd.props.Props;
 
 public class SettingsProps {
-	private static Logger LOGGER = LoggerFactory.getLogger(SettingsProps.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SettingsProps.class);
 
-	private final static String FILE_SETTINGS_PROPS = "settings.props";
-	private final static String APP_NAME = "appName";
-	private final static String SCAN_PACKAGES = "scanPackages";
-	private final static String ANNOTATED_CLASSES = "annotatedClasses";
+	private static final String FILE_SETTINGS_PROPS = "settings.props";
+	private static final String APP_NAME = "appName";
+	private static final String SCAN_PACKAGES = "scanPackages";
+	private static final String ANNOTATED_CLASSES = "annotatedClasses";
 
-	private Props props;
+	private Props props = new Props();
 	private static SettingsProps SETTINGS_PROPS;
 
 	private SettingsProps() throws IOException {
-		this.props = new Props();
-		initSettingsProps();
+		initializeSettingsProps();
 	}
 
 	public static SettingsProps SINGLETON() throws IOException {
 		if (SETTINGS_PROPS != null) {
 			return SETTINGS_PROPS;
 		}
-		synchronized (SETTINGS_PROPS) {
+		synchronized (SettingsProps.class) {
 			if (SETTINGS_PROPS == null) {
 				SETTINGS_PROPS = new SettingsProps();
 			}
@@ -40,7 +39,7 @@ public class SettingsProps {
 		return SETTINGS_PROPS;
 	}
 
-	private void initSettingsProps() throws IOException {
+	private void initializeSettingsProps() throws IOException {
 		Enumeration<URL> ps = null;
 		try {
 			ps = Thread.currentThread().getContextClassLoader().getResources(FILE_SETTINGS_PROPS);

@@ -7,7 +7,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.exception.LightException;
@@ -20,7 +19,7 @@ import com.haiyiyang.light.utils.NetworkUtils;
 
 public class LightAppMeta {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(LightAppMeta.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightAppMeta.class);
 
 	private String appName;
 	private String configRegistry;
@@ -30,16 +29,14 @@ public class LightAppMeta {
 	private ResourceProps resourceProps;
 
 	private static byte ZERO_ONE_GROUPING;
-	private static List<String> PUBLISH_REGISTRIES = new ArrayList<>(3);
 	private static String MACHINE_IP = LightConstants.IP_127_0_0_1;
-	private final static String LIGHT_SLASH_PATH = "/light/"; // TODO
-	private static String APP_SERVICE_PATH;
+	private static final List<String> PUBLISH_REGISTRIES = new ArrayList<>(3);
 
-	private static volatile LightAppMeta LIGHT_APP_META;
+	private static LightAppMeta LIGHT_APP_META;
 
 	private LightAppMeta(String appName) throws LightException {
 		this.appName = appName;
-		this.configRegistry = LightConfig.getConfigServer();
+		this.configRegistry = LightConfig.getConfigRegistry();
 		this.lightProps = LightProps.SINGLETON(this);
 		this.portProps = PortProps.SINGLETON(this);
 		this.appProps = AppProps.SINGLETON(this);
@@ -47,6 +44,18 @@ public class LightAppMeta {
 		this.initPublishRegistries();
 		this.setMachineIPAndZeroOneGrouping();
 		LOGGER.info("Initialized LightAppMeta.");
+	}
+
+	public static LightAppMeta SINGLETON(String appName) {
+		Assert.notNull(appName, "[appName] cannot be empty.");
+		if (LIGHT_APP_META == null) {
+			synchronized (LightAppMeta.class) {
+				if (LIGHT_APP_META == null) {
+					LIGHT_APP_META = new LightAppMeta(appName);
+				}
+			}
+		}
+		return LIGHT_APP_META;
 	}
 
 	private void initPublishRegistries() {
@@ -61,10 +70,7 @@ public class LightAppMeta {
 		Set<String> ips = NetworkUtils.getLocalIps();
 		String ipSegmentPrefix = lightProps.getIpSegmentPrefix();
 		for (String ip : ips) {
-			if (ipSegmentPrefix == null) {
-				MACHINE_IP = ip;
-				break;
-			} else if (ip.startsWith(ipSegmentPrefix)) {
+			if (ipSegmentPrefix == null || ip.startsWith(ipSegmentPrefix)) {
 				MACHINE_IP = ip;
 				break;
 			}
@@ -100,25 +106,6 @@ public class LightAppMeta {
 
 	public int getAppPort() {
 		return portProps.getAppPort();
-	}
-
-	public String getAppServicePath() {
-		if (APP_SERVICE_PATH == null) {
-			APP_SERVICE_PATH = new StringBuilder(LIGHT_SLASH_PATH).append(this.appName).toString();
-		}
-		return APP_SERVICE_PATH;
-	}
-
-	public static LightAppMeta SINGLETON(String appName) {
-		Assert.notNull(appName, "[appName] cannot be empty.");
-		if (LIGHT_APP_META == null) {
-			synchronized (LIGHT_APP_META) {
-				if (LIGHT_APP_META == null) {
-					LIGHT_APP_META = new LightAppMeta(appName);
-				}
-			}
-		}
-		return LIGHT_APP_META;
 	}
 
 	public LightProps getLightProps() {

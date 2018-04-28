@@ -1,23 +1,23 @@
 package com.haiyiyang.light.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.haiyiyang.light.context.LightContext;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.rpc.invocation.InvocationFactor;
 import com.haiyiyang.light.rpc.invocation.LightInvocationHandler;
-import com.haiyiyang.light.rpc.server.IpPort;
 import com.haiyiyang.light.service.entry.ServiceEntry;
 import com.haiyiyang.light.service.publish.LightPublication;
 import com.haiyiyang.light.service.publish.LightPublisher;
@@ -26,85 +26,90 @@ import com.haiyiyang.light.service.subscription.LightSubscription;
 
 public class LightService implements LightPublisher, LightSubscriber {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(LightService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightService.class);
 
 	private static final String LIGHT_SERVICE_SLASH_URL = "/light/service/";
-	private static final Set<Object> LOCAL_SERVICE = new HashSet<>();
-	private static final Map<String, Object> PUBLISHED_SERVICES = new ConcurrentHashMap<>();
-	private static final Map<String, ServiceEntry> PUBLISHED_SERVICE_ENTRIES = new ConcurrentHashMap<>();
 
-	private LightAppMeta lightAppMeta;
-	private static LightService LIGHT_SERVICE;
+	private static final Map<String, Object> LOCAL_SERVICE = new HashMap<>(8);
+	private static final Map<String, LightService> PUBLISHED_SERVICES = new ConcurrentHashMap<>(8);
+	private static final Map<String, LightService> SUBSCRIBED_SERVICES = new ConcurrentHashMap<>();
 
-	private LightService() {
-		this.lightAppMeta = LightContext.getContext().getLightAppMeta();
+	private String registry;
+	private String path;
+	private List<ServiceEntry> serviceEntries;
+
+	// private static LightService LIGHT_SERVICE;
+
+	private LightService(String registry, String path) {
+		this.path = path;
+		this.registry = registry;
 	}
 
-	public static LightService SINGLETON() {
-		if (LIGHT_SERVICE != null) {
-			return LIGHT_SERVICE;
-		}
-		synchronized (LIGHT_SERVICE) {
-			if (LIGHT_SERVICE == null) {
-				LIGHT_SERVICE = new LightService();
-			}
-		}
-		return LIGHT_SERVICE;
+	private LightService(String registry, String path, List<ServiceEntry> serviceEntries) {
+		this.path = path;
+		this.registry = registry;
+		this.serviceEntries = serviceEntries;
 	}
 
-	public Object getServiceProxy(InvocationFactor factor) {
+	public static Object getServiceProxy(InvocationFactor factor) {
 		String className = factor.getClazz().getName();
-		Object service = PUBLISHED_SERVICES.get(className);
+		Object service = LOCAL_SERVICE.get(className);
 		if (service != null) {
-			if (!LOCAL_SERVICE.contains(service)) {
-				LOCAL_SERVICE.add(service);
-			}
 			return service;
 		}
 		return LightInvocationHandler.getProxyService(factor);
 	}
 
-	public void publishService() {
-		if (!PUBLISHED_SERVICE_ENTRIES.isEmpty()) {
-			Entry<String, ServiceEntry> entry;
-			for (Iterator<Entry<String, ServiceEntry>> ite = PUBLISHED_SERVICE_ENTRIES.entrySet().iterator(); ite
-					.hasNext();) {
+	public static void publishService() {
+		if (!PUBLISHED_SERVICES.isEmpty()) {
+			Entry<String, LightService> entry;
+			for (Iterator<Entry<String, LightService>> ite = PUBLISHED_SERVICES.entrySet().iterator(); ite.hasNext();) {
 				entry = ite.next();
-				LightPublication.getPublish(this).publishService(entry.getKey(), ServiceEntry.encode(entry.getValue()));
+				LightPublication.getPublish(entry.getValue()).publishService(entry.getValue().getPath(),
+						entry.getValue().getData());
 			}
 		}
 	}
 
-	public List<ServiceEntry> subscribeService(String serviceName) {
-		// TODO add cache.
-		String appName = lightAppMeta.resolveServicePath(serviceName);
-		if (appName == null || appName.isEmpty()) {
-			appName = serviceName;
+	public static List<ServiceEntry> subscribeService(String serviceName) {
+		LightAppMeta lightAppMeta = LightContext.getContext().getLightAppMeta();
+		String servicePath = lightAppMeta.resolveServicePath(serviceName);
+		String fullPath = new StringBuilder(LIGHT_SERVICE_SLASH_URL).append(servicePath).toString();
+		LightService lightService = SUBSCRIBED_SERVICES.get(fullPath);
+		if (lightService != null) {
+			return lightService.getServiceEntries();
+		} else {
+			String registry = lightAppMeta.getLightProps().getSubscriptionRegistry(servicePath);
+			lightService = new LightService(registry, fullPath);
+			SUBSCRIBED_SERVICES.put(fullPath, lightService);
+			List<byte[]> dataList = LightSubscription.getSubscription(lightService).getChildrenData(fullPath);
+			if (dataList == null || dataList.isEmpty()) {
+				lightService.setServiceEntries(Collections.emptyList());
+				return Collections.emptyList();
+			}
+			List<ServiceEntry> serviceEntryList = new ArrayList<>(dataList.size());
+			for (byte[] data : dataList) {
+				serviceEntryList.add(ServiceEntry.decode(data));
+			}
+			lightService.setServiceEntries(serviceEntryList);
+			return serviceEntryList;
 		}
-		StringBuilder strb = new StringBuilder(LIGHT_SERVICE_SLASH_URL).append(appName);
-		List<byte[]> dataList = LightSubscription.getSubscription(this).getChildrenData(strb.toString());
-		if (dataList == null || dataList.isEmpty()) {
-			return Collections.emptyList();
-		}
-		List<ServiceEntry> serviceEntryList = new ArrayList<>(dataList.size());
-		for (byte[] data : dataList) {
-			serviceEntryList.add(ServiceEntry.decode(data));
-		}
-		return serviceEntryList;
 	}
 
-	public void addService(Object object) {
-		String interfaceName = getInterfaceName(object);
-		PUBLISHED_SERVICES.put(interfaceName, object);
-		String servicePath = lightAppMeta.resolveServicePath(interfaceName);
-		ServiceEntry serviceEntry = PUBLISHED_SERVICE_ENTRIES.get(servicePath);
-		if (serviceEntry != null) {
-			serviceEntry.getServiceNames().add(interfaceName);
-		} else {
-			serviceEntry = new ServiceEntry(new IpPort(lightAppMeta.getMachineIp(), lightAppMeta.getAppPort()),
-					lightAppMeta.getLightProps().getServerLoadWeight(), lightAppMeta.getZeroOneGrouping());
-			serviceEntry.getServiceNames().add(interfaceName);
-			PUBLISHED_SERVICE_ENTRIES.put(servicePath, serviceEntry);
+	public static void publishServices(String registry, Collection<Object> objects) {
+		LightAppMeta lightAppMeta = LightContext.getContext().getLightAppMeta();
+		for (Object object : objects) {
+			String interfaceName = getInterfaceName(object);
+			LOCAL_SERVICE.put(interfaceName, object);
+			String servicePath = lightAppMeta.resolveServicePath(interfaceName);
+			LightService lightService = PUBLISHED_SERVICES.get(servicePath);
+			if (lightService != null) {
+				lightService.serviceEntries.get(0).getServiceNames().add(interfaceName);
+			} else {
+				ServiceEntry serviceEntry = new ServiceEntry(lightAppMeta, interfaceName);
+				lightService = new LightService(registry, servicePath, Lists.newArrayList(serviceEntry));
+				PUBLISHED_SERVICES.put(servicePath, lightService);
+			}
 		}
 	}
 
@@ -129,25 +134,44 @@ public class LightService implements LightPublisher, LightSubscriber {
 	}
 
 	public static boolean isLocalService(Object service) {
-		return LOCAL_SERVICE.contains(service);
+		return LOCAL_SERVICE.containsValue(service);
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public byte[] getData() {
+		return ServiceEntry.encode(this.serviceEntries.get(0));
+	}
+
+	public List<ServiceEntry> getServiceEntries() {
+		return this.serviceEntries;
+	}
+
+	public void setServiceEntries(List<ServiceEntry> serviceEntries) {
+		this.serviceEntries = serviceEntries;
 	}
 
 	@Override
 	public String getRegistry() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.registry;
 	}
 
 	@Override
 	public List<String> getPaths() {
-		// TODO Auto-generated method stub
-		return null;
+		return Lists.newArrayList(path);
 	}
 
 	@Override
 	public void processData(String path, byte[] data) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public byte[] getData(String path) {
+		return PUBLISHED_SERVICES.get(path).getData();
 	}
 
 }

@@ -12,7 +12,7 @@ import com.google.common.collect.Maps;
 import com.haiyiyang.light.registry.RegistryConnection;
 
 public class LightPublication extends RegistryConnection {
-	private static Logger LOGGER = LoggerFactory.getLogger(LightPublication.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightPublication.class);
 
 	private LightPublisher lightPublisher;
 	private static final Map<LightPublisher, LightPublication> PUBLICATIONS = Maps.newConcurrentMap();
@@ -41,15 +41,16 @@ public class LightPublication extends RegistryConnection {
 		createPath(path, data, Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 	}
 
-	protected LightPublication(String registry) {
-		super(registry);
-		// TODO Auto-generated constructor stub
-	}
-
 	@Override
 	public void doWatcherProcess(boolean sessionExpired, WatchedEvent event) {
-		// TODO Auto-generated method stub
-
+		LOGGER.info("Received [WatchedEvent], sessionExpired: {}, event: {}.", sessionExpired, event);
+		if (sessionExpired) {
+			for (String path : lightPublisher.getPaths()) {
+//				lightPublisher.processData(path, publishService());
+			}
+		} else {
+//			lightPublisher.processData(event.getPath(), getData(event.getPath()));
+		}
 	}
 
 }

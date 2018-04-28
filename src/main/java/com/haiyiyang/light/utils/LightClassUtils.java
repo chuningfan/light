@@ -9,7 +9,7 @@ import org.springframework.util.ClassUtils;
 
 public class LightClassUtils {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(LightClassUtils.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightClassUtils.class);
 
 	// TODO change to Guava cache.
 	private static final Map<String, Class<?>> userServiceClassMap = new HashMap<>(32);

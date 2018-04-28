@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.haiyiyang.light.constant.LightConstants;
+import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.rpc.server.IpPort;
 
 public class ServiceEntry {
@@ -26,6 +27,13 @@ public class ServiceEntry {
 		this.ipPort = ipPort;
 		this.group = group;
 		this.weight = weight;
+	}
+
+	public ServiceEntry(LightAppMeta lightAppMeta, String serviceName) {
+		this.ipPort = new IpPort(lightAppMeta.getMachineIp(), lightAppMeta.getAppPort());
+		this.group = lightAppMeta.getZeroOneGrouping();
+		this.weight = lightAppMeta.getLightProps().getServerLoadWeight();
+		this.serviceNames.add(serviceName);
 	}
 
 	public static byte[] encode(ServiceEntry serviceEntry) {

@@ -17,19 +17,19 @@ import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
+import com.haiyiyang.light.utils.LightUtils;
 
 import jodd.props.Props;
 import jodd.props.PropsEntry;
 
 public class AppProps implements LightSubscriber {
-	protected static Logger LOGGER = LoggerFactory.getLogger(AppProps.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(AppProps.class);
 
 	private static final String SECTION_RESOURCE = "resource";
 	private static final String APP_PROPS_PATH = "/light/app/";
-	private static final String APP_PROPS_LOCAL_PATH = LightConstants.USER_HOME
-			+ APP_PROPS_PATH.replaceAll("/", LightConstants.FS);
+	private static final String APP_PROPS_LOCAL_PATH = LightUtils.getLocalPath(APP_PROPS_PATH);
 
-	private Props props;
+	private Props props = new Props();
 	private String appPropsPath;
 	private String appPropsLocalPath;
 
@@ -37,7 +37,6 @@ public class AppProps implements LightSubscriber {
 	private static LightAppMeta LIGHT_APP_META;
 
 	private AppProps(LightAppMeta lightAppMeta) {
-		props = new Props();
 		AppProps.LIGHT_APP_META = lightAppMeta;
 		this.appPropsPath = new StringBuilder(APP_PROPS_PATH).append(lightAppMeta.getAppName())
 				.append(LightConstants.DOT_PROPS).toString();
@@ -50,7 +49,7 @@ public class AppProps implements LightSubscriber {
 		if (APP_PROPS != null) {
 			return APP_PROPS;
 		}
-		synchronized (APP_PROPS) {
+		synchronized (AppProps.class) {
 			if (APP_PROPS == null) {
 				APP_PROPS = new AppProps(lightAppMeta);
 			}
@@ -62,19 +61,19 @@ public class AppProps implements LightSubscriber {
 		if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
 			File file = new File(appPropsLocalPath);
 			if (!file.isFile()) {
-				LOGGER.error("The file[{}] does not exists.", appPropsLocalPath);
+				LOGGER.error("The file [{}] does not exists.", appPropsLocalPath);
 				throw new RuntimeException(LightException.FILE_NOT_FOUND);
 			}
 			try {
 				props.load(file);
 			} catch (Exception ex) {
-				LOGGER.error("Loading file[{}] failed.", appPropsLocalPath);
+				LOGGER.error("Loading file [{}] failed.", appPropsLocalPath);
 				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		} else {
 			byte[] data = LightSubscription.getSubscription(this).getData(appPropsPath);
 			if (data == null || data.length == 0) {
-				LOGGER.error("The file[{}] does not exists, or is empty.", appPropsPath);
+				LOGGER.error("The file [{}] does not exists, or is empty.", appPropsPath);
 				throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
 			}
 			updatePropsData(data);
@@ -86,7 +85,7 @@ public class AppProps implements LightSubscriber {
 			try {
 				props.load(new ByteArrayInputStream(data));
 			} catch (IOException e) {
-				LOGGER.error("Loading file[{}] failed.", appPropsPath);
+				LOGGER.error("Loading file [{}] failed.", appPropsPath);
 				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		}
@@ -124,7 +123,7 @@ public class AppProps implements LightSubscriber {
 	@Override
 	public void processData(String path, byte[] data) {
 		updatePropsData(data);
-		LOGGER.info("Reloading file[{}].", path);
+		LOGGER.info("Reloaded file [{}].", path);
 	}
 
 }

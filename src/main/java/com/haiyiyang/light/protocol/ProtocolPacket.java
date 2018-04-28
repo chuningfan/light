@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProtocolPacket {
-	public final static int headerLength = 18;
+	public static final int headerLength = 18;
 
 	private int packetId;
 	private byte invokeMode;
