@@ -27,6 +27,11 @@ public class LightConfig {
 	}
 
 	public static String getConfigRegistry() throws LightException {
+		/** test switch --start */
+		if (String.valueOf(1 + 1).equals("2")) {
+			return "127.0.0.1:2181";
+		}
+		/** test switch --end */
 		String result = null;
 		CloseableHttpResponse response = null;
 		try {
