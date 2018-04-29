@@ -91,23 +91,21 @@ public class LightProps implements LightSubscriber {
 				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		} else {
-			byte[] data = LightSubscription.getSubscription(this).getData(LIGHT_PROPS_URL);
-			if (data == null || data.length == 0) {
-				LOGGER.error("The file [{}] does not exists, or is empty.", LIGHT_PROPS_URL);
-				throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
-			}
-			updatePropsData(data);
+			doSubscribeLightProps();
 		}
 	}
 
-	private void updatePropsData(byte[] data) {
-		synchronized (this) {
-			try {
-				props.load(new ByteArrayInputStream(data));
-			} catch (IOException e) {
-				LOGGER.error("Loading file [{}] failed.", LIGHT_PROPS_URL);
-				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
-			}
+	private void doSubscribeLightProps() {
+		byte[] data = LightSubscription.getSubscription(this).getData(LIGHT_PROPS_URL);
+		if (data == null || data.length == 0) {
+			LOGGER.error("The file [{}] does not exists, or is empty.", LIGHT_PROPS_URL);
+			throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
+		}
+		try {
+			props.load(new ByteArrayInputStream(data));
+		} catch (IOException e) {
+			LOGGER.error("Loading file [{}] failed.", LIGHT_PROPS_URL);
+			throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 		}
 	}
 
@@ -220,8 +218,8 @@ public class LightProps implements LightSubscriber {
 	}
 
 	@Override
-	public void processData(byte[] data) {
-		updatePropsData(data);
+	public void subscribe() {
+		doSubscribeLightProps();
 		LOGGER.info("Reloaded file [{}].", getPath());
 	}
 

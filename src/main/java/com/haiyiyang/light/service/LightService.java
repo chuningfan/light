@@ -2,7 +2,6 @@ package com.haiyiyang.light.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,17 +35,17 @@ public class LightService implements LightPublisher, LightSubscriber {
 
 	private String path;
 	private String registry;
-	private List<ServiceEntry> serviceEntries;
+	private List<ServiceEntry> data;
 
 	private LightService(String registry, String path) {
 		this.path = path;
 		this.registry = registry;
 	}
 
-	private LightService(String registry, String path, List<ServiceEntry> serviceEntries) {
+	private LightService(String registry, String path, ServiceEntry serviceEntries) {
 		this.path = path;
 		this.registry = registry;
-		this.serviceEntries = serviceEntries;
+		this.data = Lists.newArrayList(serviceEntries);
 	}
 
 	public static Object getServiceProxy(InvocationFactor factor) {
@@ -63,52 +62,54 @@ public class LightService implements LightPublisher, LightSubscriber {
 			Entry<String, LightService> entry;
 			for (Iterator<Entry<String, LightService>> ite = PUBLISHED_SERVICES.entrySet().iterator(); ite.hasNext();) {
 				entry = ite.next();
-				LightPublication.getPublish(entry.getValue()).publishService(entry.getValue().getPath(), entry.getValue().getData());
+				LightPublication.getPublish(entry.getValue()).publishService(entry.getValue().getPath(), entry.getValue().getPublishedData());
 			}
-		}
-	}
-
-	public static List<ServiceEntry> subscribeService(String serviceName) {
-		LightAppMeta lightAppMeta = LightContext.getContext().getLightAppMeta();
-		String servicePath = lightAppMeta.resolveServicePath(serviceName);
-		String fullPath = new StringBuilder(LIGHT_SERVICE_SLASH_URL).append(servicePath).toString();
-		LightService lightService = SUBSCRIBED_SERVICES.get(fullPath);
-		if (lightService != null) {
-			return lightService.getServiceEntries();
-		} else {
-			String registry = lightAppMeta.getLightProps().getSubscriptionRegistry(servicePath);
-			lightService = new LightService(registry, fullPath);
-			SUBSCRIBED_SERVICES.put(fullPath, lightService);
-			List<byte[]> dataList = LightSubscription.getSubscription(lightService).getChildrenData(fullPath);
-			if (dataList == null || dataList.isEmpty()) {
-				lightService.setServiceEntries(Collections.emptyList());
-				return Collections.emptyList();
-			}
-			List<ServiceEntry> serviceEntryList = new ArrayList<>(dataList.size());
-			for (byte[] data : dataList) {
-				serviceEntryList.add(ServiceEntry.decode(data));
-			}
-			lightService.setServiceEntries(serviceEntryList);
-			return serviceEntryList;
 		}
 	}
 
 	public static void publishLightService(Collection<Object> objects) {
 		LightAppMeta lightAppMeta = LightContext.getContext().getLightAppMeta();
+		String publishRegistry = lightAppMeta.getLightProps().getPublishRegistry();
 		for (Object object : objects) {
 			String interfaceName = getInterfaceName(object);
 			LOCAL_SERVICE.put(interfaceName, object);
 			String servicePath = lightAppMeta.resolveServicePath(interfaceName);
 			LightService lightService = PUBLISHED_SERVICES.get(servicePath);
 			if (lightService != null) {
-				lightService.serviceEntries.get(0).getServiceNames().add(interfaceName);
+				lightService.data.get(0).getServiceNames().add(interfaceName);
 			} else {
 				ServiceEntry serviceEntry = new ServiceEntry(lightAppMeta, interfaceName);
-				lightService = new LightService(lightAppMeta.getLightProps().getPublishRegistry(), servicePath, Lists.newArrayList(serviceEntry));
+				lightService = new LightService(publishRegistry, servicePath, serviceEntry);
 				PUBLISHED_SERVICES.put(servicePath, lightService);
 			}
 		}
 		doPublishLightService();
+	}
+
+	public List<ServiceEntry> doSubscribeLightService() {
+		List<byte[]> dataList = LightSubscription.getSubscription(this).getChildrenData(this.path);
+		if (dataList != null && !dataList.isEmpty()) {
+			List<ServiceEntry> serviceEntryList = new ArrayList<>(dataList.size());
+			for (byte[] data : dataList) {
+				serviceEntryList.add(ServiceEntry.decode(data));
+			}
+			this.setSubscribedData(serviceEntryList);
+		}
+		return this.getSubscribedData();
+	}
+
+	public static List<ServiceEntry> subscribeLightService(String serviceName) {
+		LightAppMeta lightAppMeta = LightContext.getContext().getLightAppMeta();
+		String servicePath = lightAppMeta.resolveServicePath(serviceName);
+		String fullPath = new StringBuilder(LIGHT_SERVICE_SLASH_URL).append(servicePath).toString();
+		LightService lightService = SUBSCRIBED_SERVICES.get(fullPath);
+		if (lightService != null) {
+			return lightService.getSubscribedData();
+		}
+		String registry = lightAppMeta.getLightProps().getSubscriptionRegistry(servicePath);
+		lightService = new LightService(registry, fullPath);
+		SUBSCRIBED_SERVICES.put(fullPath, lightService);
+		return lightService.doSubscribeLightService();
 	}
 
 	private static String getInterfaceName(Object serviceImpl) {
@@ -133,20 +134,21 @@ public class LightService implements LightPublisher, LightSubscriber {
 		return LOCAL_SERVICE.containsValue(service);
 	}
 
+	public byte[] getPublishedData() {
+		return ServiceEntry.encode(this.data.get(0));
+	}
+
+	public List<ServiceEntry> getSubscribedData() {
+		return this.data;
+	}
+
+	public void setSubscribedData(List<ServiceEntry> data) {
+		this.data = data;
+	}
+
+	@Override
 	public String getPath() {
 		return path;
-	}
-
-	public byte[] getData() {
-		return ServiceEntry.encode(this.serviceEntries.get(0));
-	}
-
-	public List<ServiceEntry> getServiceEntries() {
-		return this.serviceEntries;
-	}
-
-	public void setServiceEntries(List<ServiceEntry> serviceEntries) {
-		this.serviceEntries = serviceEntries;
 	}
 
 	@Override
@@ -155,19 +157,13 @@ public class LightService implements LightPublisher, LightSubscriber {
 	}
 
 	@Override
-	public List<String> getPaths() {
-		return Lists.newArrayList(path);
+	public void subscribe() {
+		doSubscribeLightService();
 	}
 
 	@Override
-	public void processData(byte[] data) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public byte[] getData(String path) {
-		return PUBLISHED_SERVICES.get(path).getData();
+	public void publish() {
+		LightService.doPublishLightService();
 	}
 
 }

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 import com.haiyiyang.light.registry.RegistryConnection;
+import com.haiyiyang.light.service.LightService;
 
 public class LightPublication extends RegistryConnection {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LightPublication.class);
@@ -42,15 +43,9 @@ public class LightPublication extends RegistryConnection {
 	}
 
 	@Override
-	public void doWatcherProcess(boolean sessionExpired, WatchedEvent event) {
+	public void doProcess(boolean sessionExpired, WatchedEvent event) {
 		LOGGER.info("Received [WatchedEvent], sessionExpired: {}, event: {}.", sessionExpired, event);
-		if (sessionExpired) {
-			for (String path : lightPublisher.getPaths()) {
-//				lightPublisher.processData(path, publishService());
-			}
-		} else {
-//			lightPublisher.processData(event.getPath(), getData(event.getPath()));
-		}
+		LightService.doPublishLightService();
 	}
 
 }

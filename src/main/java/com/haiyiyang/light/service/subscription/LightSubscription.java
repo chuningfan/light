@@ -56,13 +56,9 @@ public class LightSubscription extends RegistryConnection {
 	}
 
 	@Override
-	public void doWatcherProcess(boolean sessionExpired, WatchedEvent event) {
+	public void doProcess(boolean sessionExpired, WatchedEvent event) {
 		LOGGER.info("Received [WatchedEvent], sessionExpired: {}, event: {}.", sessionExpired, event);
-		if (sessionExpired) {
-			lightSubscriber.processData(getData(lightSubscriber.getPath()));
-		} else {
-			lightSubscriber.processData(getData(event.getPath()));
-		}
+		lightSubscriber.subscribe();
 	}
 
 }

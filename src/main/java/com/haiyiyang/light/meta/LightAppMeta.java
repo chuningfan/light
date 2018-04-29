@@ -1,6 +1,5 @@
 package com.haiyiyang.light.meta;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -30,7 +29,6 @@ public class LightAppMeta {
 
 	private static byte ZERO_ONE_GROUPING;
 	private static String MACHINE_IP = LightConstants.IP_127_0_0_1;
-	private static final List<String> PUBLISH_REGISTRIES = new ArrayList<>(3);
 
 	private static LightAppMeta LIGHT_APP_META;
 
@@ -41,7 +39,6 @@ public class LightAppMeta {
 		this.portProps = PortProps.SINGLETON(this);
 		this.appProps = AppProps.SINGLETON(this);
 		ResourceProps.publishResourceProps(appProps.getResources());
-		this.initPublishRegistries();
 		this.setMachineIPAndZeroOneGrouping();
 		LOGGER.info("Initialized LightAppMeta.");
 	}
@@ -58,13 +55,6 @@ public class LightAppMeta {
 		return LIGHT_APP_META;
 	}
 
-	private void initPublishRegistries() {
-		String publishRegistry = lightProps.getPublishRegistry();
-		String[] registrys = publishRegistry.split(LightConstants.SEMICOLON);
-		for (String registry : registrys) {
-			PUBLISH_REGISTRIES.add(registry);
-		}
-	}
 
 	private void setMachineIPAndZeroOneGrouping() {
 		Set<String> ips = NetworkUtils.getLocalIps();

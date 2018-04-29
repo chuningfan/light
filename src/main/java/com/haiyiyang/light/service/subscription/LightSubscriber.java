@@ -7,6 +7,6 @@ public interface LightSubscriber {
 
 	public String getPath();
 
-	public void processData(byte[] data);
+	public void subscribe();
 
 }

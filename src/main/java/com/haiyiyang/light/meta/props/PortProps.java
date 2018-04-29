@@ -58,23 +58,21 @@ public class PortProps implements LightSubscriber {
 				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		} else {
-			byte[] data = LightSubscription.getSubscription(this).getData(APP_PORT_PROPS_URL);
-			if (data == null || data.length == 0) {
-				LOGGER.error("The file [{}] does not exists, or is empty.", APP_PORT_PROPS_URL);
-				throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
-			}
-			updatePropsData(data);
+			doSubscribePortProps();
 		}
 	}
 
-	private void updatePropsData(byte[] data) {
-		synchronized (this) {
-			try {
-				props.load(new ByteArrayInputStream(data));
-			} catch (IOException e) {
-				LOGGER.error("Loading file [{}] failed.", APP_PORT_PROPS_URL);
-				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
-			}
+	private void doSubscribePortProps() {
+		byte[] data = LightSubscription.getSubscription(this).getData(APP_PORT_PROPS_URL);
+		if (data == null || data.length == 0) {
+			LOGGER.error("The file [{}] does not exists, or is empty.", APP_PORT_PROPS_URL);
+			throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
+		}
+		try {
+			props.load(new ByteArrayInputStream(data));
+		} catch (IOException e) {
+			LOGGER.error("Loading file [{}] failed.", APP_PORT_PROPS_URL);
+			throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 		}
 	}
 
@@ -97,8 +95,8 @@ public class PortProps implements LightSubscriber {
 	}
 
 	@Override
-	public void processData(byte[] data) {
-		updatePropsData(data);
+	public void subscribe() {
+		doSubscribePortProps();
 		LOGGER.info("Reloaded file [{}].", getPath());
 	}
 

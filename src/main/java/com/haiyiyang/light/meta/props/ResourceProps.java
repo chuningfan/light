@@ -71,35 +71,32 @@ public class ResourceProps implements LightSubscriber {
 				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 			}
 		} else {
-			byte[] data = LightSubscription.getSubscription(this).getData(this.path);
-			if (data == null || data.length == 0) {
-				LOGGER.error("The file [{}] does not exists, or is empty.", this.path);
-				throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
-			}
-			updatePropsData(data);
+			doSubscribeResourceProps();
 		}
 	}
 
-
-	private void updatePropsData(byte[] data) {
-		synchronized (this) {
-			try {
-				Props temp = new Props();
-				temp.load(new ByteArrayInputStream(data));
-				this.props = temp;
-			} catch (IOException e) {
-				LOGGER.error("Loading file [{}] failed.", this.path);
-				throw new RuntimeException(LightException.LOADING_FILE_FAILED);
-			}
+	private void doSubscribeResourceProps() {
+		byte[] data = LightSubscription.getSubscription(this).getData(this.path);
+		if (data == null || data.length == 0) {
+			LOGGER.error("The file [{}] does not exists, or is empty.", this.path);
+			throw new RuntimeException(LightException.FILE_NOT_FOUND_OR_EMPTY);
+		}
+		try {
+			Props temp = new Props();
+			temp.load(new ByteArrayInputStream(data));
+			this.props = temp;
+		} catch (IOException e) {
+			LOGGER.error("Loading file [{}] failed.", this.path);
+			throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 		}
 	}
-	
+
 	private String getValue(String key) {
 		return this.props.getValue(key);
 	}
-	
+
 	private String getValue(String key, String profile) {
-		return this.props.getValue(key,profile);
+		return this.props.getValue(key, profile);
 	}
 
 	public String getPropsValue(ResourceEnum resourceEnum, String key) {
@@ -115,7 +112,7 @@ public class ResourceProps implements LightSubscriber {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String getRegistry() {
 		return LightContext.getContext().getLightAppMeta().getConfigRegistry();
@@ -127,8 +124,8 @@ public class ResourceProps implements LightSubscriber {
 	}
 
 	@Override
-	public void processData(byte[] data) {
-		this.updatePropsData(data);
+	public void subscribe() {
+		doSubscribeResourceProps();
 		LOGGER.info("Reloaded file [{}].", getPath());
 	}
 }
