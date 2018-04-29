@@ -3,20 +3,17 @@ package com.haiyiyang.light.meta.props;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+
+import jodd.props.Props;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
 import com.haiyiyang.light.utils.LightUtils;
-
-import jodd.props.Props;
 
 public class PortProps implements LightSubscriber {
 
@@ -48,7 +45,7 @@ public class PortProps implements LightSubscriber {
 	}
 
 	private void initializePortProps() {
-		if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
+		if (LightUtils.useLocalProps()) {
 			File file = new File(APP_PORT_PROPS_LOCAL_URL);
 			if (!file.isFile()) {
 				LOGGER.error("The file [{}] does not exists.", APP_PORT_PROPS_LOCAL_URL);
@@ -95,14 +92,14 @@ public class PortProps implements LightSubscriber {
 	}
 
 	@Override
-	public List<String> getPaths() {
-		return Lists.newArrayList(APP_PORT_PROPS_URL);
+	public String getPath() {
+		return APP_PORT_PROPS_URL;
 	}
 
 	@Override
-	public void processData(String path, byte[] data) {
+	public void processData(byte[] data) {
 		updatePropsData(data);
-		LOGGER.info("Reloaded file [{}].", path);
+		LOGGER.info("Reloaded file [{}].", getPath());
 	}
 
 }

@@ -40,7 +40,7 @@ public class LightAppMeta {
 		this.lightProps = LightProps.SINGLETON(this);
 		this.portProps = PortProps.SINGLETON(this);
 		this.appProps = AppProps.SINGLETON(this);
-		this.resourceProps = ResourceProps.SINGLETON(this, appProps.getResources());
+		ResourceProps.publishResourceProps(appProps.getResources());
 		this.initPublishRegistries();
 		this.setMachineIPAndZeroOneGrouping();
 		LOGGER.info("Initialized LightAppMeta.");

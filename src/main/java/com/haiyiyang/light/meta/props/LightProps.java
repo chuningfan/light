@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import jodd.props.Props;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +18,6 @@ import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
 import com.haiyiyang.light.utils.LightUtils;
-
-import jodd.props.Props;
 
 public class LightProps implements LightSubscriber {
 
@@ -78,7 +78,7 @@ public class LightProps implements LightSubscriber {
 	}
 
 	private void initializeLightProps() {
-		if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
+		if (LightUtils.useLocalProps()) {
 			File file = new File(LIGHT_PROPS_LOCAL_URL);
 			if (!file.isFile()) {
 				LOGGER.error("The file [{}] does not exists.", LIGHT_PROPS_LOCAL_URL);
@@ -215,14 +215,14 @@ public class LightProps implements LightSubscriber {
 	}
 
 	@Override
-	public List<String> getPaths() {
-		return Lists.newArrayList(LIGHT_PROPS_URL);
+	public String getPath() {
+		return LIGHT_PROPS_URL;
 	}
 
 	@Override
-	public void processData(String path, byte[] data) {
+	public void processData(byte[] data) {
 		updatePropsData(data);
-		LOGGER.info("Reloaded file [{}].", path);
+		LOGGER.info("Reloaded file [{}].", getPath());
 	}
 
 }

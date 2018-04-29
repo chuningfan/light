@@ -34,11 +34,9 @@ public class LightService implements LightPublisher, LightSubscriber {
 	private static final Map<String, LightService> PUBLISHED_SERVICES = new ConcurrentHashMap<>(8);
 	private static final Map<String, LightService> SUBSCRIBED_SERVICES = new ConcurrentHashMap<>();
 
-	private String registry;
 	private String path;
+	private String registry;
 	private List<ServiceEntry> serviceEntries;
-
-	// private static LightService LIGHT_SERVICE;
 
 	private LightService(String registry, String path) {
 		this.path = path;
@@ -60,13 +58,12 @@ public class LightService implements LightPublisher, LightSubscriber {
 		return LightInvocationHandler.getProxyService(factor);
 	}
 
-	public static void publishService() {
+	public static void doPublishLightService() {
 		if (!PUBLISHED_SERVICES.isEmpty()) {
 			Entry<String, LightService> entry;
 			for (Iterator<Entry<String, LightService>> ite = PUBLISHED_SERVICES.entrySet().iterator(); ite.hasNext();) {
 				entry = ite.next();
-				LightPublication.getPublish(entry.getValue()).publishService(entry.getValue().getPath(),
-						entry.getValue().getData());
+				LightPublication.getPublish(entry.getValue()).publishService(entry.getValue().getPath(), entry.getValue().getData());
 			}
 		}
 	}
@@ -96,7 +93,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 		}
 	}
 
-	public static void publishServices(String registry, Collection<Object> objects) {
+	public static void publishLightService(Collection<Object> objects) {
 		LightAppMeta lightAppMeta = LightContext.getContext().getLightAppMeta();
 		for (Object object : objects) {
 			String interfaceName = getInterfaceName(object);
@@ -107,10 +104,11 @@ public class LightService implements LightPublisher, LightSubscriber {
 				lightService.serviceEntries.get(0).getServiceNames().add(interfaceName);
 			} else {
 				ServiceEntry serviceEntry = new ServiceEntry(lightAppMeta, interfaceName);
-				lightService = new LightService(registry, servicePath, Lists.newArrayList(serviceEntry));
+				lightService = new LightService(lightAppMeta.getLightProps().getPublishRegistry(), servicePath, Lists.newArrayList(serviceEntry));
 				PUBLISHED_SERVICES.put(servicePath, lightService);
 			}
 		}
+		doPublishLightService();
 	}
 
 	private static String getInterfaceName(Object serviceImpl) {
@@ -127,10 +125,8 @@ public class LightService implements LightPublisher, LightSubscriber {
 				}
 			}
 		}
-		LOGGER.error("The simple name of the Class [{}] must be prefixed with its interface simple name.",
-				serviceImpl.getClass().getName());
-		throw new RuntimeException(
-				"The simple name of an implementation class must be prefixed with its interface simple name.");
+		LOGGER.error("The simple name of the Class [{}] must be prefixed with its interface simple name.", serviceImpl.getClass().getName());
+		throw new RuntimeException("The simple name of an implementation class must be prefixed with its interface simple name.");
 	}
 
 	public static boolean isLocalService(Object service) {
@@ -164,7 +160,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 	}
 
 	@Override
-	public void processData(String path, byte[] data) {
+	public void processData(byte[] data) {
 		// TODO Auto-generated method stub
 
 	}

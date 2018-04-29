@@ -75,15 +75,11 @@ public class LightContext extends AnnotationConfigApplicationContext implements 
 		if (event instanceof ContextRefreshedEvent) {
 			if (CONTEXT == null) {
 				CONTEXT = (AbstractApplicationContext) event.getSource();
-				publishLightService();
+				Map<String, Object> objectMap = CONTEXT.getBeansWithAnnotation(IAmALightService.class);
+				if (objectMap != null && !objectMap.isEmpty()) {
+					LightService.publishLightService(objectMap.values());
+				}
 			}
-		}
-	}
-
-	private void publishLightService() {
-		Map<String, Object> objectMap = CONTEXT.getBeansWithAnnotation(IAmALightService.class);
-		if (objectMap != null && !objectMap.isEmpty()) {
-			LightService.publishServices(lightAppMeta.getLightProps().getRegistry(), objectMap.values());
 		}
 	}
 

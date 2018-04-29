@@ -5,22 +5,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+
+import jodd.props.Props;
+import jodd.props.PropsEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
 import com.haiyiyang.light.utils.LightUtils;
-
-import jodd.props.Props;
-import jodd.props.PropsEntry;
 
 public class AppProps implements LightSubscriber {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AppProps.class);
@@ -38,10 +36,8 @@ public class AppProps implements LightSubscriber {
 
 	private AppProps(LightAppMeta lightAppMeta) {
 		AppProps.LIGHT_APP_META = lightAppMeta;
-		this.appPropsPath = new StringBuilder(APP_PROPS_PATH).append(lightAppMeta.getAppName())
-				.append(LightConstants.DOT_PROPS).toString();
-		this.appPropsLocalPath = new StringBuilder(APP_PROPS_LOCAL_PATH).append(lightAppMeta.getAppName())
-				.append(LightConstants.DOT_PROPS).toString();
+		this.appPropsPath = new StringBuilder(APP_PROPS_PATH).append(lightAppMeta.getAppName()).append(LightConstants.DOT_PROPS).toString();
+		this.appPropsLocalPath = new StringBuilder(APP_PROPS_LOCAL_PATH).append(lightAppMeta.getAppName()).append(LightConstants.DOT_PROPS).toString();
 		initializeAppProps();
 	}
 
@@ -58,7 +54,7 @@ public class AppProps implements LightSubscriber {
 	}
 
 	private void initializeAppProps() {
-		if (LightConstants.STR1.equals(LightConstants.USE_LOCAL_PROPS)) {
+		if (LightUtils.useLocalProps()) {
 			File file = new File(appPropsLocalPath);
 			if (!file.isFile()) {
 				LOGGER.error("The file [{}] does not exists.", appPropsLocalPath);
@@ -116,14 +112,14 @@ public class AppProps implements LightSubscriber {
 	}
 
 	@Override
-	public List<String> getPaths() {
-		return Lists.newArrayList(this.appPropsPath);
+	public String getPath() {
+		return this.appPropsPath;
 	}
 
 	@Override
-	public void processData(String path, byte[] data) {
+	public void processData(byte[] data) {
 		updatePropsData(data);
-		LOGGER.info("Reloaded file [{}].", path);
+		LOGGER.info("Reloaded file [{}].", getPath());
 	}
 
 }
