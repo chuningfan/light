@@ -58,10 +58,10 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 	}
 
 	public static Object getProxyService(InvocationFactor factor) {
-		if (INVOCATION_HANDLER.containsKey(factor)) {
-			return INVOCATION_HANDLER.get(factor).objectProxy;
+		if (!INVOCATION_HANDLER.containsKey(factor)) {
+			INVOCATION_HANDLER.putIfAbsent(factor, new LightInvocationHandler(factor));
 		}
-		return INVOCATION_HANDLER.putIfAbsent(factor, new LightInvocationHandler(factor)).objectProxy;
+		return INVOCATION_HANDLER.get(factor).objectProxy;
 	}
 
 	@Override

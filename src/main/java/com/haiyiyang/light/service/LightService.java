@@ -109,14 +109,13 @@ public class LightService implements LightPublisher, LightSubscriber {
 	public static List<ServiceEntry> subscribeLightService(String serviceName) {
 		LightAppMeta lightAppMeta = LightContext.getContext().getLightAppMeta();
 		String servicePath = lightAppMeta.resolveServicePath(serviceName);
-		String fullPath = new StringBuilder(LIGHT_SERVICE_SLASH_URL).append(servicePath).toString();
-		LightService lightService = SUBSCRIBED_SERVICES.get(fullPath);
+		LightService lightService = SUBSCRIBED_SERVICES.get(servicePath);
 		if (lightService != null) {
 			return lightService.getSubscribedData();
 		}
 		String registry = lightAppMeta.getLightProps().getSubscriptionRegistry(servicePath);
-		lightService = new LightService(registry, fullPath);
-		SUBSCRIBED_SERVICES.put(fullPath, lightService);
+		lightService = new LightService(registry, servicePath);
+		SUBSCRIBED_SERVICES.put(servicePath, lightService);
 		return lightService.doSubscribeLightService();
 	}
 
