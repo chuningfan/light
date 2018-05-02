@@ -41,12 +41,12 @@ public class LightService implements LightPublisher, LightSubscriber {
 	private List<ServiceEntry> data;
 
 	private LightService(String registry, String path) {
-		this.path = getServiceFullPath(path);
+		this.path = path;
 		this.registry = registry;
 	}
 
 	private LightService(String registry, String path, ServiceEntry serviceEntries) {
-		this.path = getServiceFullPath(path);
+		this.path = path;
 		this.registry = registry;
 		this.data = Lists.newArrayList(serviceEntries);
 	}
@@ -83,7 +83,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 				lightService.data.get(0).getServiceNames().add(interfaceName);
 			} else {
 				ServiceEntry serviceEntry = new ServiceEntry(lightAppMeta, interfaceName);
-				lightService = new LightService(publishRegistry, servicePath, serviceEntry);
+				lightService = new LightService(getPublishPath(publishRegistry), servicePath, serviceEntry);
 				PUBLISHED_SERVICES.put(servicePath, lightService);
 			}
 		}
@@ -114,14 +114,18 @@ public class LightService implements LightPublisher, LightSubscriber {
 			return lightService.getSubscribedData();
 		}
 		String registry = lightAppMeta.getLightProps().getSubscriptionRegistry(servicePath);
-		lightService = new LightService(registry, servicePath);
+		lightService = new LightService(registry, getSubscriptionPath(servicePath));
 		SUBSCRIBED_SERVICES.put(servicePath, lightService);
 		return lightService.doSubscribeLightService();
 	}
 
-	private static String getServiceFullPath(String path) {
+	private static String getPublishPath(String path) {
 		return new StringBuilder(LIGHT_SERVICE_SLASH_URL).append(path).append(LightConstants.SLASH)
 				.append(LightContext.getContext().getLightAppMeta().getMachineIp()).toString();
+	}
+
+	private static String getSubscriptionPath(String path) {
+		return new StringBuilder(LIGHT_SERVICE_SLASH_URL).append(path).toString();
 	}
 
 	private static String getInterfaceName(Object serviceImpl) {
