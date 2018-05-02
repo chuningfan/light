@@ -1,2 +1,2 @@
 appName=test
-scanPackages=com.haiyiyang.light
+scanPackages=org.haiyiyang.demo.service

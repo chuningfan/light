@@ -1,4 +1,4 @@
-package com.haiyiyang.light.test.demo.service;
+package org.haiyiyang.demo.service;
 
 public interface DemoService {
 
