@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.netty.channel.ChannelHandlerContext;
+
 public class ProtocolPacket {
 	public static final int headerLength = 18;
 
@@ -12,6 +14,7 @@ public class ProtocolPacket {
 	private byte serializerType;
 	private long startTime;
 	private List<ByteBuffer> requestMeta;
+	private ChannelHandlerContext chContext;
 
 	public ProtocolPacket(int packetId, byte invokeMode, byte serializerType, long startTime,
 			List<ByteBuffer> requestMeta) {
@@ -78,6 +81,14 @@ public class ProtocolPacket {
 
 	public List<ByteBuffer> getRequestMeta() {
 		return requestMeta;
+	}
+
+	public ChannelHandlerContext getChContext() {
+		return chContext;
+	}
+
+	public void setChContext(ChannelHandlerContext chContext) {
+		this.chContext = chContext;
 	}
 
 }

@@ -13,10 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.context.LightContext;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.rpc.invocation.InvocationFactor;
 import com.haiyiyang.light.rpc.invocation.LightInvocationHandler;
+import com.haiyiyang.light.rpc.server.LightRpcServer;
+import com.haiyiyang.light.rpc.server.task.handler.RequestHandler;
 import com.haiyiyang.light.service.entry.ServiceEntry;
 import com.haiyiyang.light.service.publish.LightPublication;
 import com.haiyiyang.light.service.publish.LightPublisher;
@@ -38,12 +41,12 @@ public class LightService implements LightPublisher, LightSubscriber {
 	private List<ServiceEntry> data;
 
 	private LightService(String registry, String path) {
-		this.path = path;
+		this.path = getServiceFullPath(path);
 		this.registry = registry;
 	}
 
 	private LightService(String registry, String path, ServiceEntry serviceEntries) {
-		this.path = path;
+		this.path = getServiceFullPath(path);
 		this.registry = registry;
 		this.data = Lists.newArrayList(serviceEntries);
 	}
@@ -62,7 +65,8 @@ public class LightService implements LightPublisher, LightSubscriber {
 			Entry<String, LightService> entry;
 			for (Iterator<Entry<String, LightService>> ite = PUBLISHED_SERVICES.entrySet().iterator(); ite.hasNext();) {
 				entry = ite.next();
-				LightPublication.getPublish(entry.getValue()).publishService(entry.getValue().getPath(), entry.getValue().getPublishedData());
+				LightPublication.getPublish(entry.getValue()).publishService(entry.getValue().getPath(),
+						entry.getValue().getPublishedData());
 			}
 		}
 	}
@@ -83,7 +87,11 @@ public class LightService implements LightPublisher, LightSubscriber {
 				PUBLISHED_SERVICES.put(servicePath, lightService);
 			}
 		}
-		doPublishLightService();
+		if (!PUBLISHED_SERVICES.isEmpty()) {
+			RequestHandler.handle();
+			LightRpcServer.SINGLETON().start();
+			doPublishLightService();
+		}
 	}
 
 	public List<ServiceEntry> doSubscribeLightService() {
@@ -112,6 +120,11 @@ public class LightService implements LightPublisher, LightSubscriber {
 		return lightService.doSubscribeLightService();
 	}
 
+	private static String getServiceFullPath(String path) {
+		return new StringBuilder(LIGHT_SERVICE_SLASH_URL).append(path).append(LightConstants.SLASH)
+				.append(LightContext.getContext().getLightAppMeta().getMachineIp()).toString();
+	}
+
 	private static String getInterfaceName(Object serviceImpl) {
 		Class<?>[] classes = serviceImpl.getClass().getInterfaces();
 		if (classes == null || classes.length == 0) {
@@ -126,8 +139,10 @@ public class LightService implements LightPublisher, LightSubscriber {
 				}
 			}
 		}
-		LOGGER.error("The simple name of the Class [{}] must be prefixed with its interface simple name.", serviceImpl.getClass().getName());
-		throw new RuntimeException("The simple name of an implementation class must be prefixed with its interface simple name.");
+		LOGGER.error("The simple name of the Class [{}] must be prefixed with its interface simple name.",
+				serviceImpl.getClass().getName());
+		throw new RuntimeException(
+				"The simple name of an implementation class must be prefixed with its interface simple name.");
 	}
 
 	public static boolean isLocalService(Object service) {

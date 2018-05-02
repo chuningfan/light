@@ -19,6 +19,7 @@ public class SettingsProps {
 	private static final String APP_NAME = "appName";
 	private static final String SCAN_PACKAGES = "scanPackages";
 	private static final String ANNOTATED_CLASSES = "annotatedClasses";
+	private static final String LIGHT_CONFIGRATION_CLASS = "com.haiyiyang.light.meta.Configration";
 
 	private Props props = new Props();
 	private static SettingsProps SETTINGS_PROPS;
@@ -89,18 +90,14 @@ public class SettingsProps {
 	public Class<?>[] getConfigurableClasses() throws ClassNotFoundException {
 		String annotatedClasses = getAnnotatedClasses();
 		if (annotatedClasses == null || annotatedClasses.isEmpty()) {
-			return null;
+			return new Class<?>[] { Class.forName(LIGHT_CONFIGRATION_CLASS) };
 		}
 		String[] classesNames = annotatedClasses.split(LightConstants.COMMA);
-		Class<?>[] classes = new Class<?>[classesNames.length];
+		Class<?>[] classes = new Class<?>[classesNames.length + 1];
 		for (int i = 0; i < classesNames.length; i++) {
-			try {
-				classes[i] = Class.forName(classesNames[i]);
-			} catch (ClassNotFoundException e) {
-				LOGGER.error("Class {} forName error.", classesNames[i]);
-				throw e;
-			}
+			classes[i] = Class.forName(classesNames[i]);
 		}
+		classes[classesNames.length] = Class.forName(LIGHT_CONFIGRATION_CLASS);
 		return classes;
 	}
 

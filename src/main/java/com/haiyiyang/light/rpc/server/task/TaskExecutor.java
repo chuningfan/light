@@ -1,4 +1,4 @@
-package com.haiyiyang.light.rpc.server.center;
+package com.haiyiyang.light.rpc.server.task;
 
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -11,7 +11,7 @@ public class TaskExecutor {
 
 	private ThreadPoolExecutor threadPool;
 
-	private static volatile TaskExecutor taskExecutor;
+	private static volatile TaskExecutor TASK_EXECUTOR;
 
 	private TaskExecutor(LightProps lightProps) {
 		threadPool = new ThreadPoolExecutor(lightProps.getMinThread(), lightProps.getMaxThread(), 60, TimeUnit.SECONDS,
@@ -19,15 +19,15 @@ public class TaskExecutor {
 	}
 
 	public static TaskExecutor SINGLETON(LightProps lightProps) {
-		if (taskExecutor != null) {
-			return taskExecutor;
+		if (TASK_EXECUTOR != null) {
+			return TASK_EXECUTOR;
 		}
-		synchronized (taskExecutor) {
-			if (taskExecutor == null) {
-				taskExecutor = new TaskExecutor(lightProps);
+		synchronized (TASK_EXECUTOR) {
+			if (TASK_EXECUTOR == null) {
+				TASK_EXECUTOR = new TaskExecutor(lightProps);
 			}
 		}
-		return taskExecutor;
+		return TASK_EXECUTOR;
 	}
 
 	public boolean execute(Runnable runnable) {

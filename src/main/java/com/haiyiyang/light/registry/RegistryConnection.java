@@ -24,8 +24,6 @@ public abstract class RegistryConnection implements Watcher {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RegistryConnection.class);
 
-	protected static final String PATH_LIGHT = "/light";
-
 	protected String registry = null;
 	protected ZooKeeper zooKeeper = null;
 
@@ -119,10 +117,6 @@ public abstract class RegistryConnection implements Watcher {
 		}
 	}
 
-	protected void createLightPath() {
-		createPath(PATH_LIGHT, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-	}
-
 	protected Stat existsPath(String path, boolean watch) {
 		try {
 			return getRegistry().exists(path, watch);
@@ -135,15 +129,18 @@ public abstract class RegistryConnection implements Watcher {
 		}
 	}
 
-	protected void createPath(String fullPath, byte[] data, List<ACL> acl, CreateMode createMode) {
+	protected void createServicePath(String fullPath, byte[] data) {
 		synchronized (this.registry) {
 			String[] pathArray = fullPath.split("/");
 			StringBuilder pathStrb = new StringBuilder();
 			int i = 1;
 			while (i < pathArray.length) {
 				pathStrb.append(LightConstants.SLASH).append(pathArray[i]);
-				createLastPath(pathStrb.toString(), ++i == pathArray.length ? data : null, Ids.OPEN_ACL_UNSAFE,
-						createMode);
+				if (++i != pathArray.length) {
+					createLastPath(pathStrb.toString(), null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+				} else {
+					createLastPath(pathStrb.toString(), data, Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+				}
 			}
 		}
 	}
