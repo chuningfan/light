@@ -25,17 +25,17 @@ public class ProtocolPacket {
 		this.requestMeta = requestMeta;
 	}
 
-	public static ByteBuffer encode(ProtocolPacket packet) {
+	public ByteBuffer encode() {
 		int totalLenght = headerLength;
-		int datasize = packet.getRequestMeta().size();
+		int datasize = this.requestMeta.size();
 		for (int i = 0; i < datasize; i++) {
-			totalLenght += (4 + packet.getRequestMeta().get(i).limit());
+			totalLenght += (4 + this.requestMeta.get(i).limit());
 		}
 		ByteBuffer byteBuffer = ByteBuffer.allocate(totalLenght);
-		byteBuffer.putInt(packet.getPacketId()).put(packet.getInvokeMode()).put(packet.getSerializerType())
-				.putLong(packet.getStartTime()).putInt(datasize);
+		byteBuffer.putInt(this.packetId).put(this.invokeMode).put(this.serializerType).putLong(this.startTime)
+				.putInt(datasize);
 		for (int i = 0; i < datasize; i++) {
-			ByteBuffer data = packet.getRequestMeta().get(i);
+			ByteBuffer data = this.requestMeta.get(i);
 			int lenli = data.limit();
 			byteBuffer.putInt(lenli);
 			System.arraycopy(data.array(), 0, byteBuffer.array(), byteBuffer.position(), lenli);
@@ -81,6 +81,10 @@ public class ProtocolPacket {
 
 	public List<ByteBuffer> getRequestMeta() {
 		return requestMeta;
+	}
+
+	public void setRequestMeta(List<ByteBuffer> requestMeta) {
+		this.requestMeta = requestMeta;
 	}
 
 	public ChannelHandlerContext getChContext() {

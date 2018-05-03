@@ -11,6 +11,7 @@ public class LightException extends RuntimeException {
 
 	public static final String FILE_NOT_FOUND = "File does not exist.";
 	public static final String LOADING_FILE_FAILED = "Loading file failed.";
+	public static final String SERVER_STARTUP_FAILED = "Server startup failed.";
 	public static final String FILE_NOT_FOUND_OR_EMPTY = "File does not exist, or is empty.";
 
 	public String getCode() {

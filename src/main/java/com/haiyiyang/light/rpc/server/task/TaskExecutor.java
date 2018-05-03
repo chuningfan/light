@@ -22,7 +22,7 @@ public class TaskExecutor {
 		if (TASK_EXECUTOR != null) {
 			return TASK_EXECUTOR;
 		}
-		synchronized (TASK_EXECUTOR) {
+		synchronized (TaskExecutor.class) {
 			if (TASK_EXECUTOR == null) {
 				TASK_EXECUTOR = new TaskExecutor(lightProps);
 			}

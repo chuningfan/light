@@ -60,6 +60,10 @@ public class LightService implements LightPublisher, LightSubscriber {
 		return LightInvocationHandler.getProxyService(factor);
 	}
 
+	public static Object getLocalBean(String serviceName) {
+		return PUBLISHED_SERVICES.get(serviceName);
+	}
+
 	public static void doPublishLightService() {
 		if (!PUBLISHED_SERVICES.isEmpty()) {
 			Entry<String, LightService> entry;

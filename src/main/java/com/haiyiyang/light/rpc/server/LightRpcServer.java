@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.haiyiyang.light.context.LightContext;
+import com.haiyiyang.light.exception.LightException;
 import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.protocol.codec.ProtocolDecoder;
 import com.haiyiyang.light.protocol.codec.ProtocolEncoder;
@@ -19,6 +20,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
 public class LightRpcServer {
 
@@ -44,21 +46,24 @@ public class LightRpcServer {
 					.option(ChannelOption.TCP_NODELAY, true).childHandler(new ChannelInitializer<SocketChannel>() {
 						@Override
 						public void initChannel(SocketChannel ch) {
-							ch.pipeline().addLast("decoder", new ProtocolDecoder());
-							ch.pipeline().addLast("encoder", new ProtocolEncoder());
-							ch.pipeline().addLast("handler", new ServerInboundHandler(this));
+							ch.pipeline().addLast("decoder", new ProtocolDecoder())
+									.addLast("encoder", new ProtocolEncoder()).addLast(
+											new DefaultEventExecutorGroup(
+													lightAppMeta.getLightProps().getServerThreadQuantity()),
+											new ServerInboundHandler());
 						}
-					});
+					}).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
 			String serverIp = lightAppMeta.getMachineIp();
 			int serverPort = lightAppMeta.getAppPort();
 			ChannelFuture channelFuture = serverBootstrap.bind(serverIp, serverPort);
 
 			channelFuture.awaitUninterruptibly(lightAppMeta.getLightProps().getTimeout(), TimeUnit.SECONDS);
-			if (!channelFuture.isSuccess()) {
-				LOGGER.debug("starting Netty  successfully");
+			if (channelFuture.isSuccess()) {
+				LOGGER.info("Server was completed successfully.");
 			}
-
 		} catch (Exception e) {
+			LOGGER.error(LightException.SERVER_STARTUP_FAILED);
+			throw new RuntimeException(LightException.SERVER_STARTUP_FAILED);
 		}
 	}
 

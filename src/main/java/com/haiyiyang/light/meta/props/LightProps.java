@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import jodd.props.Props;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +16,8 @@ import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
 import com.haiyiyang.light.utils.LightUtils;
+
+import jodd.props.Props;
 
 public class LightProps implements LightSubscriber {
 
@@ -35,7 +35,7 @@ public class LightProps implements LightSubscriber {
 	private static final String DEFAULT_PROXY_TYPE = "JDK";
 
 	private static final String SERIALIZER = "serializer";
-	private static final String DEFAULT_SERIALIZER = "PROTOBUF";
+	private static final String DEFAULT_SERIALIZER = "JSON";
 
 	private static final String IP_SEGMENT_PREFIX = "ipSegmentPrefix";
 
@@ -51,6 +51,9 @@ public class LightProps implements LightSubscriber {
 
 	private static final String LIGHT_PROPS_URL = "/light/light.props";
 	private static final String LIGHT_PROPS_LOCAL_URL = LightUtils.getLocalPath(LIGHT_PROPS_URL);
+
+	private static final int DEFAULT_SERVER_THREAD_QUANTITY = 1;
+	private static final String SERVER_THREAD_QUANTITY = "serverThreadQuantity";
 
 	public static final String DOMAIN_PACKAGES = "domainPackages";
 
@@ -107,6 +110,14 @@ public class LightProps implements LightSubscriber {
 			LOGGER.error("Loading file [{}] failed.", LIGHT_PROPS_URL);
 			throw new RuntimeException(LightException.LOADING_FILE_FAILED);
 		}
+	}
+
+	public int getServerThreadQuantity() {
+		Integer quantity = props.getIntegerValue(SERVER_THREAD_QUANTITY);
+		if (quantity != null) {
+			return quantity.intValue();
+		}
+		return DEFAULT_SERVER_THREAD_QUANTITY;
 	}
 
 	public List<String> getDomainPackages() {

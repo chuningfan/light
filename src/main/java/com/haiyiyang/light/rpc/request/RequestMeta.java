@@ -12,7 +12,7 @@ import com.haiyiyang.light.utils.LightClassUtils;
 public class RequestMeta implements Serializable {
 
 	private static final long serialVersionUID = -1L;
-	private static final int FIELDS_COUNT = 7;
+	private static final int STRING_FIELDS_COUNT = 6;
 
 	private String requestId;
 	private String serviceName;
@@ -41,7 +41,7 @@ public class RequestMeta implements Serializable {
 		int len = 0;
 		List<String> fieldsValues = Lists.newArrayList(requestId, serviceName, method, clientIP, clientAppName,
 				datetime);
-		for (int i = 0; i < FIELDS_COUNT; i++) {
+		for (int i = 0; i < STRING_FIELDS_COUNT; i++) {
 			len += (4 + getFieldLength(fieldsValues.get(i)));
 		}
 		len = len + 4;
@@ -51,7 +51,7 @@ public class RequestMeta implements Serializable {
 			}
 		}
 		ByteBuffer buffer = ByteBuffer.allocate(len);
-		for (int j = 0; j < FIELDS_COUNT; j++) {
+		for (int j = 0; j < STRING_FIELDS_COUNT; j++) {
 			buffer.putInt(getFieldLength(fieldsValues.get(j))).put(getFieldValue(fieldsValues.get(j)));
 		}
 		if (paramsTypes == null) {
@@ -67,20 +67,21 @@ public class RequestMeta implements Serializable {
 		return buffer;
 	}
 
-	public RequestMeta deserialize(ByteBuffer buffer) {
-		List<String> fieldsValues = new ArrayList<>(FIELDS_COUNT);
+	public static RequestMeta deserialize(ByteBuffer buffer) {
+		RequestMeta requestMeta = new RequestMeta();
+		List<String> fieldsValues = new ArrayList<>(STRING_FIELDS_COUNT);
 		byte[] data;
-		for (int i = 0; i < FIELDS_COUNT; i++) {
+		for (int i = 0; i < STRING_FIELDS_COUNT; i++) {
 			data = new byte[buffer.getInt()];
 			buffer.get(data);
 			fieldsValues.add(new String(data, LightConstants.CHARSET_UTF8));
 		}
-		this.requestId = fieldsValues.get(0);
-		this.serviceName = fieldsValues.get(1);
-		this.method = fieldsValues.get(2);
-		this.clientIP = fieldsValues.get(3);
-		this.clientAppName = fieldsValues.get(4);
-		this.datetime = fieldsValues.get(5);
+		requestMeta.requestId = fieldsValues.get(0);
+		requestMeta.serviceName = fieldsValues.get(1);
+		requestMeta.method = fieldsValues.get(2);
+		requestMeta.clientIP = fieldsValues.get(3);
+		requestMeta.clientAppName = fieldsValues.get(4);
+		requestMeta.datetime = fieldsValues.get(5);
 		if (buffer.hasRemaining()) {
 			int paramConut = buffer.getInt();
 			if (paramConut != 0) {
@@ -90,10 +91,10 @@ public class RequestMeta implements Serializable {
 					buffer.get(data);
 					classArray[j] = LightClassUtils.forName(new String(data, LightConstants.CHARSET_UTF8));
 				}
-				this.paramsTypes = classArray;
+				requestMeta.paramsTypes = classArray;
 			}
 		}
-		return this;
+		return requestMeta;
 	}
 
 	private static int getFieldLength(String field) {
