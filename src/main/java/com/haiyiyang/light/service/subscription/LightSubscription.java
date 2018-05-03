@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
+import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.registry.RegistryConnection;
 
 public class LightSubscription extends RegistryConnection {
@@ -46,9 +47,12 @@ public class LightSubscription extends RegistryConnection {
 	public List<byte[]> getChildrenData(String path) {
 		List<String> childrenPaths = getChildren(path, this);
 		if (childrenPaths != null && !childrenPaths.isEmpty()) {
+			int length = path.length();
+			StringBuilder pathStrb = new StringBuilder(length + 16);
 			List<byte[]> result = new ArrayList<>(childrenPaths.size());
 			for (String childrenPath : childrenPaths) {
-				result.add(getData(childrenPath));
+				pathStrb.delete(length, pathStrb.length());
+				result.add(getData(pathStrb.append(path).append(LightConstants.SLASH).append(childrenPath).toString()));
 			}
 			return result;
 		}
