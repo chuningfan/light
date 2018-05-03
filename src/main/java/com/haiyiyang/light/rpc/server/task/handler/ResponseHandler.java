@@ -49,7 +49,7 @@ public class ResponseHandler implements Runnable {
 
 			if (method != null) {
 				try {
-					response = method.invoke(service, "abc");
+					response = method.invoke(service, args);
 				} catch (IllegalAccessException e) {
 					LOGGER.error("Calling Method [{}] throws Illegal Access Exception.", requestMeta.getMethod());
 				} catch (IllegalArgumentException e) {
