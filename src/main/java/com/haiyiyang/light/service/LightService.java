@@ -83,7 +83,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 				lightService.data.get(0).getServiceNames().add(interfaceName);
 			} else {
 				ServiceEntry serviceEntry = new ServiceEntry(lightAppMeta, interfaceName);
-				lightService = new LightService(getPublishPath(publishRegistry), servicePath, serviceEntry);
+				lightService = new LightService(publishRegistry, getPublishPath(servicePath), serviceEntry);
 				PUBLISHED_SERVICES.put(servicePath, lightService);
 			}
 		}
