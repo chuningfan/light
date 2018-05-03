@@ -48,11 +48,11 @@ public class LightSubscription extends RegistryConnection {
 		List<String> childrenPaths = getChildren(path, this);
 		if (childrenPaths != null && !childrenPaths.isEmpty()) {
 			int length = path.length();
-			StringBuilder pathStrb = new StringBuilder(length + 16);
+			StringBuilder pathStrb = new StringBuilder(length + 16).append(path);
 			List<byte[]> result = new ArrayList<>(childrenPaths.size());
 			for (String childrenPath : childrenPaths) {
 				pathStrb.delete(length, pathStrb.length());
-				result.add(getData(pathStrb.append(path).append(LightConstants.SLASH).append(childrenPath).toString()));
+				result.add(getData(pathStrb.append(LightConstants.SLASH).append(childrenPath).toString()));
 			}
 			return result;
 		}
