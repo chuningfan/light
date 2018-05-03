@@ -49,7 +49,7 @@ public class ResponseHandler implements Runnable {
 
 			if (method != null) {
 				try {
-					response = method.invoke(service, args);
+					response = method.invoke(service, (Object[])args);
 				} catch (IllegalAccessException e) {
 					LOGGER.error("Calling Method [{}] throws Illegal Access Exception.", requestMeta.getMethod());
 				} catch (IllegalArgumentException e) {
@@ -64,7 +64,7 @@ public class ResponseHandler implements Runnable {
 					.serialize(response, null));
 			buffers.add(responseByteBuffer);
 			protocolPacket.setRequestMeta(buffers);
-			protocolPacket.getChContext().writeAndFlush(protocolPacket);
+			protocolPacket.getChContext().writeAndFlush(protocolPacket.encode());
 		} else if (serializerType == SerializerFactory.SERIALIZER_PROTOBUF) {
 
 		}
