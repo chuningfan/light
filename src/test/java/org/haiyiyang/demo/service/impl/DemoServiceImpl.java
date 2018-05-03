@@ -14,4 +14,10 @@ public class DemoServiceImpl implements DemoService {
 		return "Hello " + name + ", to the World.";
 	}
 
+	@Override
+	public String welcome(String firstName, String lastName) {
+		// TODO Auto-generated method stub
+		return "Welcome " + firstName + ", " + lastName;
+	}
+
 }

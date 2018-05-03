@@ -61,7 +61,7 @@ public class LightService implements LightPublisher, LightSubscriber {
 	}
 
 	public static Object getLocalBean(String serviceName) {
-		return PUBLISHED_SERVICES.get(serviceName);
+		return LOCAL_SERVICE.get(serviceName);
 	}
 
 	public static void doPublishLightService() {

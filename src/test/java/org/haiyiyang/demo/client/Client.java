@@ -10,7 +10,8 @@ public class Client {
 	public static void main(String[] args) {
 		System.setProperty("useLocalProps", LightConstants.STR1);
 		DemoService ds = LightServiceFactory.getService(DemoService.class);
-		String result = ds.helloWord("Agent");
+//		String result = ds.helloWord("Agent");
+		String result = ds.welcome("Jack", "Ma");
 		System.out.println(result);
 	}
 }
