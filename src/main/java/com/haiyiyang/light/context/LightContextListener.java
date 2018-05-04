@@ -19,13 +19,15 @@ public class LightContextListener implements ApplicationListener<ContextRefreshe
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (event instanceof ContextRefreshedEvent) {
-			if (CONTEXT == null) {
-				CONTEXT = (AbstractApplicationContext) event.getSource();
-				Map<String, Object> objectMap = CONTEXT.getBeansWithAnnotation(IAmALightService.class);
-				if (objectMap != null && !objectMap.isEmpty()) {
-					LightService.publishLightService(objectMap.values());
-					LOGGER.debug("Published Light services.");
+		if (CONTEXT == null && event instanceof ContextRefreshedEvent) {
+			synchronized (LightContextListener.class) {
+				if (CONTEXT == null) {
+					CONTEXT = (AbstractApplicationContext) event.getSource();
+					Map<String, Object> objectMap = CONTEXT.getBeansWithAnnotation(IAmALightService.class);
+					if (objectMap != null && !objectMap.isEmpty()) {
+						LightService.publishLightService(objectMap.values());
+						LOGGER.info("Published Light services.");
+					}
 				}
 			}
 		}

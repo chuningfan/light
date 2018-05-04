@@ -3,9 +3,14 @@ package com.haiyiyang.light.rpc.server.task;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.haiyiyang.light.protocol.ProtocolPacket;
 
 public class TaskQueue {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TaskQueue.class);
 
 	private static volatile TaskQueue TASK_QUEUE = new TaskQueue();
 
@@ -27,7 +32,7 @@ public class TaskQueue {
 		try {
 			return BLOCKING_QUEUE.take();
 		} catch (InterruptedException e) {
-			// TODO
+			LOGGER.error(e.getMessage());
 		}
 		return null;
 	}

@@ -7,7 +7,8 @@ import java.util.List;
 import io.netty.channel.ChannelHandlerContext;
 
 public class ProtocolPacket {
-	public static final int headerLength = 18;
+
+	public static final int HEADER_LENGTH = 18;
 
 	private int packetId;
 	private byte invokeMode;
@@ -26,7 +27,7 @@ public class ProtocolPacket {
 	}
 
 	public ByteBuffer encode() {
-		int totalLenght = headerLength;
+		int totalLenght = HEADER_LENGTH;
 		int datasize = this.requestMeta.size();
 		for (int i = 0; i < datasize; i++) {
 			totalLenght += (4 + this.requestMeta.get(i).limit());

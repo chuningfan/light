@@ -5,6 +5,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.context.LightContext;
 import com.haiyiyang.light.meta.props.LightProps;
@@ -28,6 +31,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 
 public class LightRpcClient {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightRpcClient.class);
+
 	private ClientInboundHandler clentInboundHandler;
 	private static Map<IpPort, Channel> CHANNELS = new ConcurrentHashMap<>();
 	private static Map<IpPort, EventLoopGroup> EVENT_LOOP_GROUPS = new ConcurrentHashMap<>();
@@ -58,11 +64,14 @@ public class LightRpcClient {
 						}
 					});
 			ChannelFuture channelFuture = b.connect(ipPort.getIp(), ipPort.getPort());
+			LOGGER.info("Starting Netty server, IP: {}, port: {}.", ipPort.getIp(), ipPort.getPort());
 			channelFuture.awaitUninterruptibly(10, TimeUnit.SECONDS); // TODO
 			if (channelFuture.isSuccess()) {
 				CHANNELS.put(ipPort, channelFuture.channel());
 				EVENT_LOOP_GROUPS.put(ipPort, group);
+				LOGGER.info("Netty server have already started up successfully.");
 			} else {
+				LOGGER.error("Netty server started failed.");
 				throw new Exception();
 			}
 		} finally {

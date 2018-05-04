@@ -20,8 +20,8 @@ public class LightRpcContext {
 
 	private Integer packetId;
 
-	public static LoadingCache<Integer, Future<?>> FUTURE_CACHE = CacheBuilder.newBuilder().maximumSize(1024)
-			.expireAfterWrite(30, TimeUnit.SECONDS).build(new CacheLoader<Integer, Future<?>>() {
+	private static LoadingCache<Integer, Future<?>> FUTURE_CACHE = CacheBuilder.newBuilder().maximumSize(1024)
+			.expireAfterWrite(60, TimeUnit.SECONDS).build(new CacheLoader<Integer, Future<?>>() {
 				@Override
 				public Future<?> load(Integer key) throws Exception {
 					return new ResponseFuture<>(true);
@@ -56,7 +56,7 @@ public class LightRpcContext {
 
 	public static void setResponseFuture(Integer packetId, ResponseFuture<?> future) {
 		THREAD_LOCAL.get().packetId = packetId;
-		FUTURE_CACHE.put(packetId, future);
+		FUTURE_CACHE.put(THREAD_LOCAL.get().packetId, future);
 	}
 
 	public <T> Future<T> asyncCall(Object service, Callable<T> callable) {

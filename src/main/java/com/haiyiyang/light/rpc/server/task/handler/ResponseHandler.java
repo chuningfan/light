@@ -9,6 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.protocol.ProtocolPacket;
 import com.haiyiyang.light.rpc.request.RequestMeta;
 import com.haiyiyang.light.serialization.SerializerFactory;
@@ -49,7 +50,7 @@ public class ResponseHandler implements Runnable {
 
 			if (method != null) {
 				try {
-					response = method.invoke(service, (Object[])args);
+					response = method.invoke(service, (Object[]) args);
 				} catch (IllegalAccessException e) {
 					LOGGER.error("Calling Method [{}] throws Illegal Access Exception.", requestMeta.getMethod());
 				} catch (IllegalArgumentException e) {
@@ -59,7 +60,7 @@ public class ResponseHandler implements Runnable {
 				}
 			}
 			List<ByteBuffer> buffers = new ArrayList<ByteBuffer>();
-			buffers.add(ByteBuffer.allocate(1));
+			buffers.add(ByteBuffer.allocate(1).put(LightConstants.BYTE1));
 			ByteBuffer responseByteBuffer = (SerializerFactory.getSerializer(protocolPacket.getSerializerType())
 					.serialize(response, null));
 			buffers.add(responseByteBuffer);

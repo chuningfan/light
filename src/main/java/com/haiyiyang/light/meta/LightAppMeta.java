@@ -55,7 +55,6 @@ public class LightAppMeta {
 		return LIGHT_APP_META;
 	}
 
-
 	private void setMachineIPAndZeroOneGrouping() {
 		Set<String> ips = NetworkUtils.getLocalIps();
 		String ipSegmentPrefix = lightProps.getIpSegmentPrefix();

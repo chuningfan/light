@@ -7,7 +7,7 @@ import com.haiyiyang.light.context.LightContextListener;
 
 @Configurable
 public class Configration {
-	
+
 	@Bean()
 	LightContextListener getLightContextListener() {
 		return new LightContextListener();

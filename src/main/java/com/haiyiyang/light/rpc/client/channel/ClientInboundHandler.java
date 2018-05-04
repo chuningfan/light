@@ -1,23 +1,24 @@
 package com.haiyiyang.light.rpc.client.channel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.haiyiyang.light.protocol.ProtocolPacket;
 import com.haiyiyang.light.rpc.client.LightRpcClient;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
-public class ClientInboundHandler extends ChannelInboundHandlerAdapter {
+public class ClientInboundHandler extends SimpleChannelInboundHandler<ProtocolPacket> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ClientInboundHandler.class);
 
 	private LightRpcClient lightRpcClient;
 
 	public ClientInboundHandler(LightRpcClient lightRpcClient) {
 		this.lightRpcClient = lightRpcClient;
-	}
-
-	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		lightRpcClient.receiveMessage(msg);
 	}
 
 	@Override
@@ -45,4 +46,12 @@ public class ClientInboundHandler extends ChannelInboundHandlerAdapter {
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		ctx.close();
 	}
+
+	@Override
+	protected void channelRead0(ChannelHandlerContext ctx, ProtocolPacket msg) throws Exception {
+		LOGGER.info("Received a protocol packet, packetId: {}.", msg.getPacketId());
+		msg.setChContext(ctx);
+		lightRpcClient.receiveMessage(msg);
+	}
+
 }

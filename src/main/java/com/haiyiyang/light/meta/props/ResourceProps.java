@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import jodd.props.Props;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +18,11 @@ import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
 import com.haiyiyang.light.utils.LightUtils;
 
+import jodd.props.Props;
+
 public class ResourceProps implements LightSubscriber {
-	protected static final Logger LOGGER = LoggerFactory.getLogger(ResourceProps.class);
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceProps.class);
 
 	public static final String RESOURCE_PATH = "/light/resource/";
 	public static final String RESOURCE_LOCAL_PATH = LightUtils.getLocalPath(RESOURCE_PATH);

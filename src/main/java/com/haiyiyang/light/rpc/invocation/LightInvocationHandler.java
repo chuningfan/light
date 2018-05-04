@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
@@ -29,6 +31,8 @@ import com.haiyiyang.light.utils.RequestUtil;
 import io.netty.channel.Channel;
 
 public class LightInvocationHandler implements InvocationHandler, MethodInterceptor {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightInvocationHandler.class);
 
 	private static final Map<InvocationFactor, LightInvocationHandler> INVOCATION_HANDLER = new ConcurrentHashMap<>();
 
@@ -78,6 +82,7 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 		if (TO_STRING.equals(method.getName())) {
 			return proxy.getClass().getName();
 		}
+		LOGGER.info("Prepare to start calling method [{}].", method.getName());
 		Byte group = null;
 		if (getLightProps().isOpenGroup()) {
 			group = LightContext.getContext().getLightAppMeta().getZeroOneGrouping();
@@ -88,7 +93,8 @@ public class LightInvocationHandler implements InvocationHandler, MethodIntercep
 			try {
 				channel = client.connect(serviceEntry.getIpPort());
 			} catch (Exception e) {
-				// TODO
+				LOGGER.error("Getting Channel failed, IP: {}, port: {}.", serviceEntry.getIpPort().getIp(),
+						serviceEntry.getIpPort().getPort());
 			}
 		}
 

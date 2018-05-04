@@ -7,9 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import jodd.props.Props;
-import jodd.props.PropsEntry;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +17,12 @@ import com.haiyiyang.light.service.subscription.LightSubscriber;
 import com.haiyiyang.light.service.subscription.LightSubscription;
 import com.haiyiyang.light.utils.LightUtils;
 
+import jodd.props.Props;
+import jodd.props.PropsEntry;
+
 public class AppProps implements LightSubscriber {
-	protected static final Logger LOGGER = LoggerFactory.getLogger(AppProps.class);
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(AppProps.class);
 
 	private static final String SECTION_RESOURCE = "resource";
 	private static final String APP_PROPS_PATH = "/light/app/";
@@ -36,8 +37,10 @@ public class AppProps implements LightSubscriber {
 
 	private AppProps(LightAppMeta lightAppMeta) {
 		AppProps.LIGHT_APP_META = lightAppMeta;
-		this.appPropsPath = new StringBuilder(APP_PROPS_PATH).append(lightAppMeta.getAppName()).append(LightConstants.DOT_PROPS).toString();
-		this.appPropsLocalPath = new StringBuilder(APP_PROPS_LOCAL_PATH).append(lightAppMeta.getAppName()).append(LightConstants.DOT_PROPS).toString();
+		this.appPropsPath = new StringBuilder(APP_PROPS_PATH).append(lightAppMeta.getAppName())
+				.append(LightConstants.DOT_PROPS).toString();
+		this.appPropsLocalPath = new StringBuilder(APP_PROPS_LOCAL_PATH).append(lightAppMeta.getAppName())
+				.append(LightConstants.DOT_PROPS).toString();
 		initializeAppProps();
 	}
 

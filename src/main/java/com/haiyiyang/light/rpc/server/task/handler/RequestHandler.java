@@ -1,5 +1,8 @@
 package com.haiyiyang.light.rpc.server.task.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.haiyiyang.light.context.LightContext;
 import com.haiyiyang.light.meta.props.LightProps;
 import com.haiyiyang.light.protocol.ProtocolPacket;
@@ -8,6 +11,8 @@ import com.haiyiyang.light.rpc.server.task.TaskQueue;
 
 public class RequestHandler extends Thread {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
+
 	private LightProps lightProps;
 
 	private static RequestHandler requestHandler;
@@ -15,6 +20,7 @@ public class RequestHandler extends Thread {
 	private RequestHandler() {
 		this.setName("Request Handler Thread.");
 		this.lightProps = LightContext.getContext().getLightAppMeta().getLightProps();
+		LOGGER.info("Starting request handler [RequestHandler] thread.");
 	}
 
 	public synchronized static void handle() {
@@ -29,19 +35,17 @@ public class RequestHandler extends Thread {
 		boolean threadPoolIsExecute = false;
 		ProtocolPacket protocolPacket = null;
 		while (true) {
-			try {
-				if (!threadPoolIsExecute && protocolPacket != null) {
+			if (!threadPoolIsExecute && protocolPacket != null) {
+				try {
 					Thread.sleep(1);
-					threadPoolIsExecute = execute(protocolPacket);
-				} else {
-					protocolPacket = TaskQueue.SINGLETON().get();
-					threadPoolIsExecute = execute(protocolPacket);
+				} catch (InterruptedException e) {
+					LOGGER.warn("InterruptedException: {}", e.getMessage());
 				}
-
-			} catch (Throwable e) {
-				// TODO
+				threadPoolIsExecute = execute(protocolPacket);
+			} else {
+				protocolPacket = TaskQueue.SINGLETON().get();
+				threadPoolIsExecute = execute(protocolPacket);
 			}
-
 		}
 	}
 

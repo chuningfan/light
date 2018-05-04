@@ -13,16 +13,17 @@ import com.haiyiyang.light.constant.LightConstants;
 import jodd.props.Props;
 
 public class SettingsProps {
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SettingsProps.class);
-
-	private static final String FILE_SETTINGS_PROPS = "settings.props";
-	private static final String APP_NAME = "appName";
-	private static final String SCAN_PACKAGES = "scanPackages";
-	private static final String ANNOTATED_CLASSES = "annotatedClasses";
-	private static final String LIGHT_CONFIGRATION_CLASS = "com.haiyiyang.light.meta.Configration";
 
 	private Props props = new Props();
 	private static SettingsProps SETTINGS_PROPS;
+
+	private static final String APP_NAME = "appName";
+	private static final String SCAN_PACKAGES = "scanPackages";
+	private static final String ANNOTATED_CLASSES = "annotatedClasses";
+	private static final String FILE_SETTINGS_PROPS = "settings.props";
+	private static final String LIGHT_CONFIGRATION_CLASS = "com.haiyiyang.light.meta.Configration";
 
 	private SettingsProps() throws IOException {
 		initializeSettingsProps();
@@ -53,7 +54,7 @@ public class SettingsProps {
 			try {
 				in = ps.nextElement().openStream();
 				props.load(in);
-				LOGGER.debug("Loaded file [settings.props] successful.");
+				LOGGER.info("Loaded file [settings.props] successful.");
 			} catch (IOException e) {
 				LOGGER.error("Loaded file [settings.props] error.");
 				throw e;
@@ -72,11 +73,7 @@ public class SettingsProps {
 	}
 
 	public String getAppName() {
-		String appName = props.getValue(APP_NAME);
-		if (appName == null || appName.isEmpty()) {
-			return null;
-		}
-		return appName;
+		return props.getValue(APP_NAME);
 	}
 
 	public String getScanPackages() {
