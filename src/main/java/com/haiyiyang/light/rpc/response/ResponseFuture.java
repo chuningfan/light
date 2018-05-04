@@ -23,7 +23,12 @@ public class ResponseFuture<V> implements Future<V> {
 	private long timeout;
 	private TimeUnit timeUnit;
 	private Object classType = null;
+	private boolean returnNull = false;
 	private volatile ProtocolPacket packet;
+
+	public ResponseFuture(boolean returnNull) {
+		this.returnNull = returnNull;
+	}
 
 	public ResponseFuture(Object classType, long timeout, TimeUnit timeUnit) {
 		this.classType = classType;
@@ -33,13 +38,13 @@ public class ResponseFuture<V> implements Future<V> {
 
 	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
-		// TODO Auto-generated method stub
+		// TODO
 		return false;
 	}
 
 	@Override
 	public boolean isCancelled() {
-		// TODO Auto-generated method stub
+		// TODO
 		return false;
 	}
 
@@ -63,6 +68,9 @@ public class ResponseFuture<V> implements Future<V> {
 	}
 
 	private Object getResponse() {
+		if (returnNull) {
+			return null;
+		}
 		if (!isDone()) {
 			lock.lock();
 			try {

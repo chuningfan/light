@@ -1,18 +1,32 @@
 package com.haiyiyang.light.rpc;
 
-import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.haiyiyang.light.rpc.response.ResponseFuture;
 import com.haiyiyang.light.service.LightService;
 
 public class LightRpcContext {
 
-	private Integer currentPacketId;
-	private Map<Integer, ResponseFuture<?>> futureMap = new ConcurrentHashMap<>(8);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LightRpcContext.class);
+
+	private Integer packetId;
+
+	public static LoadingCache<Integer, Future<?>> FUTURE_CACHE = CacheBuilder.newBuilder().maximumSize(1024)
+			.expireAfterWrite(30, TimeUnit.SECONDS).build(new CacheLoader<Integer, Future<?>>() {
+				@Override
+				public Future<?> load(Integer key) throws Exception {
+					return new ResponseFuture<>(true);
+				}
+			});
 
 	private static final ThreadLocal<LightRpcContext> THREAD_LOCAL = new ThreadLocal<LightRpcContext>() {
 		@Override
@@ -21,23 +35,28 @@ public class LightRpcContext {
 		}
 	};
 
+	public static LightRpcContext getContext() {
+		return THREAD_LOCAL.get();
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T> Future<T> getFuture(Integer packetId) {
-		return (Future<T>) THREAD_LOCAL.get().futureMap.get(packetId);
+		return (Future<T>) FUTURE_CACHE.getUnchecked(packetId);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> ResponseFuture<T> getResponseFuture(Integer packetId) {
+		return (ResponseFuture<T>) FUTURE_CACHE.getUnchecked(packetId);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Future<T> getCurrentFuture() {
+		return (Future<T>) FUTURE_CACHE.getUnchecked(THREAD_LOCAL.get().packetId);
 	}
 
 	public static void setResponseFuture(Integer packetId, ResponseFuture<?> future) {
-		THREAD_LOCAL.get().currentPacketId = packetId;
-		THREAD_LOCAL.get().futureMap.put(packetId, future);
-	}
-
-	public static ResponseFuture<?> getResponseFuture(Integer packetId) {
-		return THREAD_LOCAL.get().futureMap.get(packetId);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> Future<T> getCurrentFuture() {
-		return (Future<T>) THREAD_LOCAL.get().futureMap.get(THREAD_LOCAL.get().currentPacketId);
+		THREAD_LOCAL.get().packetId = packetId;
+		FUTURE_CACHE.put(packetId, future);
 	}
 
 	public <T> Future<T> asyncCall(Object service, Callable<T> callable) {
@@ -51,7 +70,7 @@ public class LightRpcContext {
 				return getCurrentFuture();
 			}
 		} catch (Exception e) {
-			// TODO
+			LOGGER.error(e.getMessage());
 		}
 		return null;
 	}

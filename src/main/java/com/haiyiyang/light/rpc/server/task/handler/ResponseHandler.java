@@ -64,7 +64,7 @@ public class ResponseHandler implements Runnable {
 					.serialize(response, null));
 			buffers.add(responseByteBuffer);
 			protocolPacket.setRequestMeta(buffers);
-			protocolPacket.getChContext().writeAndFlush(protocolPacket.encode());
+			protocolPacket.getChContext().writeAndFlush(protocolPacket);
 		} else if (serializerType == SerializerFactory.SERIALIZER_PROTOBUF) {
 
 		}

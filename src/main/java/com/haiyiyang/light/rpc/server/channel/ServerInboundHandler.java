@@ -12,7 +12,8 @@ public class ServerInboundHandler extends SimpleChannelInboundHandler<ProtocolPa
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, ProtocolPacket msg) throws Exception {
-		TaskQueue.SINGLETON().add((ProtocolPacket) msg);
+		msg.setChContext(ctx);
+		TaskQueue.SINGLETON().add(msg);
 	}
 
 }
