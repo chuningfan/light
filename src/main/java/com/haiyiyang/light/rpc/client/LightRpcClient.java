@@ -69,7 +69,7 @@ public class LightRpcClient {
 			if (channelFuture.isSuccess()) {
 				CHANNELS.put(ipPort, channelFuture.channel());
 				EVENT_LOOP_GROUPS.put(ipPort, group);
-				LOGGER.info("Netty server have already started up successfully.");
+				LOGGER.info("Netty server have already started successfully.");
 			} else {
 				LOGGER.error("Netty server started failed.");
 				throw new Exception();

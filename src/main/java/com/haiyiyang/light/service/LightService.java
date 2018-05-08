@@ -75,6 +75,16 @@ public class LightService implements LightPublisher, LightSubscriber {
 		}
 	}
 
+	public static void doUnpublishLightService() {
+		if (!PUBLISHED_SERVICES.isEmpty()) {
+			Entry<String, LightService> entry;
+			for (Iterator<Entry<String, LightService>> ite = PUBLISHED_SERVICES.entrySet().iterator(); ite.hasNext();) {
+				entry = ite.next();
+				LightPublication.getPublish(entry.getValue()).unpublishService(entry.getValue().getPath());
+			}
+		}
+	}
+
 	public static void publishLightService(Collection<Object> objects) {
 		LightAppMeta lightAppMeta = LightContext.getContext().getLightAppMeta();
 		String publishRegistry = lightAppMeta.getLightProps().getPublishRegistry();

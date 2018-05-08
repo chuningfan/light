@@ -11,6 +11,7 @@ import com.haiyiyang.light.meta.LightAppMeta;
 import com.haiyiyang.light.protocol.codec.ProtocolDecoder;
 import com.haiyiyang.light.protocol.codec.ProtocolEncoder;
 import com.haiyiyang.light.rpc.server.channel.ServerInboundHandler;
+import com.haiyiyang.light.service.LightService;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -63,7 +64,17 @@ public class LightRpcServer {
 			}
 		} catch (Exception e) {
 			LOGGER.error(LightException.SERVER_STARTUP_FAILED);
+			LightService.doUnpublishLightService();
 			throw new RuntimeException(LightException.SERVER_STARTUP_FAILED);
+		}
+	}
+
+	public synchronized void stop() {
+		if (workerGroup != null) {
+			workerGroup.shutdownGracefully();
+		}
+		if (bossGroup != null) {
+			bossGroup.shutdownGracefully();
 		}
 	}
 

@@ -172,4 +172,21 @@ public abstract class RegistryConnection implements Watcher {
 		return null;
 	}
 
+	public void deleteServicePath(String fullPath) {
+		if (existsPath(fullPath, false) == null) {
+			LOGGER.info("This path {} does not exists.", fullPath);
+			return;
+		}
+		try {
+			getRegistry().delete(fullPath, -1);
+			LOGGER.info("Deleted the path {}.", fullPath);
+		} catch (InterruptedException ie) {
+			LOGGER.error("Execute createServicePath of path {} caused InterruptedException error : {}", fullPath,
+					ie.getMessage());
+		} catch (KeeperException ke) {
+			LOGGER.error("Execute createServicePath of path {} caused KeeperException error : {}", fullPath,
+					ke.getMessage());
+		}
+	}
+
 }

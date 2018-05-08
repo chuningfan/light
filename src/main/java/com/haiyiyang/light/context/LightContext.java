@@ -6,9 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import com.haiyiyang.light.app.ShutdownHook;
 import com.haiyiyang.light.app.props.SettingsProps;
 import com.haiyiyang.light.constant.LightConstants;
 import com.haiyiyang.light.meta.LightAppMeta;
+import com.haiyiyang.light.service.LightService;
 
 public class LightContext extends AnnotationConfigApplicationContext {
 
@@ -63,12 +65,11 @@ public class LightContext extends AnnotationConfigApplicationContext {
 
 	@Override
 	protected void onClose() {
-		// TODO
+		LightService.doUnpublishLightService();
 	}
 
 	@Override
 	public void registerShutdownHook() {
-		// TODO
+		ShutdownHook.hook();
 	}
-
 }

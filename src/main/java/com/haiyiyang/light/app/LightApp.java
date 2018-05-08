@@ -11,7 +11,7 @@ public class LightApp {
 
 	public static void main(String[] args) {
 		LightContext.getContext().start();
-		LOGGER.info("The light app have already started up.");
+		LOGGER.info("The light app have already started.");
 	}
 
 }

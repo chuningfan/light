@@ -40,6 +40,10 @@ public class LightPublication extends RegistryConnection {
 		createServicePath(path, data);
 	}
 
+	public void unpublishService(String path) {
+		deleteServicePath(path);
+	}
+
 	@Override
 	public void doProcess(boolean sessionExpired, WatchedEvent event) {
 		LOGGER.info("Received [WatchedEvent], sessionExpired: {}, event: {}.", sessionExpired, event);
