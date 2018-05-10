@@ -24,7 +24,7 @@ public class PortProps implements LightSubscriber {
 	private static final String APP_PORT_PROPS_LOCAL_URL = LightUtils.getLocalPath(APP_PORT_PROPS_URL);
 
 	private Props props = new Props();
-	private static PortProps PORT_PROPS;
+	private static volatile PortProps PORT_PROPS;
 	private static LightAppMeta LIGHT_APP_META;
 
 	private PortProps(LightAppMeta lightAppMeta) {

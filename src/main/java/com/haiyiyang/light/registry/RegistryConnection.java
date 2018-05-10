@@ -30,7 +30,7 @@ public abstract class RegistryConnection implements Watcher {
 	private CountDownLatch countDownLatch = null;
 	protected static final int SESSION_TIMEOUT = 30 * 1000;
 
-	protected volatile static ConcurrentHashMap<String, String> REGISTRY_LEVEL_LOCK = new ConcurrentHashMap<>(8);
+	protected static volatile ConcurrentHashMap<String, String> REGISTRY_LEVEL_LOCK = new ConcurrentHashMap<>(8);
 
 	protected static ConcurrentHashMap<String, ZooKeeper> REGISTRIES = new ConcurrentHashMap<>(8);
 
@@ -46,7 +46,6 @@ public abstract class RegistryConnection implements Watcher {
 		if (event.getState() == KeeperState.SyncConnected) {
 			if (countDownLatch != null) {
 				countDownLatch.countDown();
-				countDownLatch = null;
 				LOGGER.info("CountDownLatch has counted down the latch.");
 			}
 			if (event.getPath() != null) {
@@ -80,15 +79,18 @@ public abstract class RegistryConnection implements Watcher {
 	}
 
 	private void connect() {
-		countDownLatch = new CountDownLatch(1);
 		try {
 			zooKeeper = new ZooKeeper(registry, SESSION_TIMEOUT, this);
 			REGISTRIES.put(registry, zooKeeper);
-			countDownLatch.await(SESSION_TIMEOUT, TimeUnit.MILLISECONDS);
+			countDownLatch = new CountDownLatch(1);
+			boolean flag = countDownLatch.await(SESSION_TIMEOUT, TimeUnit.MILLISECONDS);
+			LOGGER.info("The value of countDownLatch.await: {}.", flag);
 			LOGGER.info("Zookeeper connection {} have been establish.", registry);
 		} catch (IOException e) {
+			countDownLatch.countDown();
 			LOGGER.error("Zookeeper connection {} error: {}.", registry, e.getMessage());
 		} catch (InterruptedException e) {
+			countDownLatch.countDown();
 			LOGGER.error("Zookeeper connection {} got interrupted exception: {}.", registry, e.getMessage());
 		}
 	}

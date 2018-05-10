@@ -12,7 +12,6 @@ public class ShutdownHook extends Thread {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShutdownHook.class);
 
 	private ShutdownHook() {
-
 	}
 
 	private static ShutdownHook SHUTDOWN_HOOK;
@@ -21,6 +20,7 @@ public class ShutdownHook extends Thread {
 		if (SHUTDOWN_HOOK == null) {
 			Thread thread = new ShutdownHook();
 			Runtime.getRuntime().addShutdownHook(thread);
+			LOGGER.info("Added a shutdown hook.");
 		}
 	}
 
@@ -35,6 +35,7 @@ public class ShutdownHook extends Thread {
 		} finally {
 			if (LightContext.getContext() != null) {
 				LightContext.getContext().close();
+				LOGGER.info("Light Context closed.");
 			}
 		}
 	}

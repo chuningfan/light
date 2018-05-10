@@ -6,7 +6,7 @@ import com.haiyiyang.light.serialization.Serializer;
 
 public class ProtoBufSerializer implements Serializer {
 
-	private static ProtoBufSerializer PROTOBUF_SERIALIZER = new ProtoBufSerializer();
+	private static final ProtoBufSerializer PROTOBUF_SERIALIZER = new ProtoBufSerializer();
 
 	private ProtoBufSerializer() {
 	}

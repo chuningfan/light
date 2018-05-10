@@ -24,11 +24,13 @@ public class ProtocolDecoder extends ByteToMessageDecoder {
 		}
 		in.markReaderIndex();
 		if (in.readByte() != LightConstants.PROTOCOL_MAGIC_NUMBER) {
+			LOGGER.error("Invalid protocol magic number.");
 			throw new CorruptedFrameException("Invalid protocol magic number.");
 		}
 		int dataLength = in.readInt();
 		if (in.readableBytes() < dataLength) {
 			in.resetReaderIndex();
+			LOGGER.error("The length of readable bytes is less than specified length.");
 			return;
 		}
 		byte[] data = new byte[dataLength];

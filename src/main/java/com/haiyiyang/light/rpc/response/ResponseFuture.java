@@ -113,12 +113,15 @@ public class ResponseFuture<V> implements Future<V> {
 	}
 
 	public void receiveProtocolPacket(ProtocolPacket packet) {
-		lock.lock();
 		this.packet = packet;
 		if (condition != null) {
-			condition.signal();
+			lock.lock();
+			try {
+				condition.signal();
+			} finally {
+				lock.unlock();
+			}
 		}
-		lock.unlock();
 	}
 
 }

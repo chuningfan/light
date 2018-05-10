@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 
 import com.haiyiyang.light.app.ShutdownHook;
 import com.haiyiyang.light.app.props.SettingsProps;
@@ -18,16 +19,22 @@ public class LightContext extends AnnotationConfigApplicationContext {
 
 	private LightAppMeta lightAppMeta;
 
-	private static LightContext LIGHT_CONTEXT;
+	private AbstractApplicationContext ctx;
+
+	private static volatile LightContext LIGHT_CONTEXT;
 
 	public static LightContext getContext() {
+		return getContext(null);
+	}
+
+	public static LightContext getContext(AbstractApplicationContext ctx) {
 		if (LIGHT_CONTEXT != null) {
 			return LIGHT_CONTEXT;
 		}
 		synchronized (LightContext.class) {
 			if (LIGHT_CONTEXT == null) {
-				LIGHT_CONTEXT = new LightContext();
-				LIGHT_CONTEXT.refresh();
+				LIGHT_CONTEXT = new LightContext(ctx);
+				LightContext.getContext(null).refresh();
 				LOGGER.info("Refreshed the light context.");
 			}
 		}
@@ -38,7 +45,17 @@ public class LightContext extends AnnotationConfigApplicationContext {
 		return lightAppMeta;
 	}
 
-	private LightContext() {
+	private LightContext(AbstractApplicationContext ctx) {
+		this.ctx = ctx != null ? ctx : this;
+		initializeLightContext();
+	}
+
+	private void initializeLightContext() {
+		if (this.ctx != this) {
+			this.ctx.addApplicationListener(LightContextListener.SINGLETON());
+			this.ctx.refresh();
+		}
+
 		try {
 			SettingsProps settingsProps = SettingsProps.SINGLETON();
 			LOGGER.info("System Property [useLocalProps] is {}", LightConstants.USE_LOCAL_PROPS);

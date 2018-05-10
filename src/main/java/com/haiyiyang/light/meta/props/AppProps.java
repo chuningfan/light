@@ -32,7 +32,7 @@ public class AppProps implements LightSubscriber {
 	private String appPropsPath;
 	private String appPropsLocalPath;
 
-	private static AppProps APP_PROPS;
+	private static volatile AppProps APP_PROPS;
 	private static LightAppMeta LIGHT_APP_META;
 
 	private AppProps(LightAppMeta lightAppMeta) {

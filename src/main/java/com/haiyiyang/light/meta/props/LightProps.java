@@ -58,7 +58,7 @@ public class LightProps implements LightSubscriber {
 	public static final String DOMAIN_PACKAGES = "domainPackages";
 
 	private Props props = new Props();;
-	private static LightProps LIGHT_PROPS;
+	private static volatile LightProps LIGHT_PROPS;
 
 	private LightAppMeta lightAppMeta;
 	private List<String> domainPackageList;

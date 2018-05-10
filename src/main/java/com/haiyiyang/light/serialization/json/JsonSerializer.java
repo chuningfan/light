@@ -9,7 +9,7 @@ import com.haiyiyang.light.serialization.SerializerFactory;
 
 public class JsonSerializer implements Serializer {
 
-	private static JsonSerializer JSON_SERIALIZER = new JsonSerializer();
+	private static final JsonSerializer JSON_SERIALIZER = new JsonSerializer();
 
 	private JsonSerializer() {
 	}
@@ -34,9 +34,5 @@ public class JsonSerializer implements Serializer {
 			}
 		}
 	}
-	
-	public static void main (String[] args) {
-		Object classArray = new Object[2];
-		System.out.println((classArray instanceof Class));
-	}
+
 }

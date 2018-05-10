@@ -49,9 +49,9 @@ public class ClientInboundHandler extends SimpleChannelInboundHandler<ProtocolPa
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, ProtocolPacket msg) throws Exception {
-		LOGGER.info("Received a protocol packet, packetId: {}.", msg.getPacketId());
 		msg.setChContext(ctx);
 		lightRpcClient.receiveMessage(msg);
+		LOGGER.info("Received a protocol packet, packetId: {}.", msg.getPacketId());
 	}
 
 }

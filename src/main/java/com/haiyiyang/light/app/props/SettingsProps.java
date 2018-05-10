@@ -13,11 +13,11 @@ import com.haiyiyang.light.constant.LightConstants;
 import jodd.props.Props;
 
 public class SettingsProps {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(SettingsProps.class);
 
 	private Props props = new Props();
-	private static SettingsProps SETTINGS_PROPS;
+	private static volatile SettingsProps SETTINGS_PROPS;
 
 	private static final String APP_NAME = "appName";
 	private static final String SCAN_PACKAGES = "scanPackages";

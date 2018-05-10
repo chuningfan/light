@@ -10,6 +10,6 @@ public class Configration {
 
 	@Bean()
 	LightContextListener getLightContextListener() {
-		return new LightContextListener();
+		return LightContextListener.SINGLETON();
 	}
 }

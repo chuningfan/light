@@ -15,20 +15,32 @@ public class LightContextListener implements ApplicationListener<ContextRefreshe
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LightContextListener.class);
 
-	private static AbstractApplicationContext CONTEXT;
+	private static volatile AbstractApplicationContext CONTEXT;
+	private static volatile LightContextListener LIGHT_CONTEXT_LISTENER;
+
+	private LightContextListener() {
+	}
+
+	public static LightContextListener SINGLETON() {
+		if (LIGHT_CONTEXT_LISTENER != null) {
+			return LIGHT_CONTEXT_LISTENER;
+		}
+		synchronized (LightContextListener.class) {
+			if (LIGHT_CONTEXT_LISTENER == null) {
+				LIGHT_CONTEXT_LISTENER = new LightContextListener();
+			}
+		}
+		return LIGHT_CONTEXT_LISTENER;
+	}
 
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
+	public synchronized void onApplicationEvent(ContextRefreshedEvent event) {
 		if (CONTEXT == null && event instanceof ContextRefreshedEvent) {
-			synchronized (LightContextListener.class) {
-				if (CONTEXT == null) {
-					CONTEXT = (AbstractApplicationContext) event.getSource();
-					Map<String, Object> objectMap = CONTEXT.getBeansWithAnnotation(IAmALightService.class);
-					if (objectMap != null && !objectMap.isEmpty()) {
-						LightService.publishLightService(objectMap.values());
-						LOGGER.info("Published Light services.");
-					}
-				}
+			CONTEXT = (AbstractApplicationContext) event.getSource();
+			Map<String, Object> objectMap = CONTEXT.getBeansWithAnnotation(IAmALightService.class);
+			if (objectMap != null && !objectMap.isEmpty()) {
+				LightService.publishLightService(objectMap.values());
+				LOGGER.info("Published Light services.");
 			}
 		}
 	}

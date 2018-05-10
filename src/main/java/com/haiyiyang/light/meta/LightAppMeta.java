@@ -30,7 +30,7 @@ public class LightAppMeta {
 	private static byte ZERO_ONE_GROUPING;
 	private static String MACHINE_IP = LightConstants.IP_127_0_0_1;
 
-	private static LightAppMeta LIGHT_APP_META;
+	private static volatile LightAppMeta LIGHT_APP_META;
 
 	private LightAppMeta(String appName) throws LightException {
 		this.appName = appName;
